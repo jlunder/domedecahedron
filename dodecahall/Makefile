@@ -64,7 +64,9 @@ MAKEDEPEND=@set -e; rm -f $@; \
 DODECAHALL_SRC= \
 	$(GLUS_SRC) \
 	main.c \
-	gles2_harness.c
+	gles2_harness.c \
+	glus.c \
+	ddh_data.c
 
 
 -include $(DODECAHALL_SRC:.c=.d)
