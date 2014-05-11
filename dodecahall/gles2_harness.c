@@ -27,6 +27,15 @@
 
 #include <GLFW/glfw3.h>
 
+#include <time.h>
+
+///MACOS
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <unistd.h>
+///MACOS
+
+#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,6 +44,7 @@
 #include <string.h>
 
 #include "glus.h"
+#include "dodecahall.h"
 #include "ddh_data.h"
 
 
@@ -82,6 +92,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 void gles2_harness_main(void)
 {
     GLFWwindow* window;
+    //LINUX
+    //struct timespec startts;
+    //clock_gettime(CLOCK_MONOTONIC, &startts);
+    //LINUX
+    
+    //MACOS
+    uint64_t lasttime = mach_absolute_time();
+    mach_timebase_info_data_t timebase;
+    mach_timebase_info(&timebase);
+    //MACOS
 
     glfwSetErrorCallback(error_callback);
 
@@ -105,12 +125,31 @@ void gles2_harness_main(void)
     {
         float ratio;
         int width, height;
+        //LINUX
+        //struct timespec ts;
+        //LINUX
+        uint64_t time;
+        uint64_t time_ns;
 
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
 
         gles2_harness_reshape(width, height);
-        gles2_harness_update(0.0f);
+        
+        //MACOS
+        time = mach_absolute_time();
+        time_ns = ((time - lasttime) * timebase.numer) / timebase.denom;
+        lasttime = time;
+        /*LINUX
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        ts.tv_nsec -= startts.tv_nsec;
+        if(ts.tv_nsec < 0) {
+            ts.tv_nsec += 1000000000;
+        }
+        assert(ts.tv_nsec >= 0 && ts.tv_nsec < 1000000000);
+        */
+        
+        gles2_harness_update((float)time_ns * 1.0e-9f);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -333,7 +372,7 @@ bool gles2_harness_init(void)
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
-    //artifactuary_init();
+    dodecahall_init();
     
     return true;
 }
@@ -354,7 +393,7 @@ void gles2_harness_update(float time)
     GLfloat viewProjectionMatrix[16];
     GLfloat modelMatrix[16];
     
-    GLfloat lightSize = 0.2f;
+    GLfloat lightSize = 0.02f;
     
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
@@ -366,9 +405,9 @@ void gles2_harness_update(float time)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     static float phase = 0.f;
-    phase = fmodf(phase + 0.01, M_PI * 2.f);
+    phase = fmodf(phase + (float)M_PI * 2.0f * time * 0.05, (float)M_PI * 2.f);
     glusLookAtf(viewMatrix,
-        20.0f * cosf(phase), 20.0f * -sinf(phase), -2.0f,
+        5.0f * cosf(phase), 5.0f * -sinf(phase), 2.0f,
         0.0f, 0.0f, -2.0f,
         0.0f, 0.0f, 1.0f);
     glusPerspectivef(viewProjectionMatrix, 45.0f, g_aspectRatio, 0.1f, 1000.0f);
@@ -386,6 +425,111 @@ void gles2_harness_update(float time)
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
+    /*
+    size_t face = (size_t)floorf(phase * 6.0f / (float)M_PI);
+    float colors[10][3] = {
+        {0.2f, 0.2f, 0.2f},
+        {0.4f, 0.2f, 0.0f},
+        {1.0f, 0.0f, 0.0f},
+        {1.0f, 0.3f, 0.0f},
+        {1.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+        {1.0f, 0.0f, 1.0f},
+        {0.6f, 0.6f, 0.6f},
+        {1.0f, 1.0f, 1.0f},
+    };
+    
+    for(size_t i = 0; i < sizeof ddh_vertex_coords / sizeof *ddh_vertex_coords; ++i) {
+        vertex_t vertex = ddh_vertex_coords[i];
+        
+        bool isface = false;
+        
+        //for(size_t j = 0; j < 5; ++j) {
+        //    if(ddh_dodecahedron_face_vertices[face][j] == ddh_light_vertex[i]) {
+        //        isface = true;
+        //    }
+        //}
+        isface = (face % 6) == (ddh_light_dodecahedron[i] % 6);
+        
+        /////////
+        glusMatrix4x4Identityf(modelMatrix);
+        glusMatrix4x4Translatef(modelMatrix, vertex.x, vertex.y, vertex.z);
+        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
+        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
+
+        glUniform4f(g_colorLocation,
+            isface ? 1.0f : colors[ddh_light_group[i] % 10][0],
+            isface ? 1.0f : colors[ddh_light_group[i] % 10][1],
+            isface ? 1.0f : colors[ddh_light_group[i] % 10][2],
+            0.0f);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        ////////
+    }
+    */
+    
+    /*
+    float colors[20][3] = {
+        {0.1f, 0.1f, 0.1f},
+        {0.4f, 0.2f, 0.0f},
+        {1.0f, 0.0f, 0.0f},
+        {1.0f, 0.3f, 0.0f},
+        {1.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+        {1.0f, 0.0f, 1.0f},
+        {0.6f, 0.6f, 0.6f},
+        {1.0f, 1.0f, 1.0f},
+    };
+    
+    vertex_t lastv = ddh_dodecahedron_vertex_coords[0];
+    float color[3], lastc[3] = {colors[0][0], colors[0][1], colors[0][2]};
+    
+    for(size_t i = 0; i < sizeof ddh_dodecahedron_vertex_coords / sizeof *ddh_dodecahedron_vertex_coords; ++i) {
+        vertex_t vertex = ddh_dodecahedron_vertex_coords[i];
+        vertex.x *= 3;
+        vertex.y *= 3;
+        vertex.z *= 3;
+        color[0] = colors[i % 10][0] * 0.7 + (i > 10 ? 0.3f : 0.0f);
+        color[1] = colors[i % 10][1] * 0.7 + (i > 10 ? 0.3f : 0.0f);
+        color[2] = colors[i % 10][2] * 0.7 + (i > 10 ? 0.3f : 0.0f);
+        
+        /////////
+        glusMatrix4x4Identityf(modelMatrix);
+        glusMatrix4x4Translatef(modelMatrix, vertex.x, vertex.y, vertex.z);
+        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
+        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
+
+        glUniform4f(g_colorLocation,
+            (color[0]) * 255.0f * (1.0f / 255.0f),
+            (color[1]) * 255.0f * (1.0f / 255.0f),
+            (color[2]) * 255.0f * (1.0f / 255.0f),
+            0.0f);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        ////////
+        
+        /////////
+        glusMatrix4x4Identityf(modelMatrix);
+        glusMatrix4x4Translatef(modelMatrix, (vertex.x + lastv.x) * 0.5f, (vertex.y + lastv.y) * 0.5f, (vertex.z + lastv.z) * 0.5f);
+        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
+        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
+
+        glUniform4f(g_colorLocation,
+            (color[0] + lastc[0]) * 0.5f * 255.0f * (1.0f / 255.0f),
+            (color[1] + lastc[0]) * 0.5f * 255.0f * (1.0f / 255.0f),
+            (color[2] + lastc[0]) * 0.5f * 255.0f * (1.0f / 255.0f),
+            0.0f);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        ////////
+        
+        memcpy(&lastv, &vertex, sizeof lastv);
+        memcpy(&lastc, &color, sizeof lastc);
+    }
+    */
+    /*
     for(size_t i = 0; i < sizeof groups / sizeof *groups; ++i) {
         for(size_t j = 0; j < groups[i].num_shapes; ++j) {
             shape_t * shape = &groups[i].shape_start[j];
@@ -394,7 +538,8 @@ void gles2_harness_update(float time)
                 
                 /////////
                 glusMatrix4x4Identityf(modelMatrix);
-                glusMatrix4x4Translatef(modelMatrix, vertex->x, vertex->y, vertex->z);
+                float scale = 0.285f;
+                glusMatrix4x4Translatef(modelMatrix, vertex->x * scale, vertex->y * scale, vertex->z * scale);
                 glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
                 glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
     
@@ -408,7 +553,29 @@ void gles2_harness_update(float time)
                 ////////
             }
         }
-    }    
+    }
+    */
+    
+    dodecahall_process(frame_nsec);
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        vertex_t const * vertex = &ddh_vertex_coords[i];
+        
+        /////////
+        glusMatrix4x4Identityf(modelMatrix);
+        glusMatrix4x4Translatef(modelMatrix, vertex->x, vertex->y, vertex->z);
+        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
+        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
+
+        glUniform4f(g_colorLocation,
+            ddh_frame[i].r * (1.0f / 255.0f),
+            ddh_frame[i].g * (1.0f / 255.0f),
+            ddh_frame[i].b * (1.0f / 255.0f),
+            0.0f);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        ////////
+    }
     
     glDisableVertexAttribArray(g_vertexLocation);
     

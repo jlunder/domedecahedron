@@ -5,10 +5,6 @@
 #include "dodecahall.h"
 
 
-typedef struct {
-    float x, y, z;
-} vertex_t;
-
 typedef uint16_t index_t;
 
 typedef struct {
