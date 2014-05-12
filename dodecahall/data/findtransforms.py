@@ -1,4 +1,3 @@
-from illuminatedpoints import points
 import dodecahedronverts as dd
 from euclid import *
 from math import *
@@ -35,6 +34,9 @@ xlatd = makexlat(1)
 rotaxisd = xlatd.copy().normalize()
 
 f = open("coords.h", "wt")
+def writef(s):
+    #f.write(s + '\n')
+    print s
 
 def printm(m):
     #print "    // [%sf, %sf, %sf, %sf," % (repr(m[0]), repr(m[1]), repr(m[2]), repr(m[3]),)
@@ -43,8 +45,7 @@ def printm(m):
     #print "    //  %sf, %sf, %sf, %sf]" % (repr(m[12]), repr(m[13]), repr(m[14]), repr(m[15]),)
     for v in shrunkverts:
         v = m * v
-        #print "    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),)
-        f.write("    {%sf, %sf, %sf},\n" % (repr(v.x), repr(v.y), repr(v.z),))
+        writef("    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),))
 
 print
 #print "flower transforms:"
@@ -53,16 +54,14 @@ print xlat
 
 def printgroup(g, basem):
     m = basem.copy()
-    #print "    // group %d, dodecahedron 0" % (g,)
-    f.write("    // group %d, dodecahedron 0\n" % (g,))
+    writef("    // group %d, dodecahedron 0" % (g,))
     printm(m)
     for i in range(5):
         m = basem.copy()
         m.rotate_axis(-i * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
         m.rotate_axis(pi, rotaxis)
         m.translate(xlat.x, xlat.y, xlat.z)
-        #print "    // group %d, dodecahedron %d" % (g, i + 1,)
-        f.write("    // group %d, dodecahedron %d\n" % (g, i + 1,))
+        writef("    // group %d, dodecahedron %d" % (g, i + 1,))
         printm(m)
 
 m2 = Matrix4.new_rotate_axis(0.5 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
@@ -91,15 +90,13 @@ for i in range(5):
     m = Matrix4.new_identity()
     m.rotate_axis(-i * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
     m.translate(xlat.x * 2, xlat.y * 2, xlat.z * 2)
-    #print "    // group %d, dodecahedron %d" % (g, i + 1,)
-    f.write("    // unlit connectors, dodecahedron %d\n" % (i + 1,))
+    writef("    // unlit connectors, dodecahedron %d" % (i + 1,))
     for v in shrunkverts:
         v = m * v
-        #print "    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),)
-        f.write("    {%sf, %sf, %sf},\n" % (repr(v.x), repr(v.y), repr(v.z),))
+        writef("    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),))
 # and a filler
 for i in range(20):
-    f.write("    {%sf, %sf, %sf},\n" % (repr(0.0), repr(0.0), repr(0.0),))
+    writef("    {%sf, %sf, %sf}," % (repr(0.0), repr(0.0), repr(0.0),))
 """
 
 #print "}"
