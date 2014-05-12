@@ -86,12 +86,12 @@ dodecahall: $(DODECAHALL_SRC:.c=.o)
 all: dodecahall
 
 cleanall:
-	for X in artifactuary *.o GLUS/*.o; do \
+	for X in dodecahall *.o *.o.* *.d *.d.*; do \
 		if [ -f $$X ]; then rm $$X; fi \
 		done
 
 clean:
-	for X in artifactuary *.o; do \
+	for X in artifactuary *.o *.o.* *.d.*; do \
 		if [ -f $$X ]; then rm $$X; fi \
 		done
 
