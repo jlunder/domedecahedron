@@ -68,7 +68,9 @@ extern uint8_t const ddh_light_group[DDH_TOTAL_VERTICES];
 
 extern color_t ddh_frame[DDH_TOTAL_VERTICES];
 
+
 void dodecahall_init(void);
 void dodecahall_process(int32_t ns);
+
 
 #endif // DODECAHALL_H_INCLUDED

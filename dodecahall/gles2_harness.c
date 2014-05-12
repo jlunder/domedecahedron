@@ -45,7 +45,6 @@
 
 #include "glus.h"
 #include "dodecahall.h"
-#include "ddh_data.h"
 
 
 bool gles2_harness_init(void);
@@ -173,8 +172,6 @@ static char const * light_frag =
     "\n"
     "void main(void)\n"
     "{\n"
-//    "    float a = step(0.0, 1.0 - dot(v_texCoord.xyz, v_texCoord.xyz));\n"
-//    "	 gl_FragColor = vec4(a * u_color.xyz, 0);\n"
     "	 gl_FragColor = vec4(u_color.xyz, 1);\n"
     "}\n";
 
@@ -269,51 +266,6 @@ bool gles2_harness_init(void)
     glClearDepth(1.0f);
     
     GLfloat lightVertices[] = {
-        /*
-        // This is the tristrip version
-        -1.0f,  1.0f, 0.0f, 1.0f,
-         1.0f,  1.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f, 1.0f,
-         1.0f, -1.0f, 0.0f, 1.0f,
-
-        -1.0f, 0.0f,  1.0f, 1.0f,
-         1.0f, 0.0f,  1.0f, 1.0f,
-        -1.0f, 0.0f, -1.0f, 1.0f,
-         1.0f, 0.0f, -1.0f, 1.0f,
-        
-        0.0f, -1.0f,  1.0f, 1.0f,
-        0.0f,  1.0f,  1.0f, 1.0f,
-        0.0f, -1.0f, -1.0f, 1.0f,
-        0.0f,  1.0f, -1.0f, 1.0f,
-        */
-        
-        /*
-        // 3 planes on axes
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 1.0f,
-        
-        -1.0f, -1.0f,  0.0f, 1.0f,
-         1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  0.0f, 1.0f,
-
-        -1.0f,  0.0f,  1.0f, 1.0f,
-         1.0f,  0.0f,  1.0f, 1.0f,
-        -1.0f,  0.0f, -1.0f, 1.0f,
-        
-        -1.0f,  0.0f, -1.0f, 1.0f,
-         1.0f,  0.0f,  1.0f, 1.0f,
-         1.0f,  0.0f, -1.0f, 1.0f,
-        
-         0.0f, -1.0f,  1.0f, 1.0f,
-         0.0f,  1.0f,  1.0f, 1.0f,
-         0.0f, -1.0f, -1.0f, 1.0f,
-        
-         0.0f, -1.0f, -1.0f, 1.0f,
-         0.0f,  1.0f,  1.0f, 1.0f,
-         0.0f,  1.0f, -1.0f, 1.0f,
-        */
-        
         // cube
         -1.0f,  1.0f, -1.0f, 1.0f,
          1.0f,  1.0f, -1.0f, 1.0f,
@@ -398,7 +350,8 @@ void gles2_harness_update(float time)
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
     
-    /////artifactuary_process(gles2_harness_total_nsec, frame_nsec);
+    dodecahall_process(frame_nsec);
+    
     
     gles2_harness_total_nsec += frame_nsec;
     
@@ -424,139 +377,6 @@ void gles2_harness_update(float time)
     glEnableVertexAttribArray(g_vertexLocation);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
-    /*
-    size_t face = (size_t)floorf(phase * 6.0f / (float)M_PI);
-    float colors[10][3] = {
-        {0.2f, 0.2f, 0.2f},
-        {0.4f, 0.2f, 0.0f},
-        {1.0f, 0.0f, 0.0f},
-        {1.0f, 0.3f, 0.0f},
-        {1.0f, 1.0f, 0.0f},
-        {0.0f, 1.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f},
-        {1.0f, 0.0f, 1.0f},
-        {0.6f, 0.6f, 0.6f},
-        {1.0f, 1.0f, 1.0f},
-    };
-    
-    for(size_t i = 0; i < sizeof ddh_vertex_coords / sizeof *ddh_vertex_coords; ++i) {
-        vertex_t vertex = ddh_vertex_coords[i];
-        
-        bool isface = false;
-        
-        //for(size_t j = 0; j < 5; ++j) {
-        //    if(ddh_dodecahedron_face_vertices[face][j] == ddh_light_vertex[i]) {
-        //        isface = true;
-        //    }
-        //}
-        isface = (face % 6) == (ddh_light_dodecahedron[i] % 6);
-        
-        /////////
-        glusMatrix4x4Identityf(modelMatrix);
-        glusMatrix4x4Translatef(modelMatrix, vertex.x, vertex.y, vertex.z);
-        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
-        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
-
-        glUniform4f(g_colorLocation,
-            isface ? 1.0f : colors[ddh_light_group[i] % 10][0],
-            isface ? 1.0f : colors[ddh_light_group[i] % 10][1],
-            isface ? 1.0f : colors[ddh_light_group[i] % 10][2],
-            0.0f);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        ////////
-    }
-    */
-    
-    /*
-    float colors[20][3] = {
-        {0.1f, 0.1f, 0.1f},
-        {0.4f, 0.2f, 0.0f},
-        {1.0f, 0.0f, 0.0f},
-        {1.0f, 0.3f, 0.0f},
-        {1.0f, 1.0f, 0.0f},
-        {0.0f, 1.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f},
-        {1.0f, 0.0f, 1.0f},
-        {0.6f, 0.6f, 0.6f},
-        {1.0f, 1.0f, 1.0f},
-    };
-    
-    vertex_t lastv = ddh_dodecahedron_vertex_coords[0];
-    float color[3], lastc[3] = {colors[0][0], colors[0][1], colors[0][2]};
-    
-    for(size_t i = 0; i < sizeof ddh_dodecahedron_vertex_coords / sizeof *ddh_dodecahedron_vertex_coords; ++i) {
-        vertex_t vertex = ddh_dodecahedron_vertex_coords[i];
-        vertex.x *= 3;
-        vertex.y *= 3;
-        vertex.z *= 3;
-        color[0] = colors[i % 10][0] * 0.7 + (i > 10 ? 0.3f : 0.0f);
-        color[1] = colors[i % 10][1] * 0.7 + (i > 10 ? 0.3f : 0.0f);
-        color[2] = colors[i % 10][2] * 0.7 + (i > 10 ? 0.3f : 0.0f);
-        
-        /////////
-        glusMatrix4x4Identityf(modelMatrix);
-        glusMatrix4x4Translatef(modelMatrix, vertex.x, vertex.y, vertex.z);
-        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
-        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
-
-        glUniform4f(g_colorLocation,
-            (color[0]) * 255.0f * (1.0f / 255.0f),
-            (color[1]) * 255.0f * (1.0f / 255.0f),
-            (color[2]) * 255.0f * (1.0f / 255.0f),
-            0.0f);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        ////////
-        
-        /////////
-        glusMatrix4x4Identityf(modelMatrix);
-        glusMatrix4x4Translatef(modelMatrix, (vertex.x + lastv.x) * 0.5f, (vertex.y + lastv.y) * 0.5f, (vertex.z + lastv.z) * 0.5f);
-        glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
-        glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
-
-        glUniform4f(g_colorLocation,
-            (color[0] + lastc[0]) * 0.5f * 255.0f * (1.0f / 255.0f),
-            (color[1] + lastc[0]) * 0.5f * 255.0f * (1.0f / 255.0f),
-            (color[2] + lastc[0]) * 0.5f * 255.0f * (1.0f / 255.0f),
-            0.0f);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        ////////
-        
-        memcpy(&lastv, &vertex, sizeof lastv);
-        memcpy(&lastc, &color, sizeof lastc);
-    }
-    */
-    /*
-    for(size_t i = 0; i < sizeof groups / sizeof *groups; ++i) {
-        for(size_t j = 0; j < groups[i].num_shapes; ++j) {
-            shape_t * shape = &groups[i].shape_start[j];
-            for(size_t k = 0; k < shape->num_indices; ++k) {
-                vertex_t * vertex = &vertices[shape->index_start[k]];
-                
-                /////////
-                glusMatrix4x4Identityf(modelMatrix);
-                float scale = 0.285f;
-                glusMatrix4x4Translatef(modelMatrix, vertex->x * scale, vertex->y * scale, vertex->z * scale);
-                glusMatrix4x4Scalef(modelMatrix, lightSize, lightSize, lightSize);
-                glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
-    
-                glUniform4f(g_colorLocation,
-                    255.0f * (1.0f / 255.0f),
-                    127.0f * (1.0f / 255.0f),
-                    63.0f * (1.0f / 255.0f),
-                    0.0f);
-    
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-                ////////
-            }
-        }
-    }
-    */
-    
-    dodecahall_process(frame_nsec);
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         vertex_t const * vertex = &ddh_vertex_coords[i];
