@@ -1021,6 +1021,19 @@ void dodecahall_init(void)
     }
 }
 
+color_t ddh_colors[10] = {
+    { 31,  31,  31},
+    {127,  63,   0},
+    {255,   0,   0},
+    {191,  95,   0},
+    {255, 255,   0},
+    {  0, 255,   0},
+    {  0,   0, 255},
+    {191,   0, 255},
+    {127, 127, 127},
+    {255, 255, 255},
+};
+
 void dodecahall_process(int32_t delta_ns)
 {
     int32_t frame;
@@ -1035,10 +1048,28 @@ void dodecahall_process(int32_t delta_ns)
     // 30 FPS
     frame = (ddh_total_ns * 30) / 1000000000LL;
     if(frame > ddh_last_frame) {
-        for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-            ddh_frame[i].r = (frame % 128) + 63;
-            ddh_frame[i].g = (frame % 128) + 63;
-            ddh_frame[i].b = (frame % 128) + 63;
+        switch((frame / 60) % 3) {
+            case 0:
+                for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+                    ddh_frame[i].r = ddh_colors[ddh_light_group[i]].r;
+                    ddh_frame[i].g = ddh_colors[ddh_light_group[i]].g;
+                    ddh_frame[i].b = ddh_colors[ddh_light_group[i]].b;
+                }
+                break;
+            case 1:
+                for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+                    ddh_frame[i].r = ddh_colors[ddh_light_dodecahedron[i] % 6].r;
+                    ddh_frame[i].g = ddh_colors[ddh_light_dodecahedron[i] % 6].g;
+                    ddh_frame[i].b = ddh_colors[ddh_light_dodecahedron[i] % 6].b;
+                }
+                break;
+            case 2:
+                for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+                    ddh_frame[i].r = ddh_colors[ddh_light_vertex[i] % 10].r;
+                    ddh_frame[i].g = ddh_colors[ddh_light_vertex[i] % 10].g;
+                    ddh_frame[i].b = ddh_colors[ddh_light_vertex[i] % 10].b;
+                }
+                break;
         }
         ddh_last_frame = frame;
     }

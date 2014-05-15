@@ -66,8 +66,7 @@ DODECAHALL_SRC= \
 	main.c \
 	gles2_harness.c \
 	glus.c \
-	dodecahall.c \
-	ddh_data.c
+	dodecahall.c
 
 
 -include $(DODECAHALL_SRC:.c=.d)
