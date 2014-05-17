@@ -44,7 +44,6 @@
 #include <string.h>
 
 #include "glus.h"
-#include "dodecahall.h"
 
 
 bool gles2_harness_init(void);
@@ -107,7 +106,7 @@ void gles2_harness_main(void)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    window = glfwCreateWindow(640, 480, "Dodecahall", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "Domedecahedron", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -324,7 +323,7 @@ bool gles2_harness_init(void)
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
-    dodecahall_init();
+    domedecahedron_init();
     
     return true;
 }
@@ -350,7 +349,7 @@ void gles2_harness_update(float time)
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
     
-    dodecahall_process(frame_nsec);
+    domedecahedron_process(frame_nsec);
     
     
     gles2_harness_total_nsec += frame_nsec;
@@ -388,9 +387,9 @@ void gles2_harness_update(float time)
         glUniformMatrix4fv(g_modelMatrixLocation, 1, GL_FALSE, modelMatrix);
 
         glUniform4f(g_colorLocation,
-            ddh_frame[i].r * (1.0f / 255.0f),
-            ddh_frame[i].g * (1.0f / 255.0f),
-            ddh_frame[i].b * (1.0f / 255.0f),
+            ddh_frame_buffer[i].r * (1.0f / 255.0f),
+            ddh_frame_buffer[i].g * (1.0f / 255.0f),
+            ddh_frame_buffer[i].b * (1.0f / 255.0f),
             0.0f);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);

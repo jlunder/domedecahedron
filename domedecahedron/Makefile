@@ -61,15 +61,16 @@ MAKEDEPEND=@set -e; rm -f $@; \
 	@$(MAKEDEPEND)
 
 
-DODECAHALL_SRC= \
+DOMEDECAHEDRON_SRC= \
 	$(GLUS_SRC) \
 	main.c \
 	gles2_harness.c \
 	glus.c \
-	dodecahall.c
+	domedecahedron.c \
+	effect.c
 
 
--include $(DODECAHALL_SRC:.c=.d)
+-include $(DOMEDECAHEDRON_SRC:.c=.d)
 
 
 .PHONY: all cleanall clean
@@ -79,7 +80,7 @@ DODECAHALL_SRC= \
 	@$(MAKEDEPEND)
 	gcc -c -g $(CFLAGS) -o $@ $(CPPFLAGS) $<
 
-dodecahall: $(DODECAHALL_SRC:.c=.o)
+domedecahedron: $(DOMEDECAHEDRON_SRC:.c=.o)
 	gcc -g -o $@ $(LDFLAGS) $^
 
 all: dodecahall

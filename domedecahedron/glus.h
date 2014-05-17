@@ -2,7 +2,7 @@
 #define GLUS_H_INCLUDED
 
 
-#include "dodecahall.h"
+#include "domedecahedron.h"
 
 #include <GLFW/glfw3.h>
 

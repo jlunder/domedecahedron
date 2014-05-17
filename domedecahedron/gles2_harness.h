@@ -2,7 +2,7 @@
 #define GLES2_HARNESS_H_INCLUDED
 
 
-#include "dodecahall.h"
+#include "domedecahedron.h"
 
 
 void gles2_harness_main(void);

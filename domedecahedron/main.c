@@ -1,4 +1,4 @@
-#include "dodecahall.h"
+#include "domedecahedron.h"
 
 #include "gles2_harness.h"
 
@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
     
-    dodecahall_init();
+    domedecahedron_init();
     
     gles2_harness_main();
     

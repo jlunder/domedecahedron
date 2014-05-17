@@ -1,5 +1,5 @@
-#ifndef DODECAHALL_H_INCLUDED
-#define DODECAHALL_H_INCLUDED
+#ifndef DOMEDECAHEDRON_H_INCLUDED
+#define DOMEDECAHEDRON_H_INCLUDED
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -66,11 +66,18 @@ extern uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES];
 extern uint8_t const ddh_light_faces[DDH_TOTAL_VERTICES][3];
 extern uint8_t const ddh_light_group[DDH_TOTAL_VERTICES];
 
-extern color_t ddh_frame[DDH_TOTAL_VERTICES];
+extern color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
+
+extern uint64_t ddh_total_ns;
+extern uint32_t ddh_total_frames;
 
 
-void dodecahall_init(void);
-void dodecahall_process(int32_t ns);
+void domedecahedron_init(void);
+void domedecahedron_process(uint64_t delta_ns);
+
+uint64_t ddh_ns_since(uint64_t total_ns);
+uint32_t ddh_ms_since(uint64_t total_ns);
+uint32_t ddh_frames_since(uint32_t frame);
 
 
-#endif // DODECAHALL_H_INCLUDED
+#endif // DOMEDECAHEDRON_H_INCLUDED
