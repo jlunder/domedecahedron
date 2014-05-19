@@ -3,4 +3,4 @@
 \.d(.[0-9]+)?$
 \.o(.[0-9]+)?$
 \.DS_Store$
-^dodecahall/dodecahall$
+^domedecahedron/domedecahedron$
