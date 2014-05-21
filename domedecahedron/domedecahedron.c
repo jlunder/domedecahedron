@@ -878,16 +878,16 @@ uint8_t const ddh_dodecahedron_face_vertices[DDH_FACES_PER_DODECAHEDRON][
     {15, 19, 18, 17, 16},
 };
 
-uint8_t const ddh_dodecahedron_face_adjacency[DDH_FACES_PER_DODECAHEDRON][5];
-uint8_t const ddh_dodecahedron_face_opposition[DDH_FACES_PER_DODECAHEDRON];
-uint8_t const ddh_center_dodecahedron;
+uint8_t const ddh_dodecahedron_face_adjacency[DDH_FACES_PER_DODECAHEDRON][5] = {
+};
+uint8_t const ddh_dodecahedron_face_opposition[DDH_FACES_PER_DODECAHEDRON] = {
+};
 uint8_t const ddh_group_dodecahedrons[DDH_TOTAL_GROUPS][
-    DDH_DODECAHEDRONS_PER_GROUP];
-uint8_t const ddh_group_adjacencies[DDH_TOTAL_GROUPS][2];
-uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS];
-placement_t const ddh_structure_placements[DDH_TOTAL_DODECAHEDRONS];
-vertex_t const ddh_structure_vertex_coords[DDH_TOTAL_DODECAHEDRONS][
-    DDH_VERTICES_PER_DODECAHEDRON];
+    DDH_DODECAHEDRONS_PER_GROUP] = {
+};
+//uint8_t const ddh_group_adjacencies[DDH_TOTAL_GROUPS][2];
+uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS] = {
+};
 
 uint8_t const ddh_light_dodecahedron[DDH_TOTAL_VERTICES] = {
      0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -896,36 +896,36 @@ uint8_t const ddh_light_dodecahedron[DDH_TOTAL_VERTICES] = {
      3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
      4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
      5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
-     6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,
-     7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,
-     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-     9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,
-    10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-    11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
-    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-    13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,
-    14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-    16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-    17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
-    18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18,
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-    20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-    21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-    22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22,
-    23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
-    24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-    25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
-    26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-    27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
-    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-    29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
-    30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
-    31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31,
-    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
-    33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33,
-    34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34,
-    35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+     2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+     3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+     4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
+     5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+     2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+     3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+     4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
+     5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+     2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+     3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+     4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
+     5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+     2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+     3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+     4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
+     5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+     2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+     3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+     4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
+     5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
 };
 
 uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES] = {
@@ -967,7 +967,8 @@ uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES] = {
      0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 };
 
-uint8_t const ddh_light_faces[DDH_TOTAL_VERTICES][3];
+uint8_t const ddh_light_faces[DDH_TOTAL_VERTICES][3] = {
+};
 
 uint8_t const ddh_light_group[DDH_TOTAL_VERTICES] = {
      0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -1066,7 +1067,49 @@ void domedecahedron_process(uint64_t delta_ns)
     }
     
     if(ddh_total_frames - ddh_last_frames > 0) { // mod 2^32 arithmetic
-        switch((ddh_total_frames / (fps * 2)) % 3) {
+        /*
+        size_t n = (ddh_total_frames / (fps * 2 / 1)) % 20;
+        for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+            ddh_frame_buffer[i].r = ddh_light_vertex[i] == n ? 255 : 0;
+            ddh_frame_buffer[i].g = ddh_light_dodecahedron[i] == n ? 255 : 0;
+            ddh_frame_buffer[i].b = ddh_light_group[i] == n ? 255 : 0;
+            if(ddh_frame_buffer[i].r == 0 && ddh_frame_buffer[i].g == 0 && ddh_frame_buffer[i].b == 0) {
+                ddh_frame_buffer[i].r = 31;
+                ddh_frame_buffer[i].g = 31;
+                ddh_frame_buffer[i].b = 31;
+            }
+        }
+        */
+        static int32_t const k = fps * 10 / 1;
+        int32_t n = ddh_total_frames % k;
+        float smin = (5.0f / k) * (n - 2 - k / 2);
+        float smax = (5.0f / k) * (n + 3 - k / 2);
+        switch((ddh_total_frames / k) % 3) {
+        case 0:
+            for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+                ddh_frame_buffer[i].r = ddh_vertex_coords[i].x >= smin && ddh_vertex_coords[i].x < smax ? 255 : 0;
+                ddh_frame_buffer[i].g = 0;
+                ddh_frame_buffer[i].b = 0;
+            }
+            break;
+        case 1:
+            for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+                ddh_frame_buffer[i].r = 0;
+                ddh_frame_buffer[i].g = ddh_vertex_coords[i].y >= smin && ddh_vertex_coords[i].y < smax ? 255 : 0;
+                ddh_frame_buffer[i].b = 0;
+            }
+            break;
+        case 2:
+            for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+                ddh_frame_buffer[i].r = 0;
+                ddh_frame_buffer[i].g = 0;
+                ddh_frame_buffer[i].b = ddh_vertex_coords[i].z >= smin && ddh_vertex_coords[i].z < smax ? 255 : 0;
+            }
+            break;
+        }
+        /*
+        size_t n = (ddh_total_frames / (fps * 2 / 1)) % 3;
+        switch(n) {
             case 0:
                 for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
                     ddh_frame_buffer[i].r = ddh_colors[ddh_light_group[i]].r;
@@ -1089,6 +1132,7 @@ void domedecahedron_process(uint64_t delta_ns)
                 }
                 break;
         }
+        */
         ddh_last_frames = ddh_total_frames;
     }
 }

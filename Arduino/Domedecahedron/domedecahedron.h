@@ -21,11 +21,9 @@ typedef struct {
 
 typedef union {
     struct {
-        uint8_t r, g, b;
+        uint8_t r, g, b, x;
     };
-    struct {
-        uint32_t color;
-    };
+    uint32_t color;
 } color_t;
 
 typedef struct {
