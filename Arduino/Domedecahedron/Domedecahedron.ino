@@ -3,12 +3,34 @@
 static uint32_t last_micros;
 static uint32_t last_frame_end_micros;
 static uint32_t last_frame;
+
+static uint32_t debug_mode_debounce_micros;
+static uint32_t debug_submode_debounce_micros;
+static uint32_t debug_button_a_debounce_micros;
+static uint32_t debug_button_b_debounce_micros;
+
+static uint8_t debug_mode;
+static uint8_t debounced_debug_mode;
+static uint8_t debug_submode;
+static uint8_t debounced_debug_submode;
+static bool debug_button_a;
+static bool debounced_debug_button_a;
+static bool debug_button_b;
+static bool debounced_debug_button_b;
+
+
 // On the Due, pins 33-41 map to PORTC bits 1-9. This is the largest contiguous
 // ordered range on the Due, so poach it.
 static int const group_data_pins[DDH_TOTAL_GROUPS] = {33, 34, 35, 36, 37, 38};
 static int const clock_pin = 40;
 
 static int const debug_pins[4] = {23, 25, 27, 29};
+static int const debug_mode_pins[4] = {2, 3, 4, 5};
+static int const debug_submode_pins[4] = {6, 7, 8, 9};
+static int const debug_button_a_pin = 10;
+static int const debug_button_b_pin = 11;
+
+static int const debounce_micros = 500;
 
 static uint8_t intensity_map[256];
 
@@ -30,6 +52,14 @@ void setup()
     pinMode(debug_pins[i], OUTPUT);
   }
   
+  for(size_t i = 0; i < 3; ++i) {
+    pinMode(debug_mode_pins[i], INPUT_PULLUP);
+    pinMode(debug_submode_pins[i], INPUT_PULLUP);
+  }
+  
+  pinMode(debug_button_a_pin, INPUT_PULLUP);
+  pinMode(debug_button_b_pin, INPUT_PULLUP);
+  
   /*
   Serial.print("OWSR: ");
   Serial.print(REG_PIOC_OWSR, HEX);
@@ -43,7 +73,7 @@ void setup()
     intensity_map[i] = i;
   }
   
-  domedecahedron_init();
+  ddh_initialize();
   last_micros = micros();
   last_frame = ddh_total_frames;
 }
@@ -63,13 +93,75 @@ void loop()
   last_frame = ddh_total_frames;
   
   digitalWrite(debug_pins[1], 1);
-  domedecahedron_process(delta_us * 1000ULL);
+  
+  debug_mode =
+    !!digitalRead(debug_mode_pins[0]) |
+    (!!digitalRead(debug_mode_pins[1]) << 1) |
+    (!!digitalRead(debug_mode_pins[2]) << 2) |
+    (!!digitalRead(debug_mode_pins[3]) << 2);
+  debug_submode =
+    !!digitalRead(debug_submode_pins[0]) |
+    (!!digitalRead(debug_submode_pins[1]) << 1) |
+    (!!digitalRead(debug_submode_pins[2]) << 2) |
+    (!!digitalRead(debug_submode_pins[3]) << 3);
+  debug_button_a = digitalRead(debug_button_a_pin);
+  debug_button_b = digitalRead(debug_button_b_pin);
+  
+  if(debug_mode != debounced_debug_mode) {
+    debug_mode_debounce_micros = debounce_micros;
+    debounced_debug_mode = debug_mode;
+  }
+  if(debug_mode_debounce_micros < delta_us) {
+    debug_mode_debounce_micros = 0;
+    ddh_debug_mode = debug_mode;
+  }
+  else {
+    debug_mode_debounce_micros -= delta_us;
+  }
+  
+  if(debug_submode != debounced_debug_submode) {
+    debug_submode_debounce_micros = debounce_micros;
+    debounced_debug_submode = debug_submode;
+  }
+  if(debug_submode_debounce_micros < delta_us) {
+    debug_submode_debounce_micros = 0;
+    ddh_debug_submode = debug_submode;
+  }
+  else {
+    debug_submode_debounce_micros -= delta_us;
+  }
+  
+  if(debug_button_a != debounced_debug_button_a) {
+    debug_button_a_debounce_micros = debounce_micros;
+    debounced_debug_button_a = debug_button_a;
+  }
+  if(debug_button_a_debounce_micros < delta_us) {
+    debug_button_a_debounce_micros = 0;
+    ddh_debug_button_a = debug_button_a;
+  }
+  else {
+    debug_button_a_debounce_micros -= delta_us;
+  }
+  
+  if(debug_button_b != debounced_debug_button_b) {
+    debug_button_b_debounce_micros = debounce_micros;
+    debounced_debug_button_b = debug_button_b;
+  }
+  if(debug_button_b_debounce_micros < delta_us) {
+    debug_button_b_debounce_micros = 0;
+    ddh_debug_button_b = debug_button_b;
+  }
+  else {
+    debug_button_b_debounce_micros -= delta_us;
+  }
+  
+  ddh_process(delta_us * 1000ULL);
+  
   digitalWrite(debug_pins[1], 0);
   
   process_delta_us = micros() - this_micros;
   
-  if(last_frame == ddh_total_frames)
-  {
+  if(last_frame == ddh_total_frames) {
     digitalWrite(debug_pins[0], 0);
     delay(1);
     return;
@@ -96,7 +188,15 @@ void loop()
   Serial.print(process_delta_us, DEC);
   Serial.print("us, emit ");
   Serial.print(last_frame_end_micros - frame_this_micros, DEC);
-  Serial.print("us\n");
+  Serial.print("us; mode=");
+  Serial.print(ddh_debug_mode, DEC);
+  Serial.print(", submode=");
+  Serial.print(ddh_debug_submode, DEC);
+  Serial.print(", a=");
+  Serial.print(ddh_debug_button_a, DEC);
+  Serial.print(", b=");
+  Serial.print(ddh_debug_button_b, DEC);
+  Serial.print("\n");
 }
 
 void emit_frame()
