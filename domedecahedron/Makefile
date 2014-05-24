@@ -30,21 +30,18 @@ endif
 
 
 ifeq ($(OS), LINUX)
-	GLUS_SRC=$(GLUS_COMMON_SRC) $(GLUS_GLES2_SRC) GLUS/glus_raspberrypi_es.c
 	CC=gcc
 	CFLAGS=-O2 -W -Wall --std=gnu99 -fgnu89-inline
 	CPPFLAGS=-DGLUS_ES2 -I ./GLUS -I /opt/vc/include -I /opt/vc/include/interface/vcos/pthreads -I /opt/vc/include/interface/vmcs_host/linux
 	LDFLAGS=-lSDL -lEGL -lGLESv2 -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lm -L /opt/vc/lib
 endif
 ifeq ($(OS), OSX)
-	GLUS_SRC=$(GLUS_COMMON_SRC) $(GLUS_GL_SRC)
 	CC=gcc
 	CFLAGS=-O2 -W -Wall --std=gnu99 -fgnu89-inline
 	CPPFLAGS=-DGLUS_GL -I ./GLUS
 	LDFLAGS=-framework OpenGL -framework Cocoa -framework QuartzCore -framework IOKit -lm -lglfw3
 endif
 ifeq ($(OS), WIN32)
-	GLUS_SRC=$(GLUS_COMMON_SRC) $(GLUS_GLES2_SRC) GLUS/glus_windows_es.c
 	CC=!
 	CFLAGS=
 	CPPFLAGS=
@@ -62,7 +59,6 @@ MAKEDEPEND=@set -e; rm -f $@; \
 
 
 DOMEDECAHEDRON_SRC= \
-	$(GLUS_SRC) \
 	main.c \
 	gles2_harness.c \
 	glus.c \

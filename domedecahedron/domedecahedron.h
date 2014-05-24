@@ -7,6 +7,8 @@
 #include <math.h>
 
 
+#define DDH_FPS 60
+
 #define DDH_VERTICES_PER_DODECAHEDRON 20
 #define DDH_FACES_PER_DODECAHEDRON 12
 #define DDH_VERTICES_PER_FACE 5
@@ -19,8 +21,11 @@ typedef struct {
     float x, y, z;
 } vertex_t;
 
-typedef struct {
-    uint8_t r, g, b;
+typedef union {
+    struct {
+        uint8_t r, g, b, x;
+    };
+    uint32_t color;
 } color_t;
 
 typedef struct {
@@ -33,6 +38,10 @@ typedef struct {
     quaternion_t orientation;
 } placement_t;
 
+static inline color_t ddh_make_color(uint8_t r, uint8_t g, uint8_t b) {
+    color_t c = {{r, g, b, 0}};
+    return c;
+}
 
 extern vertex_t const ddh_dodecahedron_vertex_coords[
     DDH_VERTICES_PER_DODECAHEDRON];
@@ -52,14 +61,10 @@ extern uint8_t const ddh_dodecahedron_face_adjacency[
     DDH_FACES_PER_DODECAHEDRON][5];
 extern uint8_t const ddh_dodecahedron_face_opposition[
     DDH_FACES_PER_DODECAHEDRON];
-extern uint8_t const ddh_center_dodecahedron;
+static uint8_t const ddh_center_dodecahedron = 0;
 extern uint8_t const ddh_group_dodecahedrons[DDH_TOTAL_GROUPS][
     DDH_DODECAHEDRONS_PER_GROUP];
-extern uint8_t const ddh_group_adjacencies[DDH_TOTAL_GROUPS][2];
 extern uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS];
-extern placement_t const ddh_structure_placements[DDH_TOTAL_DODECAHEDRONS];
-extern vertex_t const ddh_structure_vertex_coords[DDH_TOTAL_DODECAHEDRONS][
-    DDH_VERTICES_PER_DODECAHEDRON];
 
 extern uint8_t const ddh_light_dodecahedron[DDH_TOTAL_VERTICES];
 extern uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES];
@@ -71,9 +76,39 @@ extern color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
 extern uint64_t ddh_total_ns;
 extern uint32_t ddh_total_frames;
 
+#define DDH_DEBUG_MODE_RUN                     0
+#define DDH_DEBUG_MODE_LOCATE                  5
+#define DDH_DEBUG_MODE_SWEEP                   6
+#define DDH_DEBUG_MODE_COLOR                   7
 
-void domedecahedron_init(void);
-void domedecahedron_process(uint64_t delta_ns);
+#define DDH_DEBUG_SUBMODE_LOCATE_VERTICES      0
+#define DDH_DEBUG_SUBMODE_LOCATE_DODECAHEDRONS 1
+#define DDH_DEBUG_SUBMODE_LOCATE_FACES         2
+#define DDH_DEBUG_SUBMODE_LOCATE_GROUPS        3
+
+#define DDH_DEBUG_SUBMODE_SWEEP_ALL            0
+#define DDH_DEBUG_SUBMODE_SWEEP_X              1
+#define DDH_DEBUG_SUBMODE_SWEEP_Y              2
+#define DDH_DEBUG_SUBMODE_SWEEP_Z              3
+#define DDH_DEBUG_SUBMODE_SWEEP_STEP_X         4
+#define DDH_DEBUG_SUBMODE_SWEEP_STEP_Y         5
+#define DDH_DEBUG_SUBMODE_SWEEP_STEP_Z         6
+
+#define DDH_DEBUG_SUBMODE_COLOR_WHITE          0
+#define DDH_DEBUG_SUBMODE_COLOR_RED            1
+#define DDH_DEBUG_SUBMODE_COLOR_GREEN          2
+#define DDH_DEBUG_SUBMODE_COLOR_BLUE           3
+#define DDH_DEBUG_SUBMODE_COLOR_GRADIENT       4
+
+extern uint8_t ddh_debug_mode;
+extern uint8_t ddh_debug_submode;
+extern bool ddh_debug_button_a;
+extern bool ddh_debug_button_a_edge;
+extern bool ddh_debug_button_b;
+extern bool ddh_debug_button_b_edge;
+
+void ddh_initialize(void);
+void ddh_process(uint64_t delta_ns);
 
 uint64_t ddh_ns_since(uint64_t total_ns);
 uint32_t ddh_ms_since(uint64_t total_ns);

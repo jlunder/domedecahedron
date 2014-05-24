@@ -66,8 +66,19 @@ static GLuint g_verticesVBO;
 
 static GLfloat g_aspectRatio;
 
-int32_t gles2_harness_light_index = 0;
-int64_t gles2_harness_total_nsec = 0;
+static float const gles2_harness_delta_v = (float)M_PI;
+static float const gles2_harness_max_v = (float)M_PI / 2.0f;
+
+bool gles2_harness_input_left = false;
+bool gles2_harness_input_right = false;
+bool gles2_harness_input_up = false;
+bool gles2_harness_input_down = false;
+
+float gles2_harness_horizontal_v = 0.f;
+float gles2_harness_horizontal_pos = 0.f;
+float gles2_harness_vertical_v = 0.f;
+float gles2_harness_vertical_pos = 0.f;
+float gles2_harness_dist = 5.f;
 
 
 
@@ -83,8 +94,54 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     (void)scancode;
     (void)mods;
     
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
+    if(action == GLFW_PRESS) {
+        switch(key) {
+        case 'Q': ddh_debug_mode = 0; break;
+        case 'W': ddh_debug_mode = 1; break;
+        case 'E': ddh_debug_mode = 2; break;
+        case 'R': ddh_debug_mode = 3; break;
+        case 'T': ddh_debug_mode = 4; break;
+        case 'Y': ddh_debug_mode = 5; break;
+        case 'U': ddh_debug_mode = 6; break;
+        case 'I': ddh_debug_mode = 7; break;
+        case 'O': ddh_debug_mode = 8; break;
+        case 'P': ddh_debug_mode = 9; break;
+        
+        case 'A': ddh_debug_submode = 0; break;
+        case 'S': ddh_debug_submode = 1; break;
+        case 'D': ddh_debug_submode = 2; break;
+        case 'F': ddh_debug_submode = 3; break;
+        case 'G': ddh_debug_submode = 4; break;
+        case 'H': ddh_debug_submode = 5; break;
+        case 'J': ddh_debug_submode = 6; break;
+        case 'K': ddh_debug_submode = 7; break;
+        case 'L': ddh_debug_submode = 8; break;
+        case ';': ddh_debug_submode = 9; break;
+        
+        case '[': ddh_debug_button_a = true; break;
+        case ']': ddh_debug_button_b = true; break;
+        
+        case GLFW_KEY_LEFT: gles2_harness_input_left = true; break;
+        case GLFW_KEY_RIGHT: gles2_harness_input_right = true; break;
+        case GLFW_KEY_UP: gles2_harness_input_up = true; break;
+        case GLFW_KEY_DOWN: gles2_harness_input_down = true; break;
+        
+        case GLFW_KEY_ESCAPE:
+            glfwSetWindowShouldClose(window, GL_TRUE);
+            break;
+        }
+    }
+    else if(action == GLFW_RELEASE) {
+        switch(key) {
+        case '[': ddh_debug_button_a = false; break;
+        case ']': ddh_debug_button_b = false; break;
+        
+        case GLFW_KEY_LEFT: gles2_harness_input_left = false;
+        case GLFW_KEY_RIGHT: gles2_harness_input_right = false;
+        case GLFW_KEY_UP: gles2_harness_input_up = false;
+        case GLFW_KEY_DOWN: gles2_harness_input_down = false;
+        }
+    }
 }
 
 void gles2_harness_main(void)
@@ -261,7 +318,7 @@ bool gles2_harness_init(void)
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClearDepth(1.0f);
     
     GLfloat lightVertices[] = {
@@ -323,7 +380,7 @@ bool gles2_harness_init(void)
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
-    domedecahedron_init();
+    ddh_initialize();
     
     return true;
 }
@@ -349,17 +406,112 @@ void gles2_harness_update(float time)
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
     
-    domedecahedron_process(frame_nsec);
+    ddh_process(frame_nsec);
     
-    
-    gles2_harness_total_nsec += frame_nsec;
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    static float phase = 0.f;
-    phase = fmodf(phase + (float)M_PI * 2.0f * time * 0.05, (float)M_PI * 2.f);
+    float horizontal_a = 0.0f;
+    if(gles2_harness_input_left && !gles2_harness_input_right) {
+        horizontal_a = gles2_harness_delta_v;
+        gles2_harness_horizontal_v += horizontal_a * time;
+    }
+    if(!gles2_harness_input_left && gles2_harness_input_right) {
+        horizontal_a = -gles2_harness_delta_v;
+        gles2_harness_horizontal_v += horizontal_a * time;
+    }
+    if(!gles2_harness_input_left && !gles2_harness_input_right) {
+        float delta_v;
+        
+        if(gles2_harness_horizontal_v > 0) {
+            horizontal_a = -gles2_harness_delta_v;
+        }
+        else {
+            horizontal_a = gles2_harness_delta_v;
+        }
+        
+        delta_v = horizontal_a * time;
+        
+        if(fabsf(delta_v) > fabsf(gles2_harness_horizontal_v)) {
+            horizontal_a = 0.f;
+            gles2_harness_horizontal_v = 0.f;
+        }
+        else {
+            gles2_harness_horizontal_v += delta_v;
+        }
+    }
+    if(gles2_harness_horizontal_v > gles2_harness_max_v) {
+        gles2_harness_horizontal_v = gles2_harness_max_v;
+        horizontal_a = 0.f;
+    }
+    if(gles2_harness_horizontal_v < -gles2_harness_max_v) {
+        gles2_harness_horizontal_v = -gles2_harness_max_v;
+        horizontal_a = 0.f;
+    }
+    
+    float vertical_a = 0.0f;
+    if(gles2_harness_input_up && !gles2_harness_input_down) {
+        vertical_a = gles2_harness_delta_v * gles2_harness_dist * 0.5f;
+        gles2_harness_vertical_v += vertical_a * time;
+    }
+    if(!gles2_harness_input_up && gles2_harness_input_down) {
+        vertical_a = -gles2_harness_delta_v * gles2_harness_dist * 0.5f;
+        gles2_harness_vertical_v += vertical_a * time;
+    }
+    if(!gles2_harness_input_up && !gles2_harness_input_down) {
+        float delta_v;
+        
+        if(gles2_harness_vertical_v > 0) {
+            vertical_a = -gles2_harness_delta_v;
+        }
+        else {
+            vertical_a = gles2_harness_delta_v;
+        }
+        
+        delta_v = vertical_a * time;
+        
+        if(fabsf(delta_v) > fabsf(gles2_harness_vertical_v)) {
+            vertical_a = 0.f;
+            gles2_harness_vertical_v = 0.f;
+        }
+        else {
+            gles2_harness_vertical_v += delta_v;
+        }
+    }
+    if(gles2_harness_vertical_v > gles2_harness_max_v) {
+        gles2_harness_vertical_v = gles2_harness_max_v;
+        vertical_a = 0.f;
+    }
+    if(gles2_harness_vertical_v < -gles2_harness_max_v) {
+        gles2_harness_vertical_v = -gles2_harness_max_v;
+        vertical_a = 0.f;
+    }
+    
+    
+    gles2_harness_horizontal_pos = fmodf(
+        gles2_harness_horizontal_pos +
+        gles2_harness_horizontal_v * time +
+        0.5f * horizontal_a * time * time,
+        (float)M_PI * 2.f);
+    gles2_harness_vertical_pos +=
+        gles2_harness_vertical_v * time +
+        0.5f * vertical_a * time * time;
+    if(gles2_harness_vertical_pos > 2.f) {
+        gles2_harness_vertical_pos = 2.f;
+        if(gles2_harness_vertical_v > 0.f) {
+            gles2_harness_vertical_v = 0.f;
+        }
+    }
+    if(gles2_harness_vertical_pos < -2.f) {
+        gles2_harness_vertical_pos = -2.f;
+        if(gles2_harness_vertical_v < 0.f) {
+            gles2_harness_vertical_v = 0.f;
+        }
+    }
     glusLookAtf(viewMatrix,
-        5.0f * cosf(phase), 5.0f * -sinf(phase), 2.0f,
+        gles2_harness_dist * cosf(gles2_harness_horizontal_pos),
+            gles2_harness_dist * -sinf(gles2_harness_horizontal_pos),
+            gles2_harness_vertical_pos + 2.f,
         0.0f, 0.0f, -2.0f,
         0.0f, 0.0f, 1.0f);
     glusPerspectivef(viewProjectionMatrix, 45.0f, g_aspectRatio, 0.1f, 1000.0f);

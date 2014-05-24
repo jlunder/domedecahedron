@@ -864,20 +864,29 @@ uint8_t const ddh_dodecahedron_vertex_opposition[
 
 uint8_t const ddh_dodecahedron_face_vertices[DDH_FACES_PER_DODECAHEDRON][
         DDH_VERTICES_PER_FACE] = {
-    {0, 4, 3, 2, 1},
-    {3, 4, 5, 6, 7},
-    {2, 3, 7, 8, 9},
-    {1, 2, 9, 10, 11},
-    {0, 1, 11, 12, 13},
-    {0, 13, 14, 5, 4},
-    {5, 14, 15, 16, 6},
+    { 0,  4,  3,  2,  1},
+    { 3,  4,  5,  6,  7},
+    { 2,  3,  7,  8,  9},
+    { 1,  2,  9, 10, 11},
+    { 0,  1, 11, 12, 13},
+    { 0, 13, 14,  5,  4},
+    { 5, 14, 15, 16,  6},
     {12, 19, 15, 14, 13},
     {10, 18, 19, 12, 11},
-    {8, 17, 18, 10, 9},
-    {6, 16, 17, 8, 7},
+    { 8, 17, 18, 10,  9},
+    { 6, 16, 17,  8,  7},
     {15, 19, 18, 17, 16},
 };
-
+/*
+uint8_t const ddh_dodecahedron_vertex_faces[DDH_VERTICES_PER_DODECAHEDRON][
+        DDH_VERTICES_PER_FACE] = {
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2},
+    { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10},
+    { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8},
+    { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11},
+    { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+};
+*/
 uint8_t const ddh_dodecahedron_face_adjacency[DDH_FACES_PER_DODECAHEDRON][5] = {
 };
 uint8_t const ddh_dodecahedron_face_opposition[DDH_FACES_PER_DODECAHEDRON] = {
@@ -968,6 +977,42 @@ uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES] = {
 };
 
 uint8_t const ddh_light_faces[DDH_TOTAL_VERTICES][3] = {
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
+    { 0,  4,  5}, { 0,  3,  4}, { 0,  2,  3}, { 0,  1,  2}, { 0,  1,  5}, { 1,  5,  6}, { 1,  6, 10}, { 1,  2, 10}, { 2,  9, 10}, { 2,  3,  9}, { 3,  8,  9}, { 3,  4,  8}, { 4,  7,  8}, { 4,  5,  7}, { 5,  6,  7}, { 6,  7, 11}, { 6, 10, 11}, { 9, 10, 11}, { 8,  9, 11}, { 7,  8, 11},
 };
 
 uint8_t const ddh_light_group[DDH_TOTAL_VERTICES] = {
@@ -1018,7 +1063,27 @@ uint64_t ddh_frame_fraction = 0;
 
 uint64_t ddh_frame_convert_offset = 0;
 
-void domedecahedron_init(void)
+uint8_t ddh_debug_mode;
+uint8_t ddh_debug_submode;
+bool ddh_debug_last_button_a;
+bool ddh_debug_button_a;
+bool ddh_debug_button_a_edge;
+bool ddh_debug_last_button_b;
+bool ddh_debug_button_b;
+bool ddh_debug_button_b_edge;
+
+uint32_t ddh_debug_start_frame;
+uint32_t ddh_debug_cursor;
+uint8_t ddh_debug_last_submode;
+
+void ddh_initialize_debug_mode_locate(void);
+void ddh_process_debug_mode_locate(void);
+void ddh_initialize_debug_mode_sweep(void);
+void ddh_process_debug_mode_sweep(void);
+void ddh_initialize_debug_mode_color(void);
+void ddh_process_debug_mode_color(void);
+
+void ddh_initialize(void)
 {
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         ddh_frame_buffer[i].r = 255;
@@ -1028,31 +1093,29 @@ void domedecahedron_init(void)
 }
 
 color_t ddh_colors[10] = {
-    { 31,  31,  31},
-    {127,  63,   0},
-    {255,   0,   0},
-    {191,  95,   0},
-    {255, 255,   0},
-    {  0, 255,   0},
-    {  0,   0, 255},
-    {191,   0, 255},
-    {127, 127, 127},
-    {255, 255, 255},
+    {{ 31,  31,  31, 0}},
+    {{127,  63,   0, 0}},
+    {{255,   0,   0, 0}},
+    {{191,  95,   0, 0}},
+    {{255, 255,   0, 0}},
+    {{  0, 255,   0, 0}},
+    {{  0,   0, 255, 0}},
+    {{191,   0, 255, 0}},
+    {{127, 127, 127, 0}},
+    {{255, 255, 255, 0}},
 };
 
-uint32_t ddh_ms_table[30] = {
-};
+uint8_t ddh_last_debug_mode = 255;
 
-void domedecahedron_process(uint64_t delta_ns)
+void ddh_process(uint64_t delta_ns)
 {
     static const uint64_t billion = 1000000000ULL;
     static const uint64_t tenbillion = 10000000000ULL;
-    static const uint32_t fps = 30;
     
     ddh_total_ns += delta_ns;
     
     // 30 FPS
-    ddh_frame_fraction += delta_ns * fps;
+    ddh_frame_fraction += delta_ns * DDH_FPS;
     
     if(ddh_frame_fraction > tenbillion) {
         uint32_t delta_frames = (uint32_t)(ddh_frame_fraction / billion);
@@ -1066,74 +1129,46 @@ void domedecahedron_process(uint64_t delta_ns)
         }
     }
     
-    if(ddh_total_frames - ddh_last_frames > 0) { // mod 2^32 arithmetic
-        /*
-        size_t n = (ddh_total_frames / (fps * 2 / 1)) % 20;
-        for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-            ddh_frame_buffer[i].r = ddh_light_vertex[i] == n ? 255 : 0;
-            ddh_frame_buffer[i].g = ddh_light_dodecahedron[i] == n ? 255 : 0;
-            ddh_frame_buffer[i].b = ddh_light_group[i] == n ? 255 : 0;
-            if(ddh_frame_buffer[i].r == 0 && ddh_frame_buffer[i].g == 0 && ddh_frame_buffer[i].b == 0) {
-                ddh_frame_buffer[i].r = 31;
-                ddh_frame_buffer[i].g = 31;
-                ddh_frame_buffer[i].b = 31;
-            }
-        }
-        */
-        static int32_t const k = fps * 10 / 1;
-        int32_t n = ddh_total_frames % k;
-        float smin = (5.0f / k) * (n - 2 - k / 2);
-        float smax = (5.0f / k) * (n + 3 - k / 2);
-        switch((ddh_total_frames / k) % 3) {
-        case 0:
-            for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-                ddh_frame_buffer[i].r = ddh_vertex_coords[i].x >= smin && ddh_vertex_coords[i].x < smax ? 255 : 0;
-                ddh_frame_buffer[i].g = 0;
-                ddh_frame_buffer[i].b = 0;
-            }
+    if((ddh_total_frames - ddh_last_frames) == 0) { // mod 2^32 arithmetic
+        return;
+    }
+    
+    ddh_last_frames = ddh_total_frames;
+    
+    if(ddh_debug_mode != ddh_last_debug_mode) {
+        ddh_last_debug_mode = ddh_debug_mode;
+        switch(ddh_debug_mode) {
+        case DDH_DEBUG_MODE_RUN:
             break;
-        case 1:
-            for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-                ddh_frame_buffer[i].r = 0;
-                ddh_frame_buffer[i].g = ddh_vertex_coords[i].y >= smin && ddh_vertex_coords[i].y < smax ? 255 : 0;
-                ddh_frame_buffer[i].b = 0;
-            }
+        case DDH_DEBUG_MODE_LOCATE:
+            ddh_initialize_debug_mode_locate();
             break;
-        case 2:
-            for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-                ddh_frame_buffer[i].r = 0;
-                ddh_frame_buffer[i].g = 0;
-                ddh_frame_buffer[i].b = ddh_vertex_coords[i].z >= smin && ddh_vertex_coords[i].z < smax ? 255 : 0;
-            }
+        case DDH_DEBUG_MODE_SWEEP:
+            ddh_initialize_debug_mode_sweep();
+            break;
+        case DDH_DEBUG_MODE_COLOR:
+            ddh_initialize_debug_mode_color();
             break;
         }
-        /*
-        size_t n = (ddh_total_frames / (fps * 2 / 1)) % 3;
-        switch(n) {
-            case 0:
-                for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-                    ddh_frame_buffer[i].r = ddh_colors[ddh_light_group[i]].r;
-                    ddh_frame_buffer[i].g = ddh_colors[ddh_light_group[i]].g;
-                    ddh_frame_buffer[i].b = ddh_colors[ddh_light_group[i]].b;
-                }
-                break;
-            case 1:
-                for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-                    ddh_frame_buffer[i].r = ddh_colors[ddh_light_dodecahedron[i] % 6].r;
-                    ddh_frame_buffer[i].g = ddh_colors[ddh_light_dodecahedron[i] % 6].g;
-                    ddh_frame_buffer[i].b = ddh_colors[ddh_light_dodecahedron[i] % 6].b;
-                }
-                break;
-            case 2:
-                for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-                    ddh_frame_buffer[i].r = ddh_colors[ddh_light_vertex[i] % 10].r;
-                    ddh_frame_buffer[i].g = ddh_colors[ddh_light_vertex[i] % 10].g;
-                    ddh_frame_buffer[i].b = ddh_colors[ddh_light_vertex[i] % 10].b;
-                }
-                break;
-        }
-        */
-        ddh_last_frames = ddh_total_frames;
+    }
+    
+    ddh_debug_button_a_edge = (ddh_debug_button_a != ddh_debug_last_button_a);
+    ddh_debug_button_b_edge = (ddh_debug_button_b != ddh_debug_last_button_b);
+    ddh_debug_last_button_a = ddh_debug_button_a;
+    ddh_debug_last_button_b = ddh_debug_button_b;
+    
+    switch(ddh_debug_mode) {
+    case DDH_DEBUG_MODE_RUN:
+        break;
+    case DDH_DEBUG_MODE_LOCATE:
+        ddh_process_debug_mode_locate();
+        break;
+    case DDH_DEBUG_MODE_SWEEP:
+        ddh_process_debug_mode_sweep();
+        break;
+    case DDH_DEBUG_MODE_COLOR:
+        ddh_process_debug_mode_color();
+        break;
     }
 }
 
@@ -1151,4 +1186,165 @@ uint32_t ddh_frames_since(uint32_t total_frames)
 {
     return ddh_total_frames - total_frames;
 }
+
+void ddh_initialize_debug_mode_locate(void)
+{
+    ddh_debug_start_frame = ddh_total_frames;
+    ddh_debug_cursor = 0;
+    ddh_debug_last_submode = 255;
+}
+
+void ddh_process_debug_mode_locate(void)
+{
+    uint32_t frame;
+    bool cursor_on = false;
+    color_t cursor_color = ddh_make_color(0, 0, 0);
+    uint32_t cursor_wrap;
+    
+    while(true) {
+        frame = ddh_frames_since(ddh_debug_start_frame);
+        if(frame > DDH_FPS * 1) {
+            ddh_debug_start_frame += DDH_FPS;
+        }
+        else {
+            break;
+        }
+    }
+    
+    if(frame < DDH_FPS * 1 / 2) {
+        cursor_on = true;
+        cursor_color = ddh_make_color(255, 255, 255);
+    }
+    
+    if(ddh_debug_submode != ddh_debug_last_submode) {
+        ddh_debug_cursor = 0;
+        ddh_debug_last_submode = ddh_debug_submode;
+    }
+    
+    switch(ddh_debug_submode) {
+    case DDH_DEBUG_SUBMODE_LOCATE_VERTICES:
+        cursor_wrap = DDH_VERTICES_PER_DODECAHEDRON;
+        break;
+    case DDH_DEBUG_SUBMODE_LOCATE_DODECAHEDRONS:
+        cursor_wrap = DDH_DODECAHEDRONS_PER_GROUP;
+        break;
+    case DDH_DEBUG_SUBMODE_LOCATE_FACES:
+        cursor_wrap = DDH_FACES_PER_DODECAHEDRON;
+        break;
+    case DDH_DEBUG_SUBMODE_LOCATE_GROUPS:
+        cursor_wrap = DDH_TOTAL_GROUPS;
+        break;
+    }
+    
+    if(ddh_debug_button_a && ddh_debug_button_a_edge) {
+        ++ddh_debug_cursor;
+    }
+    if(ddh_debug_button_b && ddh_debug_button_b_edge) {
+        ddh_debug_cursor += cursor_wrap - 1;
+    }
+    ddh_debug_cursor %= cursor_wrap;
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        switch(ddh_debug_submode) {
+        case DDH_DEBUG_SUBMODE_LOCATE_VERTICES:
+            {
+                if((ddh_light_vertex[i] == ddh_debug_cursor) && cursor_on) {
+                    ddh_frame_buffer[i] = cursor_color;
+                }
+                else {
+                    color_t c = ddh_colors[ddh_light_dodecahedron[i]];
+                    ddh_frame_buffer[i] = ddh_make_color(c.r / 4, c.g / 4, c.b / 4);
+                }
+                break;
+            }
+        case DDH_DEBUG_SUBMODE_LOCATE_DODECAHEDRONS:
+            {
+                if((ddh_light_dodecahedron[i] == ddh_debug_cursor) && cursor_on) {
+                    ddh_frame_buffer[i] = cursor_color;
+                }
+                else {
+                    color_t c = ddh_colors[ddh_light_group[i]];
+                    ddh_frame_buffer[i] = ddh_make_color(c.r / 4, c.g / 4, c.b / 4);
+                }
+                break;
+            }
+        case DDH_DEBUG_SUBMODE_LOCATE_FACES:
+            {
+                bool is_face = false;
+                for(size_t j = 0; j < 3; ++j) {
+                    if(ddh_light_faces[i][j] == ddh_debug_cursor) {
+                        is_face = true;
+                    }
+                }
+                if(is_face && cursor_on) {
+                    ddh_frame_buffer[i] = cursor_color;
+                }
+                else {
+                    color_t c = ddh_colors[ddh_light_dodecahedron[i]];
+                    ddh_frame_buffer[i] = ddh_make_color(c.r / 4, c.g / 4, c.b / 4);
+                }
+                break;
+            }
+        case DDH_DEBUG_SUBMODE_LOCATE_GROUPS:
+            {
+                if((ddh_light_group[i] == ddh_debug_cursor) && cursor_on) {
+                    ddh_frame_buffer[i] = cursor_color;
+                }
+                else {
+                    color_t c = ddh_colors[ddh_light_group[i]];
+                    ddh_frame_buffer[i] = ddh_make_color(c.r / 4, c.g / 4, c.b / 4);
+                }
+                break;
+            }
+        }
+    }
+}
+
+void ddh_initialize_debug_mode_sweep(void)
+{
+}
+
+void ddh_process_debug_mode_sweep(void)
+{
+    switch(ddh_debug_submode) {
+    case DDH_DEBUG_SUBMODE_SWEEP_ALL:
+    case DDH_DEBUG_SUBMODE_SWEEP_X:
+    case DDH_DEBUG_SUBMODE_SWEEP_Y:
+    case DDH_DEBUG_SUBMODE_SWEEP_Z:
+    case DDH_DEBUG_SUBMODE_SWEEP_STEP_X:
+    case DDH_DEBUG_SUBMODE_SWEEP_STEP_Y:
+    case DDH_DEBUG_SUBMODE_SWEEP_STEP_Z:
+        break;
+    }
+}
+
+void ddh_initialize_debug_mode_color(void)
+{
+}
+
+void ddh_process_debug_mode_color(void)
+{
+    if(ddh_debug_submode == DDH_DEBUG_SUBMODE_COLOR_GRADIENT) {
+    }
+    else {
+        color_t color;
+        switch(ddh_debug_submode) {
+        case DDH_DEBUG_SUBMODE_COLOR_WHITE:
+            color = ddh_make_color(0xFF, 0xFF, 0xFF);
+            break;
+        case DDH_DEBUG_SUBMODE_COLOR_RED:
+            color = ddh_make_color(0xFF, 0x00, 0x00);
+            break;
+        case DDH_DEBUG_SUBMODE_COLOR_GREEN:
+            color = ddh_make_color(0x00, 0xFF, 0x00);
+            break;
+        case DDH_DEBUG_SUBMODE_COLOR_BLUE:
+            color = ddh_make_color(0x00, 0x00, 0xFF);
+            break;
+        case DDH_DEBUG_SUBMODE_COLOR_GRADIENT:
+            break;
+        }
+    }
+}
+
 
