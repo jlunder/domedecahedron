@@ -1,3 +1,4 @@
+import random
 import dodecahedronverts as dd
 from euclid import *
 from math import *
@@ -16,13 +17,55 @@ for v in dd.verts:
     shrunkverts.append(shrunkv)
     #print "    {%sf, %sf, %sf}, // %s" % (shrunkv.x, shrunkv.y, shrunkv.z, flatv)
 
-def makexlat(face):
-    a = Point3()
-    b = Point3()
+def facecentroid(face):
+    a = Vector3()
     for i in range(5):
-        a += flatverts[dd.faces[dd.faceopp[face]][i]]
-        b += flatverts[dd.faces[face][i]]
-    return (b - a) / 5.0
+        a += flatverts[dd.faces[face][i]]
+    a /= 5.0
+    return Point3(a.x, a.y, a.z)
+
+def makexlat(face):
+    return facecentroid(face) - facecentroid(dd.faceopp[face])
+
+def makerotate(face):
+    r = makexlat(face)
+    r.normalize()
+    return Matrix4.new_rotate_axis(pi * 2.0 / 5.0, r)
+
+def rotateto(fromface, toface, fromface2, toface2):
+    fromv = facecentroid(fromface)
+    tov = facecentroid(toface)
+    fromv2 = facecentroid(fromface2)
+    tov2 = facecentroid(toface2)
+    m = Matrix4()
+    
+    def dist(mm, fromv, tov):
+        d = tov - mm * fromv
+        return d.dot(d)
+    
+    lastdist = dist(m, fromv, tov)
+    
+    for q in range(1000):
+        m2 = m * makerotate(random.randrange(12))
+        newdist = dist(m2, fromv, tov)
+        if newdist < lastdist:
+            m = m2
+            if newdist < 0.00001:
+                break
+    else:
+        print "rotateto FAIL 1!"
+        return None
+    
+    r = makerotate(toface)
+    for q in range(5):
+        if dist(m, fromv2, tov2) < 0.00001:
+            break
+        m = m * makerotate(fromface)
+    else:
+        print "rotateto FAIL 2!"
+        return None
+    
+    return m
 
 xlat = makexlat(10)
 rotaxis = xlat.copy().normalize()
@@ -35,8 +78,8 @@ rotaxisd = xlatd.copy().normalize()
 
 f = open("coords.h", "wt")
 def writef(s):
-    #f.write(s + '\n')
-    print s
+    f.write(s + '\n')
+    #print s
 
 def printm(m):
     #print "    // [%sf, %sf, %sf, %sf," % (repr(m[0]), repr(m[1]), repr(m[2]), repr(m[3]),)
@@ -55,14 +98,14 @@ print xlat
 def printgroup(g, basem):
     m = basem.copy()
     writef("    // group %d, dodecahedron 0" % (g,))
-    printm(m)
+    printm(m * rotateto(0, 11, 1, 6))
     for i in range(5):
         m = basem.copy()
         m.rotate_axis(-i * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
         m.rotate_axis(pi, rotaxis)
         m.translate(xlat.x, xlat.y, xlat.z)
         writef("    // group %d, dodecahedron %d" % (g, i + 1,))
-        printm(m)
+        printm(m * rotateto(0, 4, 1, 0))
 
 m2 = Matrix4.new_rotate_axis(0.5 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
 
