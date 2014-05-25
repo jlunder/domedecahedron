@@ -76,36 +76,38 @@ extern color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
 extern uint64_t ddh_total_ns;
 extern uint32_t ddh_total_frames;
 
-#define DDH_DEBUG_MODE_RUN                     0
-#define DDH_DEBUG_MODE_LOCATE                  5
-#define DDH_DEBUG_MODE_SWEEP                   6
-#define DDH_DEBUG_MODE_COLOR                   7
+#define DDH_MODE_RUN                           0
+#define DDH_MODE_CONFIGURE                     1
+#define DDH_MODE_DEBUG_LOCATE                  5
+#define DDH_MODE_DEBUG_SWEEP                   6
+#define DDH_MODE_DEBUG_COLOR                   7
+#define DDH_MODE_DEBUG_LOG                     9
 
-#define DDH_DEBUG_SUBMODE_LOCATE_VERTICES      0
-#define DDH_DEBUG_SUBMODE_LOCATE_DODECAHEDRONS 1
-#define DDH_DEBUG_SUBMODE_LOCATE_FACES         2
-#define DDH_DEBUG_SUBMODE_LOCATE_GROUPS        3
+#define DDH_SUBMODE_DEBUG_LOCATE_VERTICES      0
+#define DDH_SUBMODE_DEBUG_LOCATE_DODECAHEDRONS 1
+#define DDH_SUBMODE_DEBUG_LOCATE_FACES         2
+#define DDH_SUBMODE_DEBUG_LOCATE_GROUPS        3
 
-#define DDH_DEBUG_SUBMODE_SWEEP_ALL            0
-#define DDH_DEBUG_SUBMODE_SWEEP_X              1
-#define DDH_DEBUG_SUBMODE_SWEEP_Y              2
-#define DDH_DEBUG_SUBMODE_SWEEP_Z              3
-#define DDH_DEBUG_SUBMODE_SWEEP_STEP_X         4
-#define DDH_DEBUG_SUBMODE_SWEEP_STEP_Y         5
-#define DDH_DEBUG_SUBMODE_SWEEP_STEP_Z         6
+#define DDH_SUBMODE_DEBUG_SWEEP_ALL            0
+#define DDH_SUBMODE_DEBUG_SWEEP_X              1
+#define DDH_SUBMODE_DEBUG_SWEEP_Y              2
+#define DDH_SUBMODE_DEBUG_SWEEP_Z              3
+#define DDH_SUBMODE_DEBUG_SWEEP_STEP_X         4
+#define DDH_SUBMODE_DEBUG_SWEEP_STEP_Y         5
+#define DDH_SUBMODE_DEBUG_SWEEP_STEP_Z         6
 
-#define DDH_DEBUG_SUBMODE_COLOR_WHITE          0
-#define DDH_DEBUG_SUBMODE_COLOR_RED            1
-#define DDH_DEBUG_SUBMODE_COLOR_GREEN          2
-#define DDH_DEBUG_SUBMODE_COLOR_BLUE           3
-#define DDH_DEBUG_SUBMODE_COLOR_GRADIENT       4
+#define DDH_SUBMODE_DEBUG_COLOR_WHITE          0
+#define DDH_SUBMODE_DEBUG_COLOR_RED            1
+#define DDH_SUBMODE_DEBUG_COLOR_GREEN          2
+#define DDH_SUBMODE_DEBUG_COLOR_BLUE           3
+#define DDH_SUBMODE_DEBUG_COLOR_GRADIENT       4
 
-extern uint8_t ddh_debug_mode;
-extern uint8_t ddh_debug_submode;
-extern bool ddh_debug_button_a;
-extern bool ddh_debug_button_a_edge;
-extern bool ddh_debug_button_b;
-extern bool ddh_debug_button_b_edge;
+extern uint8_t ddh_mode;
+extern uint8_t ddh_submode;
+extern bool ddh_button_a;
+extern bool ddh_button_a_edge;
+extern bool ddh_button_b;
+extern bool ddh_button_b_edge;
 
 void ddh_initialize(void);
 void ddh_process(uint64_t delta_ns);

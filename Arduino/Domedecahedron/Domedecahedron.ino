@@ -4,19 +4,19 @@ static uint32_t last_micros;
 static uint32_t last_frame_end_micros;
 static uint32_t last_frame;
 
-static uint32_t debug_mode_debounce_micros;
-static uint32_t debug_submode_debounce_micros;
-static uint32_t debug_button_a_debounce_micros;
-static uint32_t debug_button_b_debounce_micros;
+static uint32_t mode_debounce_micros;
+static uint32_t submode_debounce_micros;
+static uint32_t button_a_debounce_micros;
+static uint32_t button_b_debounce_micros;
 
-static uint8_t debug_mode;
-static uint8_t debounced_debug_mode;
-static uint8_t debug_submode;
-static uint8_t debounced_debug_submode;
-static bool debug_button_a;
-static bool debounced_debug_button_a;
-static bool debug_button_b;
-static bool debounced_debug_button_b;
+static uint8_t mode;
+static uint8_t debounced_mode;
+static uint8_t submode;
+static uint8_t debounced_submode;
+static bool button_a;
+static bool debounced_button_a;
+static bool button_b;
+static bool debounced_button_b;
 
 
 // On the Due, pins 33-41 map to PORTC bits 1-9. This is the largest contiguous
@@ -25,10 +25,10 @@ static int const group_data_pins[DDH_TOTAL_GROUPS] = {33, 34, 35, 36, 37, 38};
 static int const clock_pin = 40;
 
 static int const debug_pins[4] = {23, 25, 27, 29};
-static int const debug_mode_pins[4] = {2, 3, 4, 5};
-static int const debug_submode_pins[4] = {6, 7, 8, 9};
-static int const debug_button_a_pin = 10;
-static int const debug_button_b_pin = 11;
+static int const mode_pins[4] = {2, 3, 4, 5};
+static int const submode_pins[4] = {6, 7, 8, 9};
+static int const button_a_pin = 10;
+static int const button_b_pin = 11;
 
 static int const debounce_micros = 500;
 
@@ -70,12 +70,12 @@ void setup()
   }
   
   for(size_t i = 0; i < 3; ++i) {
-    pinMode(debug_mode_pins[i], INPUT_PULLUP);
-    pinMode(debug_submode_pins[i], INPUT_PULLUP);
+    pinMode(mode_pins[i], INPUT_PULLUP);
+    pinMode(submode_pins[i], INPUT_PULLUP);
   }
   
-  pinMode(debug_button_a_pin, INPUT_PULLUP);
-  pinMode(debug_button_b_pin, INPUT_PULLUP);
+  pinMode(button_a_pin, INPUT_PULLUP);
+  pinMode(button_b_pin, INPUT_PULLUP);
   
   /*
   Serial.print("OWSR: ");
@@ -107,65 +107,65 @@ void loop()
   
   digitalWrite(debug_pins[1], 1);
   
-  debug_mode =
-    !!digitalRead(debug_mode_pins[0]) |
-    (!!digitalRead(debug_mode_pins[1]) << 1) |
-    (!!digitalRead(debug_mode_pins[2]) << 2) |
-    (!!digitalRead(debug_mode_pins[3]) << 2);
-  debug_submode =
-    !!digitalRead(debug_submode_pins[0]) |
-    (!!digitalRead(debug_submode_pins[1]) << 1) |
-    (!!digitalRead(debug_submode_pins[2]) << 2) |
-    (!!digitalRead(debug_submode_pins[3]) << 3);
-  debug_button_a = digitalRead(debug_button_a_pin);
-  debug_button_b = digitalRead(debug_button_b_pin);
+  mode =
+    !!digitalRead(mode_pins[0]) |
+    (!!digitalRead(mode_pins[1]) << 1) |
+    (!!digitalRead(mode_pins[2]) << 2) |
+    (!!digitalRead(mode_pins[3]) << 2);
+  submode =
+    !!digitalRead(submode_pins[0]) |
+    (!!digitalRead(submode_pins[1]) << 1) |
+    (!!digitalRead(submode_pins[2]) << 2) |
+    (!!digitalRead(submode_pins[3]) << 3);
+  button_a = digitalRead(button_a_pin);
+  button_b = digitalRead(button_b_pin);
   
-  if(debug_mode != debounced_debug_mode) {
-    debug_mode_debounce_micros = debounce_micros;
-    debounced_debug_mode = debug_mode;
+  if(mode != debounced_mode) {
+    mode_debounce_micros = debounce_micros;
+    debounced_mode = mode;
   }
-  if(debug_mode_debounce_micros < delta_us) {
-    debug_mode_debounce_micros = 0;
-    ddh_debug_mode = debug_mode;
+  if(mode_debounce_micros < delta_us) {
+    mode_debounce_micros = 0;
+    ddh_mode = mode;
   }
   else {
-    debug_mode_debounce_micros -= delta_us;
+    mode_debounce_micros -= delta_us;
   }
   
-  if(debug_submode != debounced_debug_submode) {
-    debug_submode_debounce_micros = debounce_micros;
-    debounced_debug_submode = debug_submode;
+  if(submode != debounced_submode) {
+    submode_debounce_micros = debounce_micros;
+    debounced_submode = submode;
   }
-  if(debug_submode_debounce_micros < delta_us) {
-    debug_submode_debounce_micros = 0;
-    ddh_debug_submode = debug_submode;
+  if(submode_debounce_micros < delta_us) {
+    submode_debounce_micros = 0;
+    ddh_submode = submode;
   }
   else {
-    debug_submode_debounce_micros -= delta_us;
+    submode_debounce_micros -= delta_us;
   }
   
-  if(debug_button_a != debounced_debug_button_a) {
-    debug_button_a_debounce_micros = debounce_micros;
-    debounced_debug_button_a = debug_button_a;
+  if(button_a != debounced_button_a) {
+    button_a_debounce_micros = debounce_micros;
+    debounced_button_a = button_a;
   }
-  if(debug_button_a_debounce_micros < delta_us) {
-    debug_button_a_debounce_micros = 0;
-    ddh_debug_button_a = debug_button_a;
+  if(button_a_debounce_micros < delta_us) {
+    button_a_debounce_micros = 0;
+    ddh_button_a = button_a;
   }
   else {
-    debug_button_a_debounce_micros -= delta_us;
+    button_a_debounce_micros -= delta_us;
   }
   
-  if(debug_button_b != debounced_debug_button_b) {
-    debug_button_b_debounce_micros = debounce_micros;
-    debounced_debug_button_b = debug_button_b;
+  if(button_b != debounced_button_b) {
+    button_b_debounce_micros = debounce_micros;
+    debounced_button_b = button_b;
   }
-  if(debug_button_b_debounce_micros < delta_us) {
-    debug_button_b_debounce_micros = 0;
-    ddh_debug_button_b = debug_button_b;
+  if(button_b_debounce_micros < delta_us) {
+    button_b_debounce_micros = 0;
+    ddh_button_b = button_b;
   }
   else {
-    debug_button_b_debounce_micros -= delta_us;
+    button_b_debounce_micros -= delta_us;
   }
   
   ddh_process(delta_us * 1000ULL);
@@ -202,13 +202,13 @@ void loop()
   Serial.print("us, emit ");
   Serial.print(last_frame_end_micros - frame_this_micros, DEC);
   Serial.print("us; mode=");
-  Serial.print(ddh_debug_mode, DEC);
+  Serial.print(ddh_mode, DEC);
   Serial.print(", submode=");
-  Serial.print(ddh_debug_submode, DEC);
+  Serial.print(ddh_submode, DEC);
   Serial.print(", a=");
-  Serial.print(ddh_debug_button_a, DEC);
+  Serial.print(ddh_button_a, DEC);
   Serial.print(", b=");
-  Serial.print(ddh_debug_button_b, DEC);
+  Serial.print(ddh_button_b, DEC);
   Serial.print("\n");
 }
 

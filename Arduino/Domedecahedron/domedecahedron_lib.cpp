@@ -1063,35 +1063,32 @@ uint64_t ddh_frame_fraction = 0;
 
 uint64_t ddh_frame_convert_offset = 0;
 
-uint8_t ddh_debug_mode;
-uint8_t ddh_debug_submode;
-bool ddh_debug_last_button_a;
-bool ddh_debug_button_a;
-bool ddh_debug_button_a_edge;
-bool ddh_debug_last_button_b;
-bool ddh_debug_button_b;
-bool ddh_debug_button_b_edge;
+uint8_t ddh_mode;
+uint8_t ddh_submode;
+bool ddh_last_button_a;
+bool ddh_button_a;
+bool ddh_button_a_edge;
+bool ddh_last_button_b;
+bool ddh_button_b;
+bool ddh_button_b_edge;
 
 uint32_t ddh_debug_start_frame;
 uint32_t ddh_debug_cursor;
 uint8_t ddh_debug_last_submode;
 uint32_t ddh_debug_edge_frame;
 
-void ddh_initialize_debug_mode_locate(void);
-void ddh_process_debug_mode_locate(void);
-void ddh_initialize_debug_mode_sweep(void);
-void ddh_process_debug_mode_sweep(void);
-void ddh_initialize_debug_mode_color(void);
-void ddh_process_debug_mode_color(void);
-
-void ddh_initialize(void)
-{
-    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        ddh_frame_buffer[i].r = 255;
-        ddh_frame_buffer[i].g = 255;
-        ddh_frame_buffer[i].b = 255;
-    }
-}
+void ddh_initialize_mode_run(void);
+void ddh_process_mode_run(void);
+void ddh_initialize_mode_configure(void);
+void ddh_process_mode_configure(void);
+void ddh_initialize_mode_debug_locate(void);
+void ddh_process_mode_debug_locate(void);
+void ddh_initialize_mode_debug_sweep(void);
+void ddh_process_mode_debug_sweep(void);
+void ddh_initialize_mode_debug_color(void);
+void ddh_process_mode_debug_color(void);
+void ddh_initialize_mode_debug_log(void);
+void ddh_process_mode_debug_log(void);
 
 color_t ddh_colors[10] = {
     {{ 31,  31,  31, 0}},
@@ -1107,6 +1104,15 @@ color_t ddh_colors[10] = {
 };
 
 uint8_t ddh_last_debug_mode = 255;
+
+void ddh_initialize(void)
+{
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        ddh_frame_buffer[i].r = 255;
+        ddh_frame_buffer[i].g = 255;
+        ddh_frame_buffer[i].b = 255;
+    }
+}
 
 void ddh_process(uint64_t delta_ns)
 {
@@ -1136,39 +1142,55 @@ void ddh_process(uint64_t delta_ns)
     
     ddh_last_frames = ddh_total_frames;
     
-    if(ddh_debug_mode != ddh_last_debug_mode) {
-        ddh_last_debug_mode = ddh_debug_mode;
-        switch(ddh_debug_mode) {
-        case DDH_DEBUG_MODE_RUN:
+    if(ddh_mode != ddh_last_debug_mode) {
+        ddh_last_debug_mode = ddh_mode;
+        switch(ddh_mode) {
+        default:
+        case DDH_MODE_RUN:
+            ddh_initialize_mode_run();
             break;
-        case DDH_DEBUG_MODE_LOCATE:
-            ddh_initialize_debug_mode_locate();
+        case DDH_MODE_CONFIGURE:
+            ddh_initialize_mode_configure();
             break;
-        case DDH_DEBUG_MODE_SWEEP:
-            ddh_initialize_debug_mode_sweep();
+        case DDH_MODE_DEBUG_LOCATE:
+            ddh_initialize_mode_debug_locate();
             break;
-        case DDH_DEBUG_MODE_COLOR:
-            ddh_initialize_debug_mode_color();
+        case DDH_MODE_DEBUG_SWEEP:
+            ddh_initialize_mode_debug_sweep();
+            break;
+        case DDH_MODE_DEBUG_COLOR:
+            ddh_initialize_mode_debug_color();
+            break;
+        case DDH_MODE_DEBUG_LOG:
+            ddh_initialize_mode_debug_log();
             break;
         }
     }
     
-    ddh_debug_button_a_edge = (ddh_debug_button_a != ddh_debug_last_button_a);
-    ddh_debug_button_b_edge = (ddh_debug_button_b != ddh_debug_last_button_b);
-    ddh_debug_last_button_a = ddh_debug_button_a;
-    ddh_debug_last_button_b = ddh_debug_button_b;
+    ddh_button_a_edge = (ddh_button_a != ddh_last_button_a);
+    ddh_button_b_edge = (ddh_button_b != ddh_last_button_b);
+    ddh_last_button_a = ddh_button_a;
+    ddh_last_button_b = ddh_button_b;
     
-    switch(ddh_debug_mode) {
-    case DDH_DEBUG_MODE_RUN:
+    switch(ddh_mode) {
+    default:
+    case DDH_MODE_RUN:
+        ddh_process_mode_run();
         break;
-    case DDH_DEBUG_MODE_LOCATE:
-        ddh_process_debug_mode_locate();
+    case DDH_MODE_CONFIGURE:
+        ddh_process_mode_configure();
         break;
-    case DDH_DEBUG_MODE_SWEEP:
-        ddh_process_debug_mode_sweep();
+    case DDH_MODE_DEBUG_LOCATE:
+        ddh_process_mode_debug_locate();
         break;
-    case DDH_DEBUG_MODE_COLOR:
-        ddh_process_debug_mode_color();
+    case DDH_MODE_DEBUG_SWEEP:
+        ddh_process_mode_debug_sweep();
+        break;
+    case DDH_MODE_DEBUG_COLOR:
+        ddh_process_mode_debug_color();
+        break;
+    case DDH_MODE_DEBUG_LOG:
+        ddh_process_mode_debug_log();
         break;
     }
 }
@@ -1188,14 +1210,30 @@ uint32_t ddh_frames_since(uint32_t total_frames)
     return ddh_total_frames - total_frames;
 }
 
-void ddh_initialize_debug_mode_locate(void)
+void ddh_initialize_mode_run(void)
+{
+}
+
+void ddh_process_mode_run(void)
+{
+}
+
+void ddh_initialize_mode_configure(void)
+{
+}
+
+void ddh_process_mode_configure(void)
+{
+}
+
+void ddh_initialize_mode_debug_locate(void)
 {
     ddh_debug_start_frame = ddh_total_frames;
     ddh_debug_cursor = 0;
     ddh_debug_last_submode = 255;
 }
 
-void ddh_process_debug_mode_locate(void)
+void ddh_process_mode_debug_locate(void)
 {
     static uint32_t const cycle_frames = DDH_FPS;
     
@@ -1219,37 +1257,37 @@ void ddh_process_debug_mode_locate(void)
         cursor_color = ddh_make_color(255, 255, 255);
     }
     
-    if(ddh_debug_submode != ddh_debug_last_submode) {
+    if(ddh_submode != ddh_debug_last_submode) {
         ddh_debug_cursor = 0;
-        ddh_debug_last_submode = ddh_debug_submode;
+        ddh_debug_last_submode = ddh_submode;
     }
     
-    switch(ddh_debug_submode) {
-    case DDH_DEBUG_SUBMODE_LOCATE_VERTICES:
+    switch(ddh_submode) {
+    case DDH_SUBMODE_DEBUG_LOCATE_VERTICES:
         cursor_wrap = DDH_VERTICES_PER_DODECAHEDRON;
         break;
-    case DDH_DEBUG_SUBMODE_LOCATE_DODECAHEDRONS:
+    case DDH_SUBMODE_DEBUG_LOCATE_DODECAHEDRONS:
         cursor_wrap = DDH_DODECAHEDRONS_PER_GROUP;
         break;
-    case DDH_DEBUG_SUBMODE_LOCATE_FACES:
+    case DDH_SUBMODE_DEBUG_LOCATE_FACES:
         cursor_wrap = DDH_FACES_PER_DODECAHEDRON;
         break;
-    case DDH_DEBUG_SUBMODE_LOCATE_GROUPS:
+    case DDH_SUBMODE_DEBUG_LOCATE_GROUPS:
         cursor_wrap = DDH_TOTAL_GROUPS;
         break;
     }
     
-    if(ddh_debug_button_a && ddh_debug_button_a_edge) {
+    if(ddh_button_a && ddh_button_a_edge) {
         ++ddh_debug_cursor;
     }
-    if(ddh_debug_button_b && ddh_debug_button_b_edge) {
+    if(ddh_button_b && ddh_button_b_edge) {
         ddh_debug_cursor += cursor_wrap - 1;
     }
     ddh_debug_cursor %= cursor_wrap;
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        switch(ddh_debug_submode) {
-        case DDH_DEBUG_SUBMODE_LOCATE_VERTICES:
+        switch(ddh_submode) {
+        case DDH_SUBMODE_DEBUG_LOCATE_VERTICES:
             {
                 if((ddh_light_vertex[i] == ddh_debug_cursor) && cursor_on) {
                     ddh_frame_buffer[i] = cursor_color;
@@ -1260,7 +1298,7 @@ void ddh_process_debug_mode_locate(void)
                 }
             }
             break;
-        case DDH_DEBUG_SUBMODE_LOCATE_DODECAHEDRONS:
+        case DDH_SUBMODE_DEBUG_LOCATE_DODECAHEDRONS:
             {
                 if((ddh_light_dodecahedron[i] == ddh_debug_cursor) && cursor_on) {
                     ddh_frame_buffer[i] = cursor_color;
@@ -1271,7 +1309,7 @@ void ddh_process_debug_mode_locate(void)
                 }
             }
             break;
-        case DDH_DEBUG_SUBMODE_LOCATE_FACES:
+        case DDH_SUBMODE_DEBUG_LOCATE_FACES:
             {
                 bool is_face = false;
                 for(size_t j = 0; j < 3; ++j) {
@@ -1288,7 +1326,7 @@ void ddh_process_debug_mode_locate(void)
                 }
             }
             break;
-        case DDH_DEBUG_SUBMODE_LOCATE_GROUPS:
+        case DDH_SUBMODE_DEBUG_LOCATE_GROUPS:
             {
                 if((ddh_light_group[i] == ddh_debug_cursor) && cursor_on) {
                     ddh_frame_buffer[i] = cursor_color;
@@ -1303,7 +1341,7 @@ void ddh_process_debug_mode_locate(void)
     }
 }
 
-void ddh_initialize_debug_mode_sweep(void)
+void ddh_initialize_mode_debug_sweep(void)
 {
     ddh_debug_start_frame = ddh_total_frames;
     ddh_debug_cursor = 0;
@@ -1311,7 +1349,7 @@ void ddh_initialize_debug_mode_sweep(void)
     ddh_debug_edge_frame = ddh_total_frames;
 }
 
-void ddh_process_debug_mode_sweep(void)
+void ddh_process_mode_debug_sweep(void)
 {
     static uint32_t const cursor_wrap = 200;
     static uint32_t const cycle_frames = DDH_FPS * 10;
@@ -1331,27 +1369,27 @@ void ddh_process_debug_mode_sweep(void)
         }
     }
     
-    if(ddh_debug_submode != ddh_debug_last_submode) {
+    if(ddh_submode != ddh_debug_last_submode) {
         ddh_debug_cursor = 0;
-        ddh_debug_last_submode = ddh_debug_submode;
+        ddh_debug_last_submode = ddh_submode;
     }
     
-    if(ddh_debug_button_a && !ddh_debug_button_b) {
-        if(ddh_debug_button_a_edge) {
+    if(ddh_button_a && !ddh_button_b) {
+        if(ddh_button_a_edge) {
             ddh_debug_edge_frame = ddh_total_frames;
         }
-        if(ddh_debug_button_a_edge ||
+        if(ddh_button_a_edge ||
                 ((ddh_frames_since(ddh_debug_edge_frame) >
                 (DDH_FPS * 1 / 2)) &&
                 (ddh_frames_since(ddh_debug_edge_frame) % 2 == 0))) {
             ++ddh_debug_cursor;
         }
     }
-    if(!ddh_debug_button_a && ddh_debug_button_b) {
-        if(ddh_debug_button_b_edge) {
+    if(!ddh_button_a && ddh_button_b) {
+        if(ddh_button_b_edge) {
             ddh_debug_edge_frame = ddh_total_frames;
         }
-        if(ddh_debug_button_b_edge ||
+        if(ddh_button_b_edge ||
                 ((ddh_frames_since(ddh_debug_edge_frame) >
                 (DDH_FPS * 1 / 2)) &&
                 (ddh_frames_since(ddh_debug_edge_frame) % 2 == 0))) {
@@ -1360,8 +1398,8 @@ void ddh_process_debug_mode_sweep(void)
     }
     ddh_debug_cursor %= cursor_wrap;
     
-    switch(ddh_debug_submode) {
-    case DDH_DEBUG_SUBMODE_SWEEP_ALL:
+    switch(ddh_submode) {
+    case DDH_SUBMODE_DEBUG_SWEEP_ALL:
         {
             if(frame < cycle_frames * 1 / 3) {
                 float t = (float)(frame - cycle_frames * 0 / 3) / (float)(cycle_frames * 1 / 3 - cycle_frames * 0 / 3 - 1);
@@ -1380,42 +1418,42 @@ void ddh_process_debug_mode_sweep(void)
             }
         }
         break;
-    case DDH_DEBUG_SUBMODE_SWEEP_X:
+    case DDH_SUBMODE_DEBUG_SWEEP_X:
         {
             float t = (float)frame / (float)(cycle_frames - 1);
             xmin = t * scale - scale * 0.5f - 0.5f;
             xmax = t * scale - scale * 0.5f + 0.5f;
         }
         break;
-    case DDH_DEBUG_SUBMODE_SWEEP_Y:
+    case DDH_SUBMODE_DEBUG_SWEEP_Y:
         {
             float t = (float)frame / (float)(cycle_frames - 1);
             ymin = t * scale - scale * 0.5f - 0.5f;
             ymax = t * scale - scale * 0.5f + 0.5f;
         }
         break;
-    case DDH_DEBUG_SUBMODE_SWEEP_Z:
+    case DDH_SUBMODE_DEBUG_SWEEP_Z:
         {
             float t = (float)frame / (float)(cycle_frames - 1);
             zmin = t * scale - scale * 0.5f - 1.0f - 0.5f;
             zmax = t * scale - scale * 0.5f - 1.0f + 0.5f;
         }
         break;
-    case DDH_DEBUG_SUBMODE_SWEEP_STEP_X:
+    case DDH_SUBMODE_DEBUG_SWEEP_STEP_X:
         {
             float t = (float)ddh_debug_cursor / (float)(cursor_wrap - 1);
             xmin = t * scale - scale * 0.5f - 0.5f;
             xmax = t * scale - scale * 0.5f + 0.5f;
         }
         break;
-    case DDH_DEBUG_SUBMODE_SWEEP_STEP_Y:
+    case DDH_SUBMODE_DEBUG_SWEEP_STEP_Y:
         {
             float t = (float)ddh_debug_cursor / (float)(cursor_wrap - 1);
             ymin = t * scale - scale * 0.5f - 0.5f;
             ymax = t * scale - scale * 0.5f + 0.5f;
         }
         break;
-    case DDH_DEBUG_SUBMODE_SWEEP_STEP_Z:
+    case DDH_SUBMODE_DEBUG_SWEEP_STEP_Z:
         {
             float t = (float)ddh_debug_cursor / (float)(cursor_wrap - 1);
             zmin = t * scale - scale * 0.5f - 1.0f - 0.5f;
@@ -1432,28 +1470,36 @@ void ddh_process_debug_mode_sweep(void)
     }
 }
 
-void ddh_initialize_debug_mode_color(void)
+void ddh_initialize_mode_debug_color(void)
 {
 }
 
-void ddh_process_debug_mode_color(void)
+void ddh_process_mode_debug_color(void)
 {
-    if(ddh_debug_submode == DDH_DEBUG_SUBMODE_COLOR_GRADIENT) {
+    if(ddh_submode == DDH_SUBMODE_DEBUG_COLOR_GRADIENT) {
+        for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+            ddh_frame_buffer[i] = ddh_make_color(
+                255 * ddh_light_dodecahedron[i] /
+                    (DDH_DODECAHEDRONS_PER_GROUP - 1),
+                255 * ddh_light_vertex[i] /
+                    (DDH_VERTICES_PER_DODECAHEDRON - 1),
+                255 * ddh_light_group[i] / (DDH_TOTAL_GROUPS - 1));
+        }
     }
     else {
         color_t color = ddh_make_color(0xFF, 0x00, 0xFF);
         
-        switch(ddh_debug_submode) {
-        case DDH_DEBUG_SUBMODE_COLOR_WHITE:
+        switch(ddh_submode) {
+        case DDH_SUBMODE_DEBUG_COLOR_WHITE:
             color = ddh_make_color(0xFF, 0xFF, 0xFF);
             break;
-        case DDH_DEBUG_SUBMODE_COLOR_RED:
+        case DDH_SUBMODE_DEBUG_COLOR_RED:
             color = ddh_make_color(0xFF, 0x00, 0x00);
             break;
-        case DDH_DEBUG_SUBMODE_COLOR_GREEN:
+        case DDH_SUBMODE_DEBUG_COLOR_GREEN:
             color = ddh_make_color(0x00, 0xFF, 0x00);
             break;
-        case DDH_DEBUG_SUBMODE_COLOR_BLUE:
+        case DDH_SUBMODE_DEBUG_COLOR_BLUE:
             color = ddh_make_color(0x00, 0x00, 0xFF);
             break;
         }
@@ -1461,6 +1507,17 @@ void ddh_process_debug_mode_color(void)
         for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
             ddh_frame_buffer[i] = color;
         }
+    }
+}
+
+void ddh_initialize_mode_debug_log(void)
+{
+}
+
+void ddh_process_mode_debug_log(void)
+{
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        ddh_frame_buffer[i] = ddh_make_color(0x00, 0xFF, 0xFF);
     }
 }
 

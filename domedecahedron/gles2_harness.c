@@ -96,30 +96,30 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     
     if(action == GLFW_PRESS) {
         switch(key) {
-        case 'Q': ddh_debug_mode = 0; break;
-        case 'W': ddh_debug_mode = 1; break;
-        case 'E': ddh_debug_mode = 2; break;
-        case 'R': ddh_debug_mode = 3; break;
-        case 'T': ddh_debug_mode = 4; break;
-        case 'Y': ddh_debug_mode = 5; break;
-        case 'U': ddh_debug_mode = 6; break;
-        case 'I': ddh_debug_mode = 7; break;
-        case 'O': ddh_debug_mode = 8; break;
-        case 'P': ddh_debug_mode = 9; break;
+        case 'Q': ddh_mode = 0; break;
+        case 'W': ddh_mode = 1; break;
+        case 'E': ddh_mode = 2; break;
+        case 'R': ddh_mode = 3; break;
+        case 'T': ddh_mode = 4; break;
+        case 'Y': ddh_mode = 5; break;
+        case 'U': ddh_mode = 6; break;
+        case 'I': ddh_mode = 7; break;
+        case 'O': ddh_mode = 8; break;
+        case 'P': ddh_mode = 9; break;
         
-        case 'A': ddh_debug_submode = 0; break;
-        case 'S': ddh_debug_submode = 1; break;
-        case 'D': ddh_debug_submode = 2; break;
-        case 'F': ddh_debug_submode = 3; break;
-        case 'G': ddh_debug_submode = 4; break;
-        case 'H': ddh_debug_submode = 5; break;
-        case 'J': ddh_debug_submode = 6; break;
-        case 'K': ddh_debug_submode = 7; break;
-        case 'L': ddh_debug_submode = 8; break;
-        case ';': ddh_debug_submode = 9; break;
+        case 'A': ddh_submode = 0; break;
+        case 'S': ddh_submode = 1; break;
+        case 'D': ddh_submode = 2; break;
+        case 'F': ddh_submode = 3; break;
+        case 'G': ddh_submode = 4; break;
+        case 'H': ddh_submode = 5; break;
+        case 'J': ddh_submode = 6; break;
+        case 'K': ddh_submode = 7; break;
+        case 'L': ddh_submode = 8; break;
+        case ';': ddh_submode = 9; break;
         
-        case '[': ddh_debug_button_a = true; break;
-        case ']': ddh_debug_button_b = true; break;
+        case '[': ddh_button_a = true; break;
+        case ']': ddh_button_b = true; break;
         
         case GLFW_KEY_LEFT: gles2_harness_input_left = true; break;
         case GLFW_KEY_RIGHT: gles2_harness_input_right = true; break;
@@ -133,8 +133,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
     else if(action == GLFW_RELEASE) {
         switch(key) {
-        case '[': ddh_debug_button_a = false; break;
-        case ']': ddh_debug_button_b = false; break;
+        case '[': ddh_button_a = false; break;
+        case ']': ddh_button_b = false; break;
         
         case GLFW_KEY_LEFT: gles2_harness_input_left = false;
         case GLFW_KEY_RIGHT: gles2_harness_input_right = false;
