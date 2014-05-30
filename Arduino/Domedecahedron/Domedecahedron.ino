@@ -30,6 +30,10 @@ static int const submode_pins[4] = {6, 7, 8, 9};
 static int const button_a_pin = 10;
 static int const button_b_pin = 11;
 
+static int const analog_address_pins[2] = {12, 13};
+static uint8_t const analog_row_addresses[4] = {0, 3, 1, 2};
+static int const analog_column_pins[4] = {A0, A1, A2, A3};
+
 static int const debounce_micros = 500;
 
 static uint8_t const intensity_map[256]  = {
@@ -60,6 +64,9 @@ void setup()
   }
   /**/
   
+  pinMode(45, OUTPUT);
+  digitalWrite(45, LOW);
+  
   for(size_t i = 0; i < DDH_TOTAL_GROUPS; ++i) {
     pinMode(group_data_pins[i], OUTPUT);
   }
@@ -76,6 +83,10 @@ void setup()
   
   pinMode(button_a_pin, INPUT_PULLUP);
   pinMode(button_b_pin, INPUT_PULLUP);
+  
+  for(size_t i = 0; i < 2; ++i) {
+    pinMode(analog_address_pins[i], OUTPUT);
+  }
   
   /*
   Serial.print("OWSR: ");
@@ -96,6 +107,10 @@ void loop()
   uint32_t this_micros;
   uint32_t process_delta_us;
   uint32_t frame_this_micros;
+  
+  uint32_t analog_read_start_micros;
+  uint32_t analog_read_us;
+  
   uint64_t delta_us;
   
   digitalWrite(debug_pins[0], 1);
@@ -168,11 +183,24 @@ void loop()
     button_b_debounce_micros -= delta_us;
   }
   
+  analog_read_start_micros = micros();
+  
+  for(size_t i = 0; i < 4; ++i) {
+    digitalWrite(analog_address_pins[0], (analog_row_addresses[i] >> 0) & 1);
+    digitalWrite(analog_address_pins[1], (analog_row_addresses[i] >> 1) & 1);
+    delayMicroseconds(50);
+    for(size_t j = 0; j < 4; ++j) {
+      ddh_dais_proximity[i][j] = analogRead(analog_column_pins[j]);
+    }
+  }
+  
+  analog_read_us = micros() - analog_read_start_micros;
+  
   ddh_process(delta_us * 1000ULL);
   
   digitalWrite(debug_pins[1], 0);
   
-  process_delta_us = micros() - this_micros;
+  process_delta_us = micros() - analog_read_us - analog_read_start_micros;
   
   if(last_frame == ddh_total_frames) {
     digitalWrite(debug_pins[0], 0);
@@ -197,7 +225,9 @@ void loop()
   digitalWrite(debug_pins[0], 0);
   
   Serial.print(ddh_frames_since(last_frame), DEC);
-  Serial.print(" frames; process ");
+  Serial.print(" frames; read ");
+  Serial.print(analog_read_us, DEC);
+  Serial.print("us, process ");
   Serial.print(process_delta_us, DEC);
   Serial.print("us, emit ");
   Serial.print(last_frame_end_micros - frame_this_micros, DEC);
@@ -209,6 +239,15 @@ void loop()
   Serial.print(ddh_button_a, DEC);
   Serial.print(", b=");
   Serial.print(ddh_button_b, DEC);
+  
+  
+  Serial.print(" dais=");
+  Serial.print(ddh_dais_proximity[0][1], DEC);
+  Serial.print(", ");
+  Serial.print(ddh_dais_proximity[1][1], DEC);
+  Serial.print(", ");
+  Serial.print(ddh_dais_proximity[2][1], DEC);
+  
   Serial.print("\n");
 }
 
