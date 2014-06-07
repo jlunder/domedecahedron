@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 
@@ -20,6 +21,25 @@
 typedef struct {
     float x, y, z;
 } vertex_t;
+
+// 1.15.16 fixed point
+typedef struct {
+    int32_t x;
+    int32_t y;
+} vector2_t;
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t z;
+} vector3_t;
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t z;
+    int32_t w;
+} vector4_t;
 
 typedef union {
     struct {

@@ -7,6 +7,8 @@ files = [
     ('effect.h', 'effect.h',),
     ('effect_util.c', 'effect_util.cpp',),
     ('effect_util.h', 'effect_util.h',),
+    ('dais_input.c', 'dais_input.cpp',),
+    ('dais_input.h', 'dais_input.h',),
 ]
 
 home = os.environ['HOME']

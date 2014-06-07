@@ -1,5 +1,8 @@
 #include "domedecahedron.h"
 
+#include "dais_input.h"
+
+
 // (1.0 + sqrt(5.0)) / 2.0
 #define PHI (1.618033988749895f)
 // 2.0 / (1.0 + sqrt(5.0))
@@ -1109,10 +1112,10 @@ uint8_t ddh_last_debug_mode = 255;
 
 void ddh_initialize(void)
 {
+    di_initialize();
+    
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        ddh_frame_buffer[i].r = 255;
-        ddh_frame_buffer[i].g = 255;
-        ddh_frame_buffer[i].b = 255;
+        ddh_frame_buffer[i] = ddh_make_color(255, 255, 255);
     }
 }
 
@@ -1173,6 +1176,8 @@ void ddh_process(uint64_t delta_ns)
     ddh_button_b_edge = (ddh_button_b != ddh_last_button_b);
     ddh_last_button_a = ddh_button_a;
     ddh_last_button_b = ddh_button_b;
+    
+    di_process();
     
     switch(ddh_mode) {
     default:

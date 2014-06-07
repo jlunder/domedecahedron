@@ -1,5 +1,8 @@
 #include "domedecahedron.h"
 
+#include "dais_input.h"
+
+
 static uint32_t last_micros;
 static uint32_t last_frame_end_micros;
 static uint32_t last_frame;
@@ -188,9 +191,15 @@ void loop()
   for(size_t i = 0; i < 4; ++i) {
     digitalWrite(analog_address_pins[0], (analog_row_addresses[i] >> 0) & 1);
     digitalWrite(analog_address_pins[1], (analog_row_addresses[i] >> 1) & 1);
-    delayMicroseconds(50);
+    delayMicroseconds(10);
     for(size_t j = 0; j < 4; ++j) {
       ddh_dais_proximity[i][j] = analogRead(analog_column_pins[j]);
+    }
+    ddh_dais_proximity[i][0] = 
+      ddh_dais_proximity[i][2] = 
+      ddh_dais_proximity[i][3] = 0;
+    if(i == 3) {
+      ddh_dais_proximity[3][1] = ddh_dais_proximity[2][1];
     }
   }
   
@@ -240,15 +249,49 @@ void loop()
   Serial.print(", b=");
   Serial.print(ddh_button_b, DEC);
   
-  
+  /*
+  Serial.print(" motion=");
+  Serial.print(di_raw_motion_quadrants[0][0].x, DEC);
+  Serial.print(", ");
+  Serial.print(di_raw_motion_quadrants[0][1].x, DEC);
+  Serial.print(", ");
+  Serial.print(di_raw_motion_quadrants[1][0].x, DEC);
+  Serial.print(", ");
+  Serial.print(di_raw_motion_quadrants[1][1].x, DEC);
+  */
   Serial.print(" dais=");
-  Serial.print(ddh_dais_proximity[0][1], DEC);
+  Serial.print(di_detect[0][1], DEC);
   Serial.print(", ");
-  Serial.print(ddh_dais_proximity[1][1], DEC);
+  Serial.print(di_detect[1][1], DEC);
   Serial.print(", ");
-  Serial.print(ddh_dais_proximity[2][1], DEC);
+  Serial.print(di_detect[2][1], DEC);
   
+  Serial.print(" motion=");
+  Serial.print(di_raw_motion_quadrants[0][0].y, DEC);
+  Serial.print(", ");
+  Serial.print(di_raw_motion_quadrants[0][1].y, DEC);
+  Serial.print(", ");
+  Serial.print(di_raw_motion_quadrants[1][0].y, DEC);
+  Serial.print(", ");
+  Serial.print(di_raw_motion_quadrants[1][1].y, DEC);
   Serial.print("\n");
+  
+  /*
+  for(size_t i = 0; i < 4; ++i) {
+    Serial.print("dais[");
+    Serial.print(i, DEC);
+    Serial.print("]=");
+    Serial.print(ddh_dais_proximity[0][1], DEC);
+    Serial.print(", ");
+    Serial.print(ddh_dais_proximity[1][1], DEC);
+    Serial.print(", ");
+    Serial.print(ddh_dais_proximity[2][1], DEC);
+    Serial.print(", ");
+    Serial.print(ddh_dais_proximity[3][1], DEC);
+    Serial.print("\n");
+  }
+  */
+  
 }
 
 void emit_frame()
