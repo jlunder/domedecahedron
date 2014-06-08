@@ -1095,6 +1095,9 @@ void ddh_process_mode_debug_color(void);
 void ddh_initialize_mode_debug_log(void);
 void ddh_process_mode_debug_log(void);
 
+void ddh_initialize_debug_cursor(void);
+void ddh_process_debug_cursor(uint32_t cursor_wrap);
+
 color_t ddh_colors[10] = {
     {{ 31,  31,  31, 0}},
     {{127,  63,   0, 0}},
@@ -1221,21 +1224,66 @@ void ddh_initialize_mode_run(void)
 {
 }
 
-#define clamp_normalize(x, lower, upper, scale_lower, scale_upper) \
-    (x < lower ? scale_lower : (x >= upper ? scale_upper - 1 : \
-      ((x - lower) * (scale_upper - scale_lower) / (upper - lower))))
+static inline color_t ddh_add_colors(color_t x, color_t y)
+{
+    int32_t r = (int32_t)x.r + (int32_t)y.r;
+    int32_t g = (int32_t)x.g + (int32_t)y.g;
+    int32_t b = (int32_t)x.b + (int32_t)y.b;
+    
+    return ddh_make_color(r > 255 ? 255 : r, g > 255 ? 255 : g,
+        b > 255 ? 255 : b);
+}
+
+float ddh_invsqrt(float x)
+{
+    float xhalf = 0.5f * x;
+    int i = *(int*)&x;         // evil floating point bit level hacking
+    i = 0x5f3759df - (i >> 1);  // what the fuck?
+    x = *(float*)&i;
+    x = x*(1.5f-(xhalf*x*x));
+    return x;
+}
+
+#define PI_F 3.1415926535897932384626f
+#define TWO_PI_F (2.0f * 3.1415926535897932384626f)
 
 void ddh_process_mode_run(void)
 {
-    color_t color;
-    
-    color = ddh_make_color(
-        clamp_normalize(ddh_dais_proximity[1][0], 0x100, 0x200, 0x0, 0x100),
-        clamp_normalize(ddh_dais_proximity[1][1], 0x100, 0x200, 0x0, 0x100),
-        clamp_normalize(ddh_dais_proximity[1][2], 0x100, 0x200, 0x0, 0x100));
+    float t = (float)(ddh_total_ns % (1LL << 48)) / 1.0e9f;
+    fix16_t beat_t = fix16_from_float(fmodf(t * (140.0f / 60.0f), 1.0f));
+    fix16_t measure_t = fix16_from_float(fmodf(t * (140.0f / 16.0f / 60.0f), 1.0f));
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        ddh_frame_buffer[i] = color;
+        color_t beat_color;
+        color_t plasma_color;
+        
+        if(beat_t < fix16_from_float(0.5f)) {
+            int32_t l = fix16_to_int(fix16_mul((fix16_from_float(0.5f) - beat_t), fix16_from_int(127 * 2)));
+            beat_color = ddh_make_color(l, l, l);
+        }
+        else if(beat_t > fix16_from_float(0.98f)) {
+            int32_t l = fix16_to_int(fix16_mul((beat_t - fix16_from_float(0.98f)), fix16_from_int(127 * 50)));
+            beat_color = ddh_make_color(l, l, l);
+        }
+        else {
+            beat_color = ddh_make_color(0, 0, 0);
+        }
+        
+        {
+            fix16_t a_x = 2 * fix16_sin(fix16_mul(measure_t, 2 * fix16_pi));
+            fix16_t a_y = 2 * fix16_cos(fix16_mul(measure_t, 2 * fix16_pi));
+            fix16_t a_z = fix16_from_int(-2);
+            
+            int32_t l = fix16_to_int(fix16_mul(fix16_sin(fix16_sqrt(
+                fix16_sq(fix16_from_float(ddh_vertex_coords[i].x) - a_x) +
+                fix16_sq(fix16_from_float(ddh_vertex_coords[i].y) - a_y) +
+                fix16_sq(fix16_from_float(ddh_vertex_coords[i].z) - a_z)) * 1 * 2 * fix16_pi) + fix16_from_int(1),
+                fix16_from_int(127)));
+            
+            plasma_color = ddh_make_color(l, 0, 0);
+        }
+        
+        ddh_frame_buffer[i] = ddh_add_colors(ddh_make_color(0, 0, 0), plasma_color);
     }
 }
 
@@ -1365,9 +1413,7 @@ void ddh_process_mode_debug_locate(void)
 void ddh_initialize_mode_debug_sweep(void)
 {
     ddh_debug_start_frame = ddh_total_frames;
-    ddh_debug_cursor = 0;
-    ddh_debug_last_submode = 255;
-    ddh_debug_edge_frame = ddh_total_frames;
+    ddh_initialize_debug_cursor();
 }
 
 void ddh_process_mode_debug_sweep(void)
@@ -1390,34 +1436,7 @@ void ddh_process_mode_debug_sweep(void)
         }
     }
     
-    if(ddh_submode != ddh_debug_last_submode) {
-        ddh_debug_cursor = 0;
-        ddh_debug_last_submode = ddh_submode;
-    }
-    
-    if(ddh_button_a && !ddh_button_b) {
-        if(ddh_button_a_edge) {
-            ddh_debug_edge_frame = ddh_total_frames;
-        }
-        if(ddh_button_a_edge ||
-                ((ddh_frames_since(ddh_debug_edge_frame) >
-                (DDH_FPS * 1 / 2)) &&
-                (ddh_frames_since(ddh_debug_edge_frame) % 2 == 0))) {
-            ++ddh_debug_cursor;
-        }
-    }
-    if(!ddh_button_a && ddh_button_b) {
-        if(ddh_button_b_edge) {
-            ddh_debug_edge_frame = ddh_total_frames;
-        }
-        if(ddh_button_b_edge ||
-                ((ddh_frames_since(ddh_debug_edge_frame) >
-                (DDH_FPS * 1 / 2)) &&
-                (ddh_frames_since(ddh_debug_edge_frame) % 2 == 0))) {
-            ddh_debug_cursor += cursor_wrap - 1;
-        }
-    }
-    ddh_debug_cursor %= cursor_wrap;
+    ddh_process_debug_cursor(cursor_wrap);
     
     switch(ddh_submode) {
     case DDH_SUBMODE_DEBUG_SWEEP_ALL:
@@ -1493,10 +1512,15 @@ void ddh_process_mode_debug_sweep(void)
 
 void ddh_initialize_mode_debug_color(void)
 {
+    ddh_initialize_debug_cursor();
 }
 
 void ddh_process_mode_debug_color(void)
 {
+    static uint32_t const cursor_wrap = 256;
+    
+    ddh_process_debug_cursor(cursor_wrap);
+    
     if(ddh_submode == DDH_SUBMODE_DEBUG_COLOR_GRADIENT) {
         for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
             ddh_frame_buffer[i] = ddh_make_color(
@@ -1523,6 +1547,18 @@ void ddh_process_mode_debug_color(void)
         case DDH_SUBMODE_DEBUG_COLOR_BLUE:
             color = ddh_make_color(0x00, 0x00, 0xFF);
             break;
+        case DDH_SUBMODE_DEBUG_COLOR_STEP_WHITE:
+            color = ddh_make_color(ddh_debug_cursor, ddh_debug_cursor, ddh_debug_cursor);
+            break;
+        case DDH_SUBMODE_DEBUG_COLOR_STEP_RED:
+            color = ddh_make_color(ddh_debug_cursor, 0x00, 0x00);
+            break;
+        case DDH_SUBMODE_DEBUG_COLOR_STEP_GREEN:
+            color = ddh_make_color(0x00, ddh_debug_cursor, 0x00);
+            break;
+        case DDH_SUBMODE_DEBUG_COLOR_STEP_BLUE:
+            color = ddh_make_color(0x00, 0x00, ddh_debug_cursor);
+            break;
         }
         
         for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
@@ -1540,6 +1576,45 @@ void ddh_process_mode_debug_log(void)
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         ddh_frame_buffer[i] = ddh_make_color(0x00, 0xFF, 0xFF);
     }
+}
+
+void ddh_initialize_debug_cursor(void)
+{
+    ddh_debug_cursor = 0;
+    ddh_debug_last_submode = 255;
+    ddh_debug_edge_frame = ddh_total_frames;
+}
+
+void ddh_process_debug_cursor(uint32_t cursor_wrap)
+{
+    if(ddh_submode != ddh_debug_last_submode) {
+        ddh_debug_cursor = 0;
+        ddh_debug_last_submode = ddh_submode;
+    }
+    
+    if(ddh_button_a && !ddh_button_b) {
+        if(ddh_button_a_edge) {
+            ddh_debug_edge_frame = ddh_total_frames;
+        }
+        if(ddh_button_a_edge ||
+                ((ddh_frames_since(ddh_debug_edge_frame) >
+                (DDH_FPS * 1 / 2)) &&
+                (ddh_frames_since(ddh_debug_edge_frame) % 2 == 0))) {
+            ++ddh_debug_cursor;
+        }
+    }
+    if(!ddh_button_a && ddh_button_b) {
+        if(ddh_button_b_edge) {
+            ddh_debug_edge_frame = ddh_total_frames;
+        }
+        if(ddh_button_b_edge ||
+                ((ddh_frames_since(ddh_debug_edge_frame) >
+                (DDH_FPS * 1 / 2)) &&
+                (ddh_frames_since(ddh_debug_edge_frame) % 2 == 0))) {
+            ddh_debug_cursor += cursor_wrap - 1;
+        }
+    }
+    ddh_debug_cursor %= cursor_wrap;
 }
 
 

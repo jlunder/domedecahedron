@@ -64,7 +64,14 @@ DOMEDECAHEDRON_SRC= \
 	glus.c \
 	dais_input.c \
 	domedecahedron.c \
-	effect.c
+	effect.c \
+	fix16.c \
+	fix16_exp.c \
+	fix16_sqrt.c \
+	fix16_str.c \
+	fix16_trig.c \
+	fract32.c \
+	uint32.c
 
 
 -include $(DOMEDECAHEDRON_SRC:.c=.d)

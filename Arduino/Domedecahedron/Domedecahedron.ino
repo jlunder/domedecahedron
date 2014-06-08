@@ -58,6 +58,8 @@ static uint8_t const intensity_map[256]  = {
   109,110,111,113,114,115,116,117,118,120,121,122,123,125,126,127
 };
 
+extern uint32_t ddh_debug_cursor;
+
 void setup()
 {
   // put your setup code here, to run once:
@@ -129,7 +131,7 @@ void loop()
     !!digitalRead(mode_pins[0]) |
     (!!digitalRead(mode_pins[1]) << 1) |
     (!!digitalRead(mode_pins[2]) << 2) |
-    (!!digitalRead(mode_pins[3]) << 2);
+    (!!digitalRead(mode_pins[3]) << 3);
   submode =
     !!digitalRead(submode_pins[0]) |
     (!!digitalRead(submode_pins[1]) << 1) |
@@ -248,6 +250,8 @@ void loop()
   Serial.print(ddh_button_a, DEC);
   Serial.print(", b=");
   Serial.print(ddh_button_b, DEC);
+  Serial.print(", cursor=");
+  Serial.print(ddh_debug_cursor, DEC);
   
   /*
   Serial.print(" motion=");
@@ -259,6 +263,8 @@ void loop()
   Serial.print(", ");
   Serial.print(di_raw_motion_quadrants[1][1].x, DEC);
   */
+  
+  /*
   Serial.print(" dais=");
   Serial.print(di_detect[0][1], DEC);
   Serial.print(", ");
@@ -274,6 +280,7 @@ void loop()
   Serial.print(di_raw_motion_quadrants[1][0].y, DEC);
   Serial.print(", ");
   Serial.print(di_raw_motion_quadrants[1][1].y, DEC);
+  */
   Serial.print("\n");
   
   /*
@@ -322,9 +329,9 @@ void emit_frame()
  #define GET_GROUP_DATA(x) \
       temp_group_data_##x = vertex_base_ptr[group_stride * x].color; \
       temp_group_data_##x = \
-        (intensity_map[(temp_group_data_##x >> 0) & 0xFF] << 8) | \
-        (intensity_map[(temp_group_data_##x >> 8) & 0xFF] << 16) | \
-        (intensity_map[(temp_group_data_##x >> 16) & 0xFF] << 1);
+        (intensity_map[((temp_group_data_##x >> 0) & 0xFF)] << 8) | \
+        (intensity_map[((temp_group_data_##x >> 8) & 0xFF)] << 0) | \
+        (intensity_map[((temp_group_data_##x >> 16) & 0xFF)] << 16);
     
     GET_GROUP_DATA(0);
     GET_GROUP_DATA(1);
@@ -348,23 +355,23 @@ void emit_frame()
     */
     for(size_t j = 0; j < 24; ++j) {
       uint32_t data =
-        ((temp_group_data_0 & 1) << (0 + 1)) |
-        ((temp_group_data_1 & 1) << (1 + 1)) |
-        ((temp_group_data_2 & 1) << (2 + 1)) |
-        ((temp_group_data_3 & 1) << (3 + 1)) |
-        ((temp_group_data_4 & 1) << (4 + 1)) |
-        ((temp_group_data_5 & 1) << (5 + 1));
+        ((temp_group_data_0 & 0x800000) >> (22 - 0)) |
+        ((temp_group_data_1 & 0x800000) >> (22 - 1)) |
+        ((temp_group_data_2 & 0x800000) >> (22 - 2)) |
+        ((temp_group_data_3 & 0x800000) >> (22 - 3)) |
+        ((temp_group_data_4 & 0x800000) >> (22 - 4)) |
+        ((temp_group_data_5 & 0x800000) >> (22 - 5));
       
       // PORTC bits 1-9 map to our data + clock pins
       REG_PIOC_SODR = data;
       REG_PIOC_CODR = ~data;
       
-      temp_group_data_0 = temp_group_data_0 >> 1;
-      temp_group_data_1 = temp_group_data_1 >> 1;
-      temp_group_data_2 = temp_group_data_2 >> 1;
-      temp_group_data_3 = temp_group_data_3 >> 1;
-      temp_group_data_4 = temp_group_data_4 >> 1;
-      temp_group_data_5 = temp_group_data_5 >> 1;
+      temp_group_data_0 = temp_group_data_0 << 1;
+      temp_group_data_1 = temp_group_data_1 << 1;
+      temp_group_data_2 = temp_group_data_2 << 1;
+      temp_group_data_3 = temp_group_data_3 << 1;
+      temp_group_data_4 = temp_group_data_4 << 1;
+      temp_group_data_5 = temp_group_data_5 << 1;
       
       delay_precise(0);
       

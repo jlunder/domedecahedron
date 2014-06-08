@@ -7,6 +7,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "fix16.h"
+
 
 #define DDH_FPS 60
 
@@ -24,21 +26,21 @@ typedef struct {
 
 // 1.15.16 fixed point
 typedef struct {
-    int32_t x;
-    int32_t y;
+    fix16_t x;
+    fix16_t y;
 } vector2_t;
 
 typedef struct {
-    int32_t x;
-    int32_t y;
-    int32_t z;
+    fix16_t x;
+    fix16_t y;
+    fix16_t z;
 } vector3_t;
 
 typedef struct {
-    int32_t x;
-    int32_t y;
-    int32_t z;
-    int32_t w;
+    fix16_t x;
+    fix16_t y;
+    fix16_t z;
+    fix16_t w;
 } vector4_t;
 
 typedef union {
@@ -120,7 +122,11 @@ extern uint32_t ddh_total_frames;
 #define DDH_SUBMODE_DEBUG_COLOR_RED            1
 #define DDH_SUBMODE_DEBUG_COLOR_GREEN          2
 #define DDH_SUBMODE_DEBUG_COLOR_BLUE           3
-#define DDH_SUBMODE_DEBUG_COLOR_GRADIENT       4
+#define DDH_SUBMODE_DEBUG_COLOR_STEP_WHITE     4
+#define DDH_SUBMODE_DEBUG_COLOR_STEP_RED       5
+#define DDH_SUBMODE_DEBUG_COLOR_STEP_GREEN     6
+#define DDH_SUBMODE_DEBUG_COLOR_STEP_BLUE      7
+#define DDH_SUBMODE_DEBUG_COLOR_GRADIENT       8
 
 extern uint8_t ddh_mode;
 extern uint8_t ddh_submode;
