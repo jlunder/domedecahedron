@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 
@@ -20,6 +21,25 @@
 typedef struct {
     float x, y, z;
 } vertex_t;
+
+// 1.15.16 fixed point
+typedef struct {
+    int32_t x;
+    int32_t y;
+} vector2_t;
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t z;
+} vector3_t;
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t z;
+    int32_t w;
+} vector4_t;
 
 typedef union {
     struct {
@@ -108,6 +128,8 @@ extern bool ddh_button_a;
 extern bool ddh_button_a_edge;
 extern bool ddh_button_b;
 extern bool ddh_button_b_edge;
+
+extern uint32_t ddh_dais_proximity[4][4];
 
 void ddh_initialize(void);
 void ddh_process(uint64_t delta_ns);

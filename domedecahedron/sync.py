@@ -13,7 +13,7 @@ files = [
 
 home = os.environ['HOME']
 arduino = os.path.join(home, 'Documents/Arduino/Domedecahedron')
-arduino_repo = os.path.join(home, 'Documents/hg/domedecahedron/Arduino')
+arduino_repo = os.path.join(home, 'Documents/hg/domedecahedron/Arduino/Domedecahedron')
 test_repo = os.path.join(home, 'Documents/hg/domedecahedron/domedecahedron')
 
 def sync(a, b):
