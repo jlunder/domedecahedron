@@ -62,6 +62,7 @@ DOMEDECAHEDRON_SRC= \
 	main.c \
 	gles2_harness.c \
 	glus.c \
+	dais_input.c \
 	domedecahedron.c \
 	effect.c
 

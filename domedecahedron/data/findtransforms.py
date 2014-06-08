@@ -125,6 +125,11 @@ for i in range(5):
     m.rotate_axis(pi / 5.0, rotaxisc)
     m.translate(xlatc.x, xlatc.y, xlatc.z)
     
+    if i == 3:
+        m.rotate_axis(1 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
+    if i == 4:
+        m.rotate_axis(3 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
+    
     printgroup(i + 1, m)
 
 """

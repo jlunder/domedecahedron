@@ -532,6 +532,12 @@ void gles2_harness_update(float time)
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         vertex_t const * vertex = &ddh_vertex_coords[i];
         
+        if(((ddh_light_group[i] == 4) && (ddh_light_dodecahedron[i] == 5)) ||
+                ((ddh_light_group[i] == 5) &&
+                (ddh_light_dodecahedron[i] == 5))) {
+            continue;
+        }
+        
         /////////
         glusMatrix4x4Identityf(modelMatrix);
         glusMatrix4x4Translatef(modelMatrix, vertex->x, vertex->y, vertex->z);
