@@ -1,5 +1,7 @@
 #include "domedecahedron.h"
 
+#include <assert.h>
+
 #include "dais_input.h"
 
 
@@ -1274,11 +1276,31 @@ void ddh_process_mode_run(void)
             fix16_t a_y = 2 * fix16_cos(fix16_mul(measure_t, 2 * fix16_pi));
             fix16_t a_z = fix16_from_int(-2);
             
-            int32_t l = fix16_to_int(fix16_mul(fix16_sin(fix16_sqrt(
+            fix16_t dist_a = fix16_sqrt(
                 fix16_sq(fix16_from_float(ddh_vertex_coords[i].x) - a_x) +
                 fix16_sq(fix16_from_float(ddh_vertex_coords[i].y) - a_y) +
-                fix16_sq(fix16_from_float(ddh_vertex_coords[i].z) - a_z)) * 1 * 2 * fix16_pi) + fix16_from_int(1),
-                fix16_from_int(127)));
+                fix16_sq(fix16_from_float(ddh_vertex_coords[i].z) - a_z));
+            fix16_t plasma_a =
+                fix16_sin(fix16_mul(dist_a, 2 * fix16_pi)) + fix16_from_int(1);
+            
+            /*
+            float af_x = 2 * sinf(fix16_to_float(measure_t) * 2 * PI_F);
+            float af_y = 2 * cosf(fix16_to_float(measure_t) * 2 * PI_F);
+            float af_z = -2.0f;
+            
+            float dist_af = sqrtf(
+                (ddh_vertex_coords[i].x - af_x) * (ddh_vertex_coords[i].x - af_x) +
+                (ddh_vertex_coords[i].y - af_y) * (ddh_vertex_coords[i].y - af_y) +
+                (ddh_vertex_coords[i].z - af_z) * (ddh_vertex_coords[i].z - af_z));
+            float plasma_af = sinf(dist_af / 4.0f * 2.0f * PI_F) + 1.0f;
+            */
+            
+            //assert(plasma_a >= 0);
+            //assert(plasma_a <= fix16_from_int(2));
+            //assert(fabsf(fix16_to_float(dist_a) - dist_af) < 0.1f);
+            //assert(fabsf(fix16_to_float(plasma_a) - plasma_af) < 0.1f);
+            
+            int32_t l = fix16_to_int(fix16_mul(plasma_a, fix16_from_int(127)));
             
             plasma_color = ddh_make_color(l, 0, 0);
         }

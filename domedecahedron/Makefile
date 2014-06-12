@@ -37,7 +37,7 @@ ifeq ($(OS), LINUX)
 endif
 ifeq ($(OS), OSX)
 	CC=gcc
-	CFLAGS=-O2 -W -Wall --std=gnu99 -fgnu89-inline
+	CFLAGS=-O0 -W -Wall --std=gnu99 -fgnu89-inline -g
 	CPPFLAGS=-DGLUS_GL -I ./GLUS
 	LDFLAGS=-framework OpenGL -framework Cocoa -framework QuartzCore -framework IOKit -lm -lglfw3
 endif
