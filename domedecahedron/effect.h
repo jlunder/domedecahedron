@@ -3,6 +3,7 @@
 
 #include "domedecahedron.h"
 
-//typedef void (* effect_process_func_t)(void * data, );
+void effect_initialize_plasma0(void);
+void effect_process_plasma0(color_t buf[DDH_TOTAL_VERTICES]);
 
 #endif

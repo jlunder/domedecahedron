@@ -64,7 +64,9 @@ DOMEDECAHEDRON_SRC= \
 	glus.c \
 	dais_input.c \
 	domedecahedron.c \
+	domedecahedron_data.c \
 	effect.c \
+	effect_util.c \
 	fix16.c \
 	fix16_exp.c \
 	fix16_sqrt.c \

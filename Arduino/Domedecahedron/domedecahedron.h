@@ -10,6 +10,9 @@
 #include "fix16.h"
 
 
+#define PI_F 3.1415926535897932384626f
+#define TWO_PI_F (2.0f * 3.1415926535897932384626f)
+
 #define DDH_FPS 60
 
 #define DDH_VERTICES_PER_DODECAHEDRON 20
@@ -60,14 +63,52 @@ typedef struct {
     quaternion_t orientation;
 } placement_t;
 
-static inline color_t ddh_make_color(uint8_t r, uint8_t g, uint8_t b) {
+
+static color_t const color_black =   {{  0,   0,   0, 0}};
+static color_t const color_brown =   {{127,  63,   0, 0}};
+static color_t const color_red =     {{255,   0,   0, 0}};
+static color_t const color_orange =  {{191,  95,   0, 0}};
+static color_t const color_yellow =  {{255, 255,   0, 0}};
+static color_t const color_green =   {{  0, 255,   0, 0}};
+static color_t const color_blue =    {{  0,   0, 255, 0}};
+static color_t const color_purple =  {{191,   0, 255, 0}};
+static color_t const color_grey =    {{127, 127, 127, 0}};
+static color_t const color_white =   {{255, 255, 255, 0}};
+
+static color_t const color_cyan =    {{  0, 255, 255, 0}};
+static color_t const color_magenta = {{255,   0, 255, 0}};
+
+
+static inline color_t color_make(uint8_t r, uint8_t g, uint8_t b) {
     color_t c = {{r, g, b, 0}};
     return c;
 }
 
+static inline color_t color_add_sat(color_t x, color_t y)
+{
+    int32_t r = (int32_t)x.r + (int32_t)y.r;
+    int32_t g = (int32_t)x.g + (int32_t)y.g;
+    int32_t b = (int32_t)x.b + (int32_t)y.b;
+    
+    return color_make(r > 255 ? 255 : r, g > 255 ? 255 : g,
+        b > 255 ? 255 : b);
+}
+
+static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
+    vector2_t v = {x, y};
+    return v;
+}
+
+static inline vector3_t vector3_make(fix16_t x, fix16_t y, fix16_t z) {
+    vector3_t v = {x, y, z};
+    return v;
+}
+
+
 extern vertex_t const ddh_dodecahedron_vertex_coords[
     DDH_VERTICES_PER_DODECAHEDRON];
 extern vertex_t const ddh_vertex_coords[DDH_TOTAL_VERTICES];
+extern vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
 
 extern float const ddh_dodecahedron_transforms[
     DDH_DODECAHEDRONS_PER_GROUP][16];

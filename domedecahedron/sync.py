@@ -2,6 +2,7 @@ import os, shutil
 
 files = [
     ('domedecahedron.c', 'domedecahedron_lib.cpp',),
+    ('domedecahedron_data.c', 'domedecahedron_data.cpp',),
     ('domedecahedron.h', 'domedecahedron.h',),
     ('effect.c', 'effect.cpp',),
     ('effect.h', 'effect.h',),
