@@ -3,11 +3,11 @@
 #include "effect_util.h"
 
 
-void effect_initialize_plasma0(void)
+void effect_initialize_plasma_0(void)
 {
 }
 
-void effect_process_plasma0(color_t buf[DDH_TOTAL_VERTICES])
+void effect_process_plasma_0(color_t buf[DDH_TOTAL_VERTICES])
 {
     fix16_t t = fix16_from_float((float)(ddh_total_ns % (1LL << 48)) / 1.0e9f);
     color_t ca = color_make(
@@ -65,6 +65,11 @@ void effect_process_plasma0(color_t buf[DDH_TOTAL_VERTICES])
                 (l * ca.b + (255 - l) * cb.b) / 256);
         }
     }
+}
+
+
+void effect_process_rings(color_t buf[DDH_TOTAL_VERTICES])
+{
 }
 
 

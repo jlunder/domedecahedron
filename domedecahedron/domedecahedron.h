@@ -39,22 +39,32 @@ typedef struct {
     fix16_t z;
 } vector3_t;
 
-typedef struct {
-    fix16_t x;
-    fix16_t y;
-    fix16_t z;
-    fix16_t w;
+typedef union {
+    struct {
+        fix16_t x, y, z, w;
+    };
+#ifdef __ARM_NEON__
+    uint16x4_t vec;
+#endif
 } vector4_t;
 
 typedef union {
     struct {
         uint8_t r, g, b, x;
     };
+    struct {
+        uint8_t h, s, v;
+    };
     uint32_t color;
 } color_t;
 
-typedef struct {
-    float x, y, z, w;
+typedef union {
+    struct {
+        fix16_t x, y, z, w;
+    };
+#ifdef __ARM_NEON__
+    uint16x4_t vec;
+#endif
 } quaternion_t;
 
 typedef struct {
@@ -94,6 +104,28 @@ static inline color_t color_add_sat(color_t x, color_t y)
         b > 255 ? 255 : b);
 }
 
+extern color_t color_modulate_saturation(color_t color, fix16_t amount);
+
+color_t color_rgb_from_hsv(color_t hsv_color);
+color_t color_hsv_from_rgb(color_t rgb_color);
+
+static inline vector3_t vector3_add(vector3_t a, vector3_t b)
+{
+    vector3_t res = {a.x + b.x, a.y + b.y, a.z + b.z};
+    return res;
+}
+
+static inline vector3_t vector3_sub(vector3_t a, vector3_t b)
+{
+    vector3_t res = {a.x - b.x, a.y - b.y, a.z - b.z};
+    return res;
+}
+
+static inline fix16_t vector3_dot(vector3_t a, vector3_t b)
+{
+    return fix16_mul(a.x, b.x) + fix16_mul(a.y, b.y) + fix16_mul(a.z, b.z);
+}
+
 static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
     vector2_t v = {x, y};
     return v;
@@ -118,20 +150,21 @@ extern uint8_t const ddh_dodecahedron_vertex_adjacency[
     DDH_VERTICES_PER_DODECAHEDRON][3];
 extern uint8_t const ddh_dodecahedron_vertex_opposition[
     DDH_VERTICES_PER_DODECAHEDRON];
+extern uint8_t const ddh_dodecahedron_vertex_faces[
+    DDH_VERTICES_PER_DODECAHEDRON][DDH_VERTICES_PER_FACE];
 extern uint8_t const ddh_dodecahedron_face_vertices[
     DDH_FACES_PER_DODECAHEDRON][DDH_VERTICES_PER_FACE];
 extern uint8_t const ddh_dodecahedron_face_adjacency[
     DDH_FACES_PER_DODECAHEDRON][5];
 extern uint8_t const ddh_dodecahedron_face_opposition[
     DDH_FACES_PER_DODECAHEDRON];
-static uint8_t const ddh_center_dodecahedron = 0;
-extern uint8_t const ddh_group_dodecahedrons[DDH_TOTAL_GROUPS][
-    DDH_DODECAHEDRONS_PER_GROUP];
 extern uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS];
+
+extern size_t ddh_group_dodecahedron_vertex_offsets[DDH_TOTAL_GROUPS][
+    DDH_DODECAHEDRONS_PER_GROUP][DDH_VERTICES_PER_DODECAHEDRON];
 
 extern uint8_t const ddh_light_dodecahedron[DDH_TOTAL_VERTICES];
 extern uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES];
-extern uint8_t const ddh_light_faces[DDH_TOTAL_VERTICES][3];
 extern uint8_t const ddh_light_group[DDH_TOTAL_VERTICES];
 
 extern color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];

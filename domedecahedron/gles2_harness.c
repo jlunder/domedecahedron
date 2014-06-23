@@ -382,6 +382,24 @@ bool gles2_harness_init(void)
     
     ddh_initialize();
     
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        size_t g = ddh_light_group[i];
+        size_t d = ddh_light_dodecahedron[i];
+        size_t v = ddh_light_vertex[i];
+        assert(ddh_group_dodecahedron_vertex_offsets[g][d][v] == i);
+    }
+    
+    for(size_t g = 0; g < DDH_TOTAL_GROUPS; ++g) {
+        for(size_t d = 0; d < DDH_DODECAHEDRONS_PER_GROUP; ++d) {
+            for(size_t v = 0; v < DDH_VERTICES_PER_DODECAHEDRON; ++v) {
+                size_t i = ddh_group_dodecahedron_vertex_offsets[g][d][v];
+                assert(ddh_light_group[i] == g);
+                assert(ddh_light_dodecahedron[i] == d);
+                assert(ddh_light_vertex[i] == v);
+            }
+        }
+    }
+    
     return true;
 }
 
@@ -532,9 +550,8 @@ void gles2_harness_update(float time)
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         vertex_t const * vertex = &ddh_vertex_coords[i];
         
-        if(((ddh_light_group[i] == 4) && (ddh_light_dodecahedron[i] == 5)) ||
-                ((ddh_light_group[i] == 5) &&
-                (ddh_light_dodecahedron[i] == 5))) {
+        if((((i / 120) == 4) && ((i / 20 % 6) == 5)) ||
+                (((i / 120) == 5) && ((i / 20 % 6) == 5))) {
             continue;
         }
         

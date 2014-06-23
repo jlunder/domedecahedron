@@ -51,6 +51,48 @@ void ddh_process_debug_cursor(uint32_t cursor_wrap);
 
 uint8_t ddh_last_debug_mode = 255;
 
+
+color_t color_modulate_saturation(color_t color, fix16_t amount)
+{
+    int32_t r = color.r;
+    int32_t g = color.g;
+    int32_t b = color.b;
+    int32_t min = r;
+    int32_t max = r;
+    int32_t centroid = r + g + g + b;
+    
+    if(g < min) min = g;
+    if(b < min) min = b;
+    
+    if(g > max) max = g;
+    if(b > max) max = b;
+    
+    r = (fix16_to_int(amount * ((r * 4) - centroid)) + centroid) / 4;
+    g = (fix16_to_int(amount * ((g * 4) - centroid)) + centroid) / 4;
+    b = (fix16_to_int(amount * ((b * 4) - centroid)) + centroid) / 4;
+    
+    if(r < 0) r = 0;
+    if(r > 255) r = 255;
+    
+    if(g < 0) g = 0;
+    if(g > 255) g = 255;
+    
+    if(b < 0) b = 0;
+    if(b > 255) b = 255;
+    
+    return color_make(r, g, b);
+}
+
+color_t color_rgb_from_hsv(color_t hsv_color)
+{
+    return color_make(0, 0, 0);
+}
+
+color_t color_hsv_from_rgb(color_t rgb_color)
+{
+    return color_make(0, 0, 0);
+}
+
 void ddh_initialize(void)
 {
     di_initialize();
@@ -59,6 +101,14 @@ void ddh_initialize(void)
         ddh_vertex_coords_fix[i].x = fix16_from_float(ddh_vertex_coords[i].x);
         ddh_vertex_coords_fix[i].y = fix16_from_float(ddh_vertex_coords[i].y);
         ddh_vertex_coords_fix[i].z = fix16_from_float(ddh_vertex_coords[i].z);
+    }
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        size_t g = ddh_light_group[i];
+        size_t d = ddh_light_dodecahedron[i];
+        size_t v = ddh_light_vertex[i];
+        
+        ddh_group_dodecahedron_vertex_offsets[g][d][v] = i;
     }
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
@@ -166,12 +216,11 @@ uint32_t ddh_frames_since(uint32_t total_frames)
 
 void ddh_initialize_mode_run(void)
 {
-    effect_initialize_plasma0();
 }
 
 void ddh_process_mode_run(void)
 {
-    effect_process_plasma0(ddh_frame_buffer);
+    effect_process_plasma_0(ddh_frame_buffer);
 }
 
 void ddh_initialize_mode_configure(void)
@@ -282,7 +331,8 @@ void ddh_process_mode_debug_locate(void)
             {
                 bool is_face = false;
                 for(size_t j = 0; j < 3; ++j) {
-                    if(ddh_light_faces[i][j] == ddh_debug_cursor) {
+                    if(ddh_dodecahedron_vertex_faces[
+                            ddh_light_vertex[i]][j] == ddh_debug_cursor) {
                         is_face = true;
                     }
                 }

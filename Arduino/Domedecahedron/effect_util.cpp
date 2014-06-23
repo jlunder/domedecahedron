@@ -11,3 +11,16 @@ fix16_t eu_sin_dist3(vector3_t a, vector3_t b, fix16_t freq, fix16_t phase)
     return fix16_sin(fix16_mul(dist, freq) + phase);
 }
 
+
+color_t eu_rgb_from_hsv(color_t hsv_color)
+{
+    return color_make(0, 0, 0);
+}
+
+
+color_t eu_hsv_from_rgb(color_t rgb_color)
+{
+    return color_make(0, 0, 0);
+}
+
+

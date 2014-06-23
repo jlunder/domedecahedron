@@ -39,22 +39,32 @@ typedef struct {
     fix16_t z;
 } vector3_t;
 
-typedef struct {
-    fix16_t x;
-    fix16_t y;
-    fix16_t z;
-    fix16_t w;
+typedef union {
+    struct {
+        fix16_t x, y, z, w;
+    };
+#ifdef __ARM_NEON__
+    uint16x4_t vec;
+#endif
 } vector4_t;
 
 typedef union {
     struct {
         uint8_t r, g, b, x;
     };
+    struct {
+        uint8_t h, s, v;
+    };
     uint32_t color;
 } color_t;
 
-typedef struct {
-    float x, y, z, w;
+typedef union {
+    struct {
+        fix16_t x, y, z, w;
+    };
+#ifdef __ARM_NEON__
+    uint16x4_t vec;
+#endif
 } quaternion_t;
 
 typedef struct {

@@ -166,12 +166,11 @@ uint32_t ddh_frames_since(uint32_t total_frames)
 
 void ddh_initialize_mode_run(void)
 {
-    effect_initialize_plasma0();
 }
 
 void ddh_process_mode_run(void)
 {
-    effect_process_plasma0(ddh_frame_buffer);
+    effect_process_plasma_0(ddh_frame_buffer);
 }
 
 void ddh_initialize_mode_configure(void)
