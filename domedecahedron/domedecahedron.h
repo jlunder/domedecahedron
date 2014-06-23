@@ -1,11 +1,13 @@
 #ifndef DOMEDECAHEDRON_H_INCLUDED
 #define DOMEDECAHEDRON_H_INCLUDED
 
+
+#include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "fix16.h"
 
@@ -104,10 +106,8 @@ static inline color_t color_add_sat(color_t x, color_t y)
         b > 255 ? 255 : b);
 }
 
+extern color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l);
 extern color_t color_modulate_saturation(color_t color, fix16_t amount);
-
-color_t color_rgb_from_hsv(color_t hsv_color);
-color_t color_hsv_from_rgb(color_t rgb_color);
 
 static inline vector3_t vector3_add(vector3_t a, vector3_t b)
 {

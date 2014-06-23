@@ -6,6 +6,8 @@
 #include "effect.h"
 
 
+fix16_t color_hsl[7][3];
+
 vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
 
 color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
@@ -52,6 +54,47 @@ void ddh_process_debug_cursor(uint32_t cursor_wrap);
 uint8_t ddh_last_debug_mode = 255;
 
 
+color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l)
+{
+    static int32_t const h_scale = 1024;
+    int32_t const h_scale_fix16 = fix16_from_int(h_scale);
+    int32_t ha, hb;
+    fix16_t const * ca;
+    fix16_t const * cb;
+    fix16_t r, g, b;
+    
+    if(h >= h_scale * 6) {
+        return color_make(127, 127, 127);
+    }
+    
+    hb = h % h_scale;
+    ha = h_scale - hb;
+    ca = color_hsl[h / h_scale];
+    cb = color_hsl[h / h_scale + 1];
+    
+    r = fix16_mul(ca[0] * ha + cb[0] * hb - h_scale_fix16 / 2, s);
+    g = fix16_mul(ca[1] * ha + cb[1] * hb - h_scale_fix16 / 2, s);
+    b = fix16_mul(ca[2] * ha + cb[2] * hb - h_scale_fix16 / 2, s);
+    
+    r = fix16_mul(r + h_scale_fix16 / 2, l);
+    g = fix16_mul(r + h_scale_fix16 / 2, l);
+    b = fix16_mul(r + h_scale_fix16 / 2, l);
+    
+    
+    if(r < 0) r = 0;
+    if(r >= h_scale_fix16) r = h_scale_fix16 - 1;
+    
+    if(g < 0) g = 0;
+    if(g >= h_scale_fix16) g = h_scale_fix16 - 1;
+    
+    if(b < 0) b = 0;
+    if(b >= h_scale_fix16) b = h_scale_fix16 - 1;
+    
+    
+    return color_make(r * 256 / h_scale_fix16, g * 256 / h_scale_fix16,
+        b * 256 / h_scale_fix16);
+}
+
 color_t color_modulate_saturation(color_t color, fix16_t amount)
 {
     int32_t r = color.r;
@@ -83,16 +126,6 @@ color_t color_modulate_saturation(color_t color, fix16_t amount)
     return color_make(r, g, b);
 }
 
-color_t color_rgb_from_hsv(color_t hsv_color)
-{
-    return color_make(0, 0, 0);
-}
-
-color_t color_hsv_from_rgb(color_t rgb_color)
-{
-    return color_make(0, 0, 0);
-}
-
 void ddh_initialize(void)
 {
     di_initialize();
@@ -114,6 +147,34 @@ void ddh_initialize(void)
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         ddh_frame_buffer[i] = color_make(255, 255, 255);
     }
+    
+    color_hsl[0][0] = fix16_from_int(1);
+    color_hsl[0][1] = 0;
+    color_hsl[0][2] = 0;
+
+    color_hsl[1][0] = fix16_from_int(1);
+    color_hsl[1][1] = fix16_from_int(1);
+    color_hsl[1][2] = 0;
+
+    color_hsl[2][0] = 0;
+    color_hsl[2][1] = fix16_from_int(1);
+    color_hsl[2][2] = 0;
+
+    color_hsl[3][0] = 0;
+    color_hsl[3][1] = fix16_from_int(1);
+    color_hsl[3][2] = fix16_from_int(1);
+
+    color_hsl[4][0] = 0;
+    color_hsl[4][1] = 0;
+    color_hsl[4][2] = fix16_from_int(1);
+
+    color_hsl[5][0] = fix16_from_int(1);
+    color_hsl[5][1] = 0;
+    color_hsl[5][2] = fix16_from_int(1);
+
+    color_hsl[6][0] = fix16_from_int(1);
+    color_hsl[6][1] = 0;
+    color_hsl[6][2] = 0;
 }
 
 void ddh_process(uint64_t delta_ns)
