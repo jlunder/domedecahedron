@@ -133,6 +133,8 @@ void effect_add_set_parameter(void * state, size_t id,
     
     switch(id) {
     case EFFECT_ADD_PARAMETER_NUM_SOURCES:
+        add_state->num_sources = value.i;
+        break;
     default:
         if(id >= EFFECT_ADD_PARAMETER_SOURCE_N_BUF &&
                 id < EFFECT_ADD_PARAMETER_SOURCE_N_BUF +
@@ -140,12 +142,13 @@ void effect_add_set_parameter(void * state, size_t id,
             add_state->sources[id - EFFECT_ADD_PARAMETER_SOURCE_N_BUF].buf =
                 (color_t const *)value.p;
         }
-        if(id >= EFFECT_ADD_PARAMETER_SOURCE_N_ALPHA &&
+        else if(id >= EFFECT_ADD_PARAMETER_SOURCE_N_ALPHA &&
                 id < EFFECT_ADD_PARAMETER_SOURCE_N_ALPHA +
                 EFFECT_ADD_MAX_SOURCES) {
             add_state->sources[id - EFFECT_ADD_PARAMETER_SOURCE_N_BUF].alpha =
                 value.i;
         }
+        break;
     }
 }
 
