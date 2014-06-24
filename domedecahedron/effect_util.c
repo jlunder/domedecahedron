@@ -117,12 +117,12 @@ void eu_scramble(color_t dest[DDH_TOTAL_VERTICES],
 }
 
 void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
-    vector3_t plane_origin, vector3_t plane_normal, fix16_t bar_size,
+    vector3_t plane_normal, fix16_t plane_position, fix16_t bar_size,
     fix16_t transition_size)
 {
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        fix16_t pos = vector3_dot(vector3_sub(ddh_vertex_coords_fix[i],
-            plane_origin), plane_normal);
+        fix16_t pos = vector3_dot(ddh_vertex_coords_fix[i], plane_normal) -
+            plane_position;
         
         if((pos < -transition_size) || (pos >= bar_size + transition_size)) {
             dest[i] = color_black;
