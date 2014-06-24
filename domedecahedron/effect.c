@@ -124,6 +124,14 @@ void * effect_add_initialize(void)
 void effect_add_process(void * state, color_t buf[DDH_TOTAL_VERTICES])
 {
     effect_add_state_t * add_state = (effect_add_state_t *)state;
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        buf[i] = color_black;
+    }
+    for(size_t i = 0; i < add_state->num_sources; ++i) {
+        eu_add_buffer(buf, 255, add_state->sources[i].buf,
+            add_state->sources[i].alpha);
+    }
 }
 
 void effect_add_set_parameter(void * state, size_t id,
