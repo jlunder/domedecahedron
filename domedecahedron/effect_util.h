@@ -9,7 +9,7 @@
 
 extern void eu_add_buffer(color_t dest[DDH_TOTAL_VERTICES],
     uint8_t dest_alpha, color_t const source[DDH_TOTAL_VERTICES],
-    int32_t source_alpha);
+    uint8_t source_alpha);
 extern void eu_add_color(color_t dest[DDH_TOTAL_VERTICES], uint8_t dest_alpha,
     color_t color);
 extern void eu_scramble(color_t dest[DDH_TOTAL_VERTICES],

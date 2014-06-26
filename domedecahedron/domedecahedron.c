@@ -16,6 +16,9 @@ uint64_t ddh_total_ns = 0;
 uint32_t ddh_last_frames = 0;
 uint32_t ddh_total_frames = 0;
 uint64_t ddh_frame_fraction = 0;
+fix16_t ddh_last_time = 0;
+fix16_t ddh_total_time = 0;
+uint64_t ddh_time_fraction = 0;
 
 uint64_t ddh_frame_convert_offset = 0;
 
@@ -178,36 +181,31 @@ void ddh_initialize(void)
     color_hsl[6][1] = 0;
     color_hsl[6][2] = 0;
     
-    ddh_plasma_0_state = effect_initialize(&effect_plasma_0);
+    ddh_plasma_0_state = effect_initialize(&effect_rings_0);
 }
 
 void ddh_process(uint64_t delta_ns)
 {
     static const uint64_t billion = 1000000000ULL;
-    static const uint64_t tenbillion = 10000000000ULL;
+    uint32_t delta_frames;
+    fix16_t delta_t;
     
     ddh_total_ns += delta_ns;
     
-    // 30 FPS
     ddh_frame_fraction += delta_ns * DDH_FPS;
+    delta_frames = (uint32_t)(ddh_frame_fraction / billion);
+    ddh_total_frames += delta_frames;
+    ddh_frame_fraction -= (uint64_t)delta_frames * billion;
     
-    if(ddh_frame_fraction > tenbillion) {
-        uint32_t delta_frames = (uint32_t)(ddh_frame_fraction / billion);
-        ddh_total_frames += delta_frames;
-        ddh_frame_fraction -= delta_frames * billion;
-    }
-    else {
-        while(ddh_frame_fraction > billion) {
-            ++ddh_total_frames;
-            ddh_frame_fraction -= billion;
-        }
-    }
+    ddh_time_fraction += delta_ns << 16;
+    delta_t = (fix16_t)(ddh_time_fraction / billion);
+    ddh_total_time += delta_t;
+    ddh_time_fraction -= (uint64_t)delta_t * billion;
     
     if((ddh_total_frames - ddh_last_frames) == 0) { // mod 2^32 arithmetic
+        // Not time for a new frame yet!
         return;
     }
-    
-    ddh_last_frames = ddh_total_frames;
     
     if(ddh_mode != ddh_last_debug_mode) {
         ddh_last_debug_mode = ddh_mode;
@@ -262,21 +260,29 @@ void ddh_process(uint64_t delta_ns)
         ddh_process_mode_debug_log();
         break;
     }
+    
+    ddh_last_frames = ddh_total_frames;
+    ddh_last_time = ddh_total_time;
 }
 
-uint64_t ddh_ns_since(uint64_t total_ns)
+uint64_t ddh_ns_since(uint64_t last_total_ns)
 {
-    return ddh_total_ns - total_ns;
+    return ddh_total_ns - last_total_ns;
 }
 
-uint32_t ddh_ms_since(uint64_t total_ns)
+uint32_t ddh_ms_since(uint64_t last_total_ns)
 {
-    return ddh_ns_since(total_ns) / 1000000ULL;
+    return ddh_ns_since(last_total_ns) / 1000000ULL;
 }
 
-uint32_t ddh_frames_since(uint32_t total_frames)
+uint32_t ddh_frames_since(uint32_t last_total_frames)
 {
-    return ddh_total_frames - total_frames;
+    return ddh_total_frames - last_total_frames;
+}
+
+fix16_t ddh_time_since(fix16_t last_total_time)
+{
+    return ddh_total_time - last_total_time;
 }
 
 void ddh_initialize_mode_run(void)
@@ -285,7 +291,8 @@ void ddh_initialize_mode_run(void)
 
 void ddh_process_mode_run(void)
 {
-    effect_process(&effect_plasma_0, ddh_plasma_0_state, ddh_frame_buffer);
+    effect_process(&effect_rings_0, ddh_plasma_0_state,
+        ddh_time_since(ddh_last_time), ddh_frame_buffer);
 }
 
 void ddh_initialize_mode_configure(void)

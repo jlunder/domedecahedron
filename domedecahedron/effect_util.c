@@ -13,7 +13,7 @@ size_t eu_free_temp_buffers_top = EU_MAX_TEMP_BUFFERS;
 
 
 void eu_add_buffer(color_t dest[DDH_TOTAL_VERTICES], uint8_t dest_alpha,
-    color_t const source[DDH_TOTAL_VERTICES], int32_t source_alpha)
+    color_t const source[DDH_TOTAL_VERTICES], uint8_t source_alpha)
 {
     if(dest_alpha == 255 && source_alpha == 255) {
         for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
@@ -96,11 +96,11 @@ void eu_scramble(color_t dest[DDH_TOTAL_VERTICES],
     
         for(size_t i = 0; i < DDH_TOTAL_GROUPS; ++i) {
             group_offsets[i] =
-                (i + group_rotation) % DDH_VERTICES_PER_DODECAHEDRON;
+                (i + group_rotation) % DDH_TOTAL_GROUPS;
         }
         for(size_t i = 0; i < DDH_DODECAHEDRONS_PER_GROUP; ++i) {
             dodecahedron_offsets[i] =
-                (i + dodecahedron_rotation) % DDH_VERTICES_PER_DODECAHEDRON;
+                (i + dodecahedron_rotation) % DDH_DODECAHEDRONS_PER_GROUP;
         }
     
         for(size_t i = 0; i < DDH_TOTAL_GROUPS; ++i) {
@@ -120,6 +120,9 @@ void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     vector3_t plane_normal, fix16_t plane_position, fix16_t bar_size,
     fix16_t transition_size)
 {
+    fix16_t inv_transition_size =
+        fix16_div(fix16_from_int(1), transition_size);
+    
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         fix16_t pos = vector3_dot(ddh_vertex_coords_fix[i], plane_normal) -
             plane_position;
@@ -134,10 +137,11 @@ void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
             fix16_t alpha = 0;
             
             if(pos > bar_size) {
-                alpha = transition_size - (pos - bar_size) - 1;
+                alpha = fix16_mul(transition_size - (pos - bar_size) - 1,
+                    inv_transition_size);
             }
             else if(pos < 0) {
-                alpha = transition_size + pos;
+                alpha = fix16_mul(transition_size + pos, inv_transition_size);
             }
             
             if(alpha > 0) {

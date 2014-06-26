@@ -12,6 +12,9 @@
 #include "fix16.h"
 
 
+#define LENGTHOF(x) (sizeof (x) / sizeof *(x))
+#define UNUSED(x) (void)(x)
+
 #define PI_F 3.1415926535897932384626f
 #define TWO_PI_F (2.0f * 3.1415926535897932384626f)
 
@@ -171,6 +174,7 @@ extern color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
 
 extern uint64_t ddh_total_ns;
 extern uint32_t ddh_total_frames;
+extern fix16_t ddh_total_time;
 
 #define DDH_MODE_RUN                           0
 #define DDH_MODE_CONFIGURE                     1
@@ -217,6 +221,7 @@ void ddh_process(uint64_t delta_ns);
 uint64_t ddh_ns_since(uint64_t total_ns);
 uint32_t ddh_ms_since(uint64_t total_ns);
 uint32_t ddh_frames_since(uint32_t frame);
+fix16_t ddh_time_since(fix16_t last_total_time);
 
 
 #endif // DOMEDECAHEDRON_H_INCLUDED
