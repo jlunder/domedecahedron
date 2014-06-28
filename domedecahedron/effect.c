@@ -21,6 +21,12 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
 #define EFFECT_ADD_PARAMETER_SOURCE_N_ALPHA 0x200
 
 
+struct effect_instance_ {
+    effect_t const * effect;
+    void * state;
+};
+
+
 typedef struct {
     size_t num_sources;
     struct {
@@ -72,45 +78,58 @@ effect_t const effect_rings_0 = {
 };
 
 
-void * effect_initialize(effect_t const * effect)
+effect_instance_t * effect_initialize(effect_t const * effect)
 {
+    effect_instance_t * instance =
+        (effect_instance_t *)malloc(sizeof (effect_instance_t));
+    
+    instance->effect = effect;
+    
     if(effect->initialize != NULL) {
         assert(effect->finalize != NULL);
-        return effect->initialize();
+        instance->state = effect->initialize();
     }
     else {
-        return NULL;
+        instance->state = NULL;
     }
+    
+    return instance;
 }
 
-void effect_finalize(effect_t const * effect, void * state)
+void effect_finalize(effect_instance_t * instance)
 {
-    assert(state == NULL || effect->finalize != NULL);
+    effect_t const * effect = instance->effect;
+    assert(instance->state == NULL || effect->finalize != NULL);
     
     if(effect->finalize != NULL) {
-        effect->finalize(state);
+        effect->finalize(instance->state);
     }
+    free(instance);
 }
 
-void effect_process(effect_t const * effect, void * state, fix16_t delta_time,
+void effect_process(effect_instance_t * instance, fix16_t delta_time,
     color_t dest[DDH_TOTAL_VERTICES])
 {
-    effect->process(state, delta_time, dest);
+    instance->effect->process(instance->state, delta_time, dest);
 }
 
-void effect_set_parameter(effect_t const * effect, void * state,
+void effect_set_parameter(effect_instance_t * instance,
     size_t id, effect_parameter_t value)
 {
+    effect_t const * effect = instance->effect;
+    
     if(effect->set_parameter != NULL) {
-        effect->set_parameter(state, id, value);
+        effect->set_parameter(instance->state, id, value);
     }
 }
 
-effect_parameter_t effect_get_parameter(effect_t const * effect, void * state,
+effect_parameter_t effect_get_parameter(effect_instance_t * instance,
     size_t id)
 {
+    effect_t const * effect = instance->effect;
+    
     if(effect->get_parameter != NULL) {
-        return effect->get_parameter(state, id);
+        return effect->get_parameter(instance->state, id);
     }
     else {
         return effect_parameter_zero;

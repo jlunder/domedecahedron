@@ -291,8 +291,8 @@ void ddh_initialize_mode_run(void)
 
 void ddh_process_mode_run(void)
 {
-    effect_process(&effect_rings_0, ddh_plasma_0_state,
-        ddh_time_since(ddh_last_time), ddh_frame_buffer);
+    effect_process(ddh_plasma_0_state, ddh_time_since(ddh_last_time),
+        ddh_frame_buffer);
 }
 
 void ddh_initialize_mode_configure(void)
