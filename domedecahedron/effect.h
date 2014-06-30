@@ -11,7 +11,7 @@ typedef union {
 } effect_parameter_t;
 
 
-static effect_parameter_t const effect_parameter_zero;
+static effect_parameter_t const effect_parameter_zero = {};
 
 
 typedef struct {
@@ -28,8 +28,11 @@ typedef struct effect_instance_ effect_instance_t;
 
 
 extern effect_t const effect_add;
+extern effect_t const effect_twinkle;
+extern effect_t const effect_glitch;
 extern effect_t const effect_plasma_0;
 extern effect_t const effect_rings_0;
+extern effect_t const effect_dusk;
 
 
 extern effect_instance_t * effect_initialize(effect_t const * instance);

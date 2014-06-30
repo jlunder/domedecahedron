@@ -112,6 +112,11 @@ static inline color_t color_add_sat(color_t x, color_t y)
 extern color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l);
 extern color_t color_modulate_saturation(color_t color, fix16_t amount);
 
+static inline vector3_t vector3_make(fix16_t x, fix16_t y, fix16_t z) {
+    vector3_t v = {x, y, z};
+    return v;
+}
+
 static inline vector3_t vector3_add(vector3_t a, vector3_t b)
 {
     vector3_t res = {a.x + b.x, a.y + b.y, a.z + b.z};
@@ -129,13 +134,22 @@ static inline fix16_t vector3_dot(vector3_t a, vector3_t b)
     return fix16_mul(a.x, b.x) + fix16_mul(a.y, b.y) + fix16_mul(a.z, b.z);
 }
 
-static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
-    vector2_t v = {x, y};
-    return v;
+static inline vector3_t vector3_normalize(vector3_t a)
+{
+    fix16_t invlen = fix16_div(fix16_one,
+        fix16_sqrt(fix16_sq(a.x) + fix16_sq(a.y) + fix16_sq(a.z)));
+    
+    return vector3_make(fix16_mul(invlen, a.x), fix16_mul(invlen, a.y),
+        fix16_mul(invlen, a.z));
 }
 
-static inline vector3_t vector3_make(fix16_t x, fix16_t y, fix16_t z) {
-    vector3_t v = {x, y, z};
+static inline fix16_t vector3_distsq(vector3_t a, vector3_t b)
+{
+    return fix16_sq(a.x - b.x) + fix16_sq(a.y - b.y) + fix16_sq(a.z - b.z);
+}
+
+static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
+    vector2_t v = {x, y};
     return v;
 }
 

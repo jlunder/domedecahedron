@@ -56,7 +56,7 @@ void ddh_process_debug_cursor(uint32_t cursor_wrap);
 
 uint8_t ddh_last_debug_mode = 255;
 
-void * ddh_plasma_0_state;
+effect_instance_t * ddh_plasma_0_state;
 
 
 color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l)
@@ -181,7 +181,7 @@ void ddh_initialize(void)
     color_hsl[6][1] = 0;
     color_hsl[6][2] = 0;
     
-    ddh_plasma_0_state = effect_initialize(&effect_rings_0);
+    ddh_plasma_0_state = effect_initialize(&effect_dusk);
 }
 
 void ddh_process(uint64_t delta_ns)

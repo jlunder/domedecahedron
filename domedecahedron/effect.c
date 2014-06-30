@@ -8,6 +8,16 @@ void effect_add_process(void * state, fix16_t delta_time,
     color_t buf[DDH_TOTAL_VERTICES]);
 void effect_add_set_parameter(void * state, size_t id,
     effect_parameter_t value);
+void * effect_twinkle_initialize(void);
+void effect_twinkle_process(void * state, fix16_t delta_time,
+    color_t buf[DDH_TOTAL_VERTICES]);
+void effect_twinkle_set_parameter(void * state, size_t id,
+    effect_parameter_t value);
+void * effect_glitch_initialize(void);
+void effect_glitch_process(void * state, fix16_t delta_time,
+    color_t buf[DDH_TOTAL_VERTICES]);
+void effect_glitch_set_parameter(void * state, size_t id,
+    effect_parameter_t value);
 void effect_plasma_0_process(void * state, fix16_t delta_time,
     color_t buf[DDH_TOTAL_VERTICES]);
 void * effect_rings_0_initialize(void);
@@ -26,7 +36,6 @@ struct effect_instance_ {
     void * state;
 };
 
-
 typedef struct {
     size_t num_sources;
     struct {
@@ -35,6 +44,13 @@ typedef struct {
     } sources[EFFECT_ADD_MAX_SOURCES];
 } effect_add_state_t;
 
+typedef struct {
+    size_t temp;
+} effect_twinkle_state_t;
+
+typedef struct {
+    size_t temp;
+} effect_glitch_state_t;
 
 typedef struct {
     int32_t group_scramble;
@@ -58,6 +74,22 @@ effect_t const effect_add = {
     &free,
     &effect_add_process,
     &effect_add_set_parameter,
+    NULL,
+};
+
+effect_t const effect_twinkle = {
+    &effect_twinkle_initialize,
+    &free,
+    &effect_twinkle_process,
+    &effect_twinkle_set_parameter,
+    NULL,
+};
+
+effect_t const effect_glitch = {
+    &effect_glitch_initialize,
+    &free,
+    &effect_glitch_process,
+    &effect_glitch_set_parameter,
     NULL,
 };
 
@@ -189,25 +221,113 @@ void effect_add_set_parameter(void * state, size_t id,
     }
 }
 
+void * effect_twinkle_initialize(void)
+{
+    effect_twinkle_state_t * twinkle_state =
+        (effect_twinkle_state_t *)malloc(sizeof (effect_twinkle_state_t));
+    
+    memset(twinkle_state, 0, sizeof (effect_twinkle_state_t));
+    
+    return twinkle_state;
+}
+
+void effect_twinkle_process(void * state, fix16_t delta_time,
+    color_t buf[DDH_TOTAL_VERTICES])
+{
+    effect_twinkle_state_t * twinkle_state = (effect_twinkle_state_t *)state;
+    
+    UNUSED(delta_time);
+    UNUSED(twinkle_state);
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        buf[i] = color_black;
+    }
+}
+
+void effect_twinkle_set_parameter(void * state, size_t id,
+    effect_parameter_t value)
+{
+    effect_twinkle_state_t * twinkle_state = (effect_twinkle_state_t *)state;
+    
+    UNUSED(twinkle_state);
+    UNUSED(value);
+    
+    switch(id) {
+    default:
+        break;
+    }
+}
+
+void * effect_glitch_initialize(void)
+{
+    effect_glitch_state_t * glitch_state =
+        (effect_glitch_state_t *)malloc(sizeof (effect_glitch_state_t));
+    
+    memset(glitch_state, 0, sizeof (effect_glitch_state_t));
+    
+    return glitch_state;
+}
+
+void effect_glitch_process(void * state, fix16_t delta_time,
+    color_t buf[DDH_TOTAL_VERTICES])
+{
+    effect_glitch_state_t * glitch_state = (effect_glitch_state_t *)state;
+    
+    UNUSED(delta_time);
+    UNUSED(glitch_state);
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        buf[i] = color_black;
+    }
+}
+
+void effect_glitch_set_parameter(void * state, size_t id,
+    effect_parameter_t value)
+{
+    effect_glitch_state_t * glitch_state = (effect_glitch_state_t *)state;
+    
+    UNUSED(glitch_state);
+    UNUSED(value);
+    
+    switch(id) {
+    default:
+        break;
+    }
+}
+
 void effect_plasma_0_process(void * state, fix16_t delta_time,
     color_t buf[DDH_TOTAL_VERTICES])
 {
     fix16_t t =
         fix16_from_float((float)(ddh_total_ns % (1LL << 48)) / 1.0e9f);
     color_t ca = color_make(
-        fix16_mul(fix16_sin(fix16_mul(t / 20, 2 * fix16_pi)) +
+        fix16_mul(fix16_sin(fix16_mul(t / 20, fix16_two_pi)) +
             fix16_from_int(1), 127),
-        fix16_mul(fix16_cos(fix16_mul(t / 30, 2 * fix16_pi)) +
+        fix16_mul(fix16_cos(fix16_mul(t / 30, fix16_two_pi)) +
             fix16_from_int(1), 127),
-        fix16_mul(fix16_sin(fix16_mul(t / 70, 2 * fix16_pi)) +
+        fix16_mul(fix16_sin(fix16_mul(t / 70, fix16_two_pi)) +
             fix16_from_int(1), 63));
     color_t cb = color_make(
-        fix16_mul(fix16_sin(fix16_mul(t / 20, 2 * fix16_pi) +
+        fix16_mul(fix16_sin(fix16_mul(t / 20, fix16_two_pi) +
             fix16_from_int(3)) + fix16_from_int(1), 127),
-        fix16_mul(fix16_cos(fix16_mul(t / 30, 2 * fix16_pi) +
+        fix16_mul(fix16_cos(fix16_mul(t / 30, fix16_two_pi) +
             fix16_from_int(3)) + fix16_from_int(1), 127),
-        fix16_mul(fix16_sin(fix16_mul(t / 70, 2 * fix16_pi) +
+        fix16_mul(fix16_sin(fix16_mul(t / 70, fix16_two_pi) +
             fix16_from_int(3)) + fix16_from_int(1), 63));
+    vector3_t pa = vector3_make(
+        2 * fix16_sin(fix16_mul(t / 8, fix16_two_pi)) - fix16_from_int(3),
+        2 * fix16_cos(fix16_mul(t / 8, fix16_two_pi)) - fix16_from_int(1),
+        fix16_from_int(-2));
+    vector3_t pb = vector3_make(
+        1 * fix16_sin(fix16_mul(t / 9, fix16_two_pi) + fix16_from_int(19)),
+        fix16_from_int(2),
+        fix16_from_int(-2));
+    vector3_t pc = vector3_make(
+        fix16_from_int(6),
+        4 * fix16_sin(fix16_mul(t / 25, fix16_two_pi) +
+            fix16_from_int(7)) + fix16_from_int(2),
+        fix16_from_int(-2));
+
     int32_t l;
     
     UNUSED(state);
@@ -218,42 +338,25 @@ void effect_plasma_0_process(void * state, fix16_t delta_time,
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         fix16_t plasma_a =
-            eu_sin_dist3(
-                vector3_make(
-                    2 * fix16_sin(fix16_mul(t / 8, 2 * fix16_pi)) -
-                        fix16_from_int(3),
-                    2 * fix16_cos(fix16_mul(t / 8, 2 * fix16_pi)) -
-                        fix16_from_int(1),
-                    fix16_from_int(-2)),
+            eu_sin_dist3(pa,
                 ddh_vertex_coords_fix[i],
-                fix16_pi,
-                0) + fix16_from_int(1);
+                fix16_pi, 0) + fix16_from_int(1);
         
         fix16_t plasma_b =
-            eu_sin_dist3(
-                vector3_make(
-                    1 * fix16_sin(fix16_mul(t / 9, 2 * fix16_pi) +
-                        fix16_from_int(19)),
-                    fix16_from_int(2),
-                    fix16_from_int(-2)),
+            eu_sin_dist3(pb,
                 ddh_vertex_coords_fix[i],
                 fix16_pi * 13 / 7,
                 0) + fix16_from_int(1);
         
         fix16_t plasma_c =
-            eu_sin_dist3(
-                vector3_make(
-                    fix16_from_int(6),
-                    4 * fix16_sin(fix16_mul(t / 25, 2 * fix16_pi) +
-                        fix16_from_int(7)) + fix16_from_int(2),
-                    fix16_from_int(-2)),
+            eu_sin_dist3(pc,
                 ddh_vertex_coords_fix[i],
                 fix16_pi * 3 / 5,
                 0) + fix16_from_int(1);
         
         l = fix16_to_int(
-            fix16_mul((plasma_a + plasma_b + plasma_c) / 3,
-            fix16_from_int(127)));
+            fix16_mul((plasma_a + plasma_b + plasma_c),
+            fix16_from_int(128) / 3));
         
         if((l > 250) || (l < 2)) {
             buf[i] = ((l & 1) == 0) ? color_black : color_white;
@@ -362,3 +465,76 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
 }
 
 
+void * effect_dusk_initialize(void);
+void effect_dusk_process(void * voidp_state, fix16_t delta_time,
+    color_t buf[DDH_TOTAL_VERTICES]);
+
+typedef struct {
+    fix16_t time;
+    size_t stars_pos[20];
+} effect_dusk_state_t;
+
+effect_t const effect_dusk = {
+    &effect_dusk_initialize,
+    &free,
+    &effect_dusk_process,
+    NULL,
+    NULL,
+};
+
+void * effect_dusk_initialize(void)
+{
+    effect_dusk_state_t * state =
+        (effect_dusk_state_t *)malloc(sizeof (effect_dusk_state_t));
+    
+    memset(state, 0, sizeof (*state));
+    
+    for(size_t i = 0; i < LENGTHOF(state->stars_pos); ++i) {
+        state->stars_pos[i] = eu_random() % DDH_TOTAL_VERTICES;
+    }
+    
+    return state;
+}
+
+void effect_dusk_process(void * voidp_state, fix16_t delta_time,
+    color_t buf[DDH_TOTAL_VERTICES])
+{
+    effect_dusk_state_t * state = (effect_dusk_state_t *)voidp_state;
+    fix16_t t = state->time / 10;
+    vector3_t up_vec = vector3_normalize(vector3_make(0,
+        fix16_from_float(0.3f), fix16_one));
+    fix16_t bias;
+    
+    if(t > fix16_one) {
+        t = fix16_one;
+    }
+    
+    up_vec.x = fix16_mul(up_vec.x, fix16_from_float(0.35f));
+    up_vec.y = fix16_mul(up_vec.y, fix16_from_float(0.35f));
+    up_vec.z = fix16_mul(up_vec.z, fix16_from_float(0.35f));
+    
+    bias = fix16_from_float(0.8f) + t / 2;
+    
+    state->time += delta_time;
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        fix16_t pos = vector3_dot(up_vec, ddh_vertex_coords_fix[i]) + bias;
+        int32_t pal_pos = fix16_to_int(pos * 256);
+        color_t c = eu_lookup_palette3(
+            pal_pos > 255 ? 255 : (pal_pos < 0 ? 0 : pal_pos),
+            &eu_palette3_dusk);
+        
+        buf[i] = c;
+    }
+    
+    for(size_t i = 0; i < LENGTHOF(state->stars_pos); ++i) {
+        uint_fast8_t l = fix16_to_int(t * (eu_random() % 256));
+        
+        if(eu_random() % (fix16_one * 30) < delta_time) {
+            state->stars_pos[i] = eu_random() % DDH_TOTAL_VERTICES;
+        }
+        
+        buf[state->stars_pos[i]] = color_add_sat(buf[state->stars_pos[i]],
+            color_make(l, l, l));
+    }
+}

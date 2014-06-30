@@ -236,6 +236,12 @@ void loop()
   digitalWrite(debug_pins[0], 0);
   
   Serial.print(ddh_frames_since(last_frame), DEC);
+  Serial.print("f/p");
+  Serial.print(process_delta_us, DEC);
+  Serial.print("/e");
+  Serial.print(last_frame_end_micros - frame_this_micros, DEC);
+  /*
+  Serial.print(ddh_frames_since(last_frame), DEC);
   Serial.print(" frames; read ");
   Serial.print(analog_read_us, DEC);
   Serial.print("us, process ");
@@ -252,6 +258,7 @@ void loop()
   Serial.print(ddh_button_b, DEC);
   Serial.print(", cursor=");
   Serial.print(ddh_debug_cursor, DEC);
+  */
   
   /*
   Serial.print(" motion=");

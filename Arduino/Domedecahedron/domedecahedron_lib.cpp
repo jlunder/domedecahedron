@@ -6,6 +6,8 @@
 #include "effect.h"
 
 
+fix16_t color_hsl[7][3];
+
 vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
 
 color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
@@ -14,6 +16,9 @@ uint64_t ddh_total_ns = 0;
 uint32_t ddh_last_frames = 0;
 uint32_t ddh_total_frames = 0;
 uint64_t ddh_frame_fraction = 0;
+fix16_t ddh_last_time = 0;
+fix16_t ddh_total_time = 0;
+uint64_t ddh_time_fraction = 0;
 
 uint64_t ddh_frame_convert_offset = 0;
 
@@ -51,6 +56,81 @@ void ddh_process_debug_cursor(uint32_t cursor_wrap);
 
 uint8_t ddh_last_debug_mode = 255;
 
+effect_instance_t * ddh_plasma_0_state;
+
+
+color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l)
+{
+    static int32_t const h_scale = 1024;
+    int32_t const h_scale_fix16 = fix16_from_int(h_scale);
+    int32_t ha, hb;
+    fix16_t const * ca;
+    fix16_t const * cb;
+    fix16_t r, g, b;
+    
+    if(h >= h_scale * 6) {
+        return color_make(127, 127, 127);
+    }
+    
+    hb = h % h_scale;
+    ha = h_scale - hb;
+    ca = color_hsl[h / h_scale];
+    cb = color_hsl[h / h_scale + 1];
+    
+    r = fix16_mul(ca[0] * ha + cb[0] * hb - h_scale_fix16 / 2, s);
+    g = fix16_mul(ca[1] * ha + cb[1] * hb - h_scale_fix16 / 2, s);
+    b = fix16_mul(ca[2] * ha + cb[2] * hb - h_scale_fix16 / 2, s);
+    
+    r = fix16_mul(r + h_scale_fix16 / 2, l);
+    g = fix16_mul(r + h_scale_fix16 / 2, l);
+    b = fix16_mul(r + h_scale_fix16 / 2, l);
+    
+    
+    if(r < 0) r = 0;
+    if(r >= h_scale_fix16) r = h_scale_fix16 - 1;
+    
+    if(g < 0) g = 0;
+    if(g >= h_scale_fix16) g = h_scale_fix16 - 1;
+    
+    if(b < 0) b = 0;
+    if(b >= h_scale_fix16) b = h_scale_fix16 - 1;
+    
+    
+    return color_make(r * 256 / h_scale_fix16, g * 256 / h_scale_fix16,
+        b * 256 / h_scale_fix16);
+}
+
+color_t color_modulate_saturation(color_t color, fix16_t amount)
+{
+    int32_t r = color.r;
+    int32_t g = color.g;
+    int32_t b = color.b;
+    int32_t min = r;
+    int32_t max = r;
+    int32_t centroid = r + g + g + b;
+    
+    if(g < min) min = g;
+    if(b < min) min = b;
+    
+    if(g > max) max = g;
+    if(b > max) max = b;
+    
+    r = (fix16_to_int(amount * ((r * 4) - centroid)) + centroid) / 4;
+    g = (fix16_to_int(amount * ((g * 4) - centroid)) + centroid) / 4;
+    b = (fix16_to_int(amount * ((b * 4) - centroid)) + centroid) / 4;
+    
+    if(r < 0) r = 0;
+    if(r > 255) r = 255;
+    
+    if(g < 0) g = 0;
+    if(g > 255) g = 255;
+    
+    if(b < 0) b = 0;
+    if(b > 255) b = 255;
+    
+    return color_make(r, g, b);
+}
+
 void ddh_initialize(void)
 {
     di_initialize();
@@ -62,37 +142,70 @@ void ddh_initialize(void)
     }
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        size_t g = ddh_light_group[i];
+        size_t d = ddh_light_dodecahedron[i];
+        size_t v = ddh_light_vertex[i];
+        
+        ddh_group_dodecahedron_vertex_offsets[g][d][v] = i;
+    }
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         ddh_frame_buffer[i] = color_make(255, 255, 255);
     }
+    
+    color_hsl[0][0] = fix16_from_int(1);
+    color_hsl[0][1] = 0;
+    color_hsl[0][2] = 0;
+
+    color_hsl[1][0] = fix16_from_int(1);
+    color_hsl[1][1] = fix16_from_int(1);
+    color_hsl[1][2] = 0;
+
+    color_hsl[2][0] = 0;
+    color_hsl[2][1] = fix16_from_int(1);
+    color_hsl[2][2] = 0;
+
+    color_hsl[3][0] = 0;
+    color_hsl[3][1] = fix16_from_int(1);
+    color_hsl[3][2] = fix16_from_int(1);
+
+    color_hsl[4][0] = 0;
+    color_hsl[4][1] = 0;
+    color_hsl[4][2] = fix16_from_int(1);
+
+    color_hsl[5][0] = fix16_from_int(1);
+    color_hsl[5][1] = 0;
+    color_hsl[5][2] = fix16_from_int(1);
+
+    color_hsl[6][0] = fix16_from_int(1);
+    color_hsl[6][1] = 0;
+    color_hsl[6][2] = 0;
+    
+    ddh_plasma_0_state = effect_initialize(&effect_dusk);
 }
 
 void ddh_process(uint64_t delta_ns)
 {
     static const uint64_t billion = 1000000000ULL;
-    static const uint64_t tenbillion = 10000000000ULL;
+    uint32_t delta_frames;
+    fix16_t delta_t;
     
     ddh_total_ns += delta_ns;
     
-    // 30 FPS
     ddh_frame_fraction += delta_ns * DDH_FPS;
+    delta_frames = (uint32_t)(ddh_frame_fraction / billion);
+    ddh_total_frames += delta_frames;
+    ddh_frame_fraction -= (uint64_t)delta_frames * billion;
     
-    if(ddh_frame_fraction > tenbillion) {
-        uint32_t delta_frames = (uint32_t)(ddh_frame_fraction / billion);
-        ddh_total_frames += delta_frames;
-        ddh_frame_fraction -= delta_frames * billion;
-    }
-    else {
-        while(ddh_frame_fraction > billion) {
-            ++ddh_total_frames;
-            ddh_frame_fraction -= billion;
-        }
-    }
+    ddh_time_fraction += delta_ns << 16;
+    delta_t = (fix16_t)(ddh_time_fraction / billion);
+    ddh_total_time += delta_t;
+    ddh_time_fraction -= (uint64_t)delta_t * billion;
     
     if((ddh_total_frames - ddh_last_frames) == 0) { // mod 2^32 arithmetic
+        // Not time for a new frame yet!
         return;
     }
-    
-    ddh_last_frames = ddh_total_frames;
     
     if(ddh_mode != ddh_last_debug_mode) {
         ddh_last_debug_mode = ddh_mode;
@@ -147,21 +260,29 @@ void ddh_process(uint64_t delta_ns)
         ddh_process_mode_debug_log();
         break;
     }
+    
+    ddh_last_frames = ddh_total_frames;
+    ddh_last_time = ddh_total_time;
 }
 
-uint64_t ddh_ns_since(uint64_t total_ns)
+uint64_t ddh_ns_since(uint64_t last_total_ns)
 {
-    return ddh_total_ns - total_ns;
+    return ddh_total_ns - last_total_ns;
 }
 
-uint32_t ddh_ms_since(uint64_t total_ns)
+uint32_t ddh_ms_since(uint64_t last_total_ns)
 {
-    return ddh_ns_since(total_ns) / 1000000ULL;
+    return ddh_ns_since(last_total_ns) / 1000000ULL;
 }
 
-uint32_t ddh_frames_since(uint32_t total_frames)
+uint32_t ddh_frames_since(uint32_t last_total_frames)
 {
-    return ddh_total_frames - total_frames;
+    return ddh_total_frames - last_total_frames;
+}
+
+fix16_t ddh_time_since(fix16_t last_total_time)
+{
+    return ddh_total_time - last_total_time;
 }
 
 void ddh_initialize_mode_run(void)
@@ -170,7 +291,8 @@ void ddh_initialize_mode_run(void)
 
 void ddh_process_mode_run(void)
 {
-    effect_process_plasma_0(ddh_frame_buffer);
+    effect_process(ddh_plasma_0_state, ddh_time_since(ddh_last_time),
+        ddh_frame_buffer);
 }
 
 void ddh_initialize_mode_configure(void)
@@ -281,7 +403,8 @@ void ddh_process_mode_debug_locate(void)
             {
                 bool is_face = false;
                 for(size_t j = 0; j < 3; ++j) {
-                    if(ddh_light_faces[i][j] == ddh_debug_cursor) {
+                    if(ddh_dodecahedron_vertex_faces[
+                            ddh_light_vertex[i]][j] == ddh_debug_cursor) {
                         is_face = true;
                     }
                 }

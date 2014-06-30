@@ -1,14 +1,19 @@
 #ifndef DOMEDECAHEDRON_H_INCLUDED
 #define DOMEDECAHEDRON_H_INCLUDED
 
+
+#include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "fix16.h"
 
+
+#define LENGTHOF(x) (sizeof (x) / sizeof *(x))
+#define UNUSED(x) (void)(x)
 
 #define PI_F 3.1415926535897932384626f
 #define TWO_PI_F (2.0f * 3.1415926535897932384626f)
@@ -104,13 +109,47 @@ static inline color_t color_add_sat(color_t x, color_t y)
         b > 255 ? 255 : b);
 }
 
-static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
-    vector2_t v = {x, y};
-    return v;
-}
+extern color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l);
+extern color_t color_modulate_saturation(color_t color, fix16_t amount);
 
 static inline vector3_t vector3_make(fix16_t x, fix16_t y, fix16_t z) {
     vector3_t v = {x, y, z};
+    return v;
+}
+
+static inline vector3_t vector3_add(vector3_t a, vector3_t b)
+{
+    vector3_t res = {a.x + b.x, a.y + b.y, a.z + b.z};
+    return res;
+}
+
+static inline vector3_t vector3_sub(vector3_t a, vector3_t b)
+{
+    vector3_t res = {a.x - b.x, a.y - b.y, a.z - b.z};
+    return res;
+}
+
+static inline fix16_t vector3_dot(vector3_t a, vector3_t b)
+{
+    return fix16_mul(a.x, b.x) + fix16_mul(a.y, b.y) + fix16_mul(a.z, b.z);
+}
+
+static inline vector3_t vector3_normalize(vector3_t a)
+{
+    fix16_t invlen = fix16_div(fix16_one,
+        fix16_sqrt(fix16_sq(a.x) + fix16_sq(a.y) + fix16_sq(a.z)));
+    
+    return vector3_make(fix16_mul(invlen, a.x), fix16_mul(invlen, a.y),
+        fix16_mul(invlen, a.z));
+}
+
+static inline fix16_t vector3_distsq(vector3_t a, vector3_t b)
+{
+    return fix16_sq(a.x - b.x) + fix16_sq(a.y - b.y) + fix16_sq(a.z - b.z);
+}
+
+static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
+    vector2_t v = {x, y};
     return v;
 }
 
@@ -128,26 +167,28 @@ extern uint8_t const ddh_dodecahedron_vertex_adjacency[
     DDH_VERTICES_PER_DODECAHEDRON][3];
 extern uint8_t const ddh_dodecahedron_vertex_opposition[
     DDH_VERTICES_PER_DODECAHEDRON];
+extern uint8_t const ddh_dodecahedron_vertex_faces[
+    DDH_VERTICES_PER_DODECAHEDRON][DDH_VERTICES_PER_FACE];
 extern uint8_t const ddh_dodecahedron_face_vertices[
     DDH_FACES_PER_DODECAHEDRON][DDH_VERTICES_PER_FACE];
 extern uint8_t const ddh_dodecahedron_face_adjacency[
     DDH_FACES_PER_DODECAHEDRON][5];
 extern uint8_t const ddh_dodecahedron_face_opposition[
     DDH_FACES_PER_DODECAHEDRON];
-static uint8_t const ddh_center_dodecahedron = 0;
-extern uint8_t const ddh_group_dodecahedrons[DDH_TOTAL_GROUPS][
-    DDH_DODECAHEDRONS_PER_GROUP];
 extern uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS];
+
+extern size_t ddh_group_dodecahedron_vertex_offsets[DDH_TOTAL_GROUPS][
+    DDH_DODECAHEDRONS_PER_GROUP][DDH_VERTICES_PER_DODECAHEDRON];
 
 extern uint8_t const ddh_light_dodecahedron[DDH_TOTAL_VERTICES];
 extern uint8_t const ddh_light_vertex[DDH_TOTAL_VERTICES];
-extern uint8_t const ddh_light_faces[DDH_TOTAL_VERTICES][3];
 extern uint8_t const ddh_light_group[DDH_TOTAL_VERTICES];
 
 extern color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
 
 extern uint64_t ddh_total_ns;
 extern uint32_t ddh_total_frames;
+extern fix16_t ddh_total_time;
 
 #define DDH_MODE_RUN                           0
 #define DDH_MODE_CONFIGURE                     1
@@ -194,6 +235,7 @@ void ddh_process(uint64_t delta_ns);
 uint64_t ddh_ns_since(uint64_t total_ns);
 uint32_t ddh_ms_since(uint64_t total_ns);
 uint32_t ddh_frames_since(uint32_t frame);
+fix16_t ddh_time_since(fix16_t last_total_time);
 
 
 #endif // DOMEDECAHEDRON_H_INCLUDED

@@ -1,13 +1,28 @@
 #include "effect_util.h"
 
 
-int32_t eu_last_random = 0;
+eu_palette3_t eu_palette3_dusk = {{
+    {{255, 127, 0, 0}},
+    {{63, 0, 127, 0}},
+    {{0, 0, 0, 0}},
+}}; // orange -> magenta -> indigo -> black
+
+eu_palette3_t eu_palette3_adam; // cyan -> magenta -> purple
+eu_palette3_t eu_palette3_peter; // green -> indigo -> dark blue
+eu_palette3_t eu_palette3_joe; // red -> yellow -> orange -> magenta
+eu_palette3_t eu_palette3_primaries; // red -> yellow -> green -> blue
+
+int32_t eu_last_random = 24893;
 color_t eu_temp_buffers[EU_MAX_TEMP_BUFFERS][DDH_TOTAL_VERTICES];
 color_t * eu_free_temp_buffers[EU_MAX_TEMP_BUFFERS] = {
     eu_temp_buffers[0],
     eu_temp_buffers[1],
     eu_temp_buffers[2],
     eu_temp_buffers[3],
+    eu_temp_buffers[4],
+    eu_temp_buffers[5],
+    eu_temp_buffers[6],
+    eu_temp_buffers[7],
 };
 size_t eu_free_temp_buffers_top = EU_MAX_TEMP_BUFFERS;
 
@@ -153,6 +168,20 @@ void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     }
 }
 
+color_t eu_lookup_palette3(uint_fast8_t pos, eu_palette3_t const * pal)
+{
+    size_t index = (pos >> 7) & 0x1;
+    uint32_t alpha = pos & 0x7F;
+    uint32_t one_minus_alpha = 0x80 - alpha;
+    
+    return color_make((pal->colors[index + 1].r * alpha +
+            pal->colors[index].r * one_minus_alpha) >> 7,
+        (pal->colors[index + 1].g * alpha +
+            pal->colors[index].g * one_minus_alpha) >> 7,
+        (pal->colors[index + 1].b * alpha +
+            pal->colors[index].b * one_minus_alpha) >> 7);
+}
+
 int32_t eu_random(void)
 {
     eu_last_random =
@@ -163,12 +192,14 @@ int32_t eu_random(void)
 
 fix16_t eu_sin_dist3(vector3_t a, vector3_t b, fix16_t freq, fix16_t phase)
 {
-    fix16_t dist = fix16_sqrt(
-        fix16_sq(a.x - b.x) +
-        fix16_sq(a.y - b.y) +
-        fix16_sq(a.z - b.z));
+    fix16_t dist = fix16_sqrt(vector3_distsq(a, b));
+    fix16_t phi = (fix16_mul(dist, freq) + phase) % fix16_two_pi;
     
-    return fix16_sin(fix16_mul(dist, freq) + phase);
+    if(phi < 0) {
+        phi += fix16_two_pi;
+    }
+    
+    return -fix16_sin_parabola(phi - fix16_pi);
 }
 
 color_t * eu_alloc_temp_buffer(void)

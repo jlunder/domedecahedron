@@ -46,28 +46,28 @@ fix16_t fix16_sin_parabola(fix16_t inAngle)
 
 fix16_t fix16_sin(fix16_t inAngle)
 {
-	fix16_t tempAngle = inAngle % (fix16_pi << 1);
+	fix16_t tempAngle = inAngle % fix16_two_pi;
 
 	#ifdef FIXMATH_SIN_LUT
 	if(tempAngle < 0)
-		tempAngle += (fix16_pi << 1);
+		tempAngle += fix16_two_pi;
 
 	fix16_t tempOut;
 	if(tempAngle >= fix16_pi) {
 		tempAngle -= fix16_pi;
-		if(tempAngle >= (fix16_pi >> 1))
+		if(tempAngle >= fix16_pi_two)
 			tempAngle = fix16_pi - tempAngle;
 		tempOut = -(tempAngle >= _fix16_sin_lut_count ? fix16_one : _fix16_sin_lut[tempAngle]);
 	} else {
-		if(tempAngle >= (fix16_pi >> 1))
+		if(tempAngle >= fix16_pi_two)
 			tempAngle = fix16_pi - tempAngle;
 		tempOut = (tempAngle >= _fix16_sin_lut_count ? fix16_one : _fix16_sin_lut[tempAngle]);
 	}
 	#else
 	if(tempAngle > fix16_pi)
-		tempAngle -= (fix16_pi << 1);
+		tempAngle -= fix16_two_pi;
 	else if(tempAngle < -fix16_pi)
-		tempAngle += (fix16_pi << 1);
+		tempAngle += fix16_two_pi;
 
 	#ifndef FIXMATH_NO_CACHE
 	fix16_t tempIndex = ((inAngle >> 5) & 0x00000FFF);
@@ -108,7 +108,7 @@ fix16_t fix16_sin(fix16_t inAngle)
 
 fix16_t fix16_cos(fix16_t inAngle)
 {
-	return fix16_sin(inAngle + (fix16_pi >> 1));
+	return fix16_sin(inAngle + fix16_pi_two);
 }
 
 fix16_t fix16_tan(fix16_t inAngle)
@@ -131,7 +131,7 @@ fix16_t fix16_asin(fix16_t x)
 
 fix16_t fix16_acos(fix16_t x)
 {
-	return ((fix16_pi >> 1) - fix16_asin(x));
+	return (fix16_pi_two - fix16_asin(x));
 }
 
 fix16_t fix16_atan2(fix16_t inY , fix16_t inX)
