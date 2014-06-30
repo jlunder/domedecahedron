@@ -56,7 +56,11 @@ void ddh_process_debug_cursor(uint32_t cursor_wrap);
 
 uint8_t ddh_last_debug_mode = 255;
 
-effect_instance_t * ddh_plasma_0_state;
+fix16_t ddh_autoswitch_time;
+
+effect_instance_t * ddh_plasma_0_instance;
+effect_instance_t * ddh_rings_0_instance;
+effect_instance_t * ddh_dusk_instance;
 
 
 color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l)
@@ -181,7 +185,9 @@ void ddh_initialize(void)
     color_hsl[6][1] = 0;
     color_hsl[6][2] = 0;
     
-    ddh_plasma_0_state = effect_initialize(&effect_dusk);
+    ddh_plasma_0_instance = effect_initialize(&effect_plasma_0);
+    ddh_rings_0_instance = effect_initialize(&effect_rings_0);
+    ddh_dusk_instance = effect_initialize(&effect_dusk);
 }
 
 void ddh_process(uint64_t delta_ns)
@@ -287,12 +293,46 @@ fix16_t ddh_time_since(fix16_t last_total_time)
 
 void ddh_initialize_mode_run(void)
 {
+    ddh_initialize_debug_cursor();
+    ddh_autoswitch_time = 0;
 }
 
 void ddh_process_mode_run(void)
 {
-    effect_process(ddh_plasma_0_state, ddh_time_since(ddh_last_time),
-        ddh_frame_buffer);
+    uint32_t last_debug_cursor = ddh_debug_cursor;
+    
+    ddh_process_debug_cursor(3);
+    
+    if(ddh_submode == 0) {
+        if(ddh_debug_cursor != last_debug_cursor) {
+            ddh_autoswitch_time = 0;
+        }
+        else {
+            ddh_autoswitch_time += ddh_time_since(ddh_last_time);
+            if(ddh_autoswitch_time > fix16_from_int(300)) {
+                ddh_autoswitch_time -= fix16_from_int(300);
+                ddh_debug_cursor = (ddh_debug_cursor + 1) % 3;
+            }
+        }
+    }
+    else {
+        ddh_debug_cursor = ddh_submode - 1;
+    }
+    
+    switch(ddh_debug_cursor) {
+    case 0:
+        effect_process(ddh_plasma_0_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 1:
+        effect_process(ddh_rings_0_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 2:
+        effect_process(ddh_dusk_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    }
 }
 
 void ddh_initialize_mode_configure(void)

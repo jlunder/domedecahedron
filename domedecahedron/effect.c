@@ -378,6 +378,15 @@ void * effect_rings_0_initialize(void)
     
     memset(rings_state, 0, sizeof (effect_rings_0_state_t));
     
+    for(size_t i = 0; i < LENGTHOF(rings_state->rings); ++i) {
+        rings_state->rings[i].velocity = fix16_from_float(0.5f);
+        rings_state->rings[i].bar_size = 0;
+        rings_state->rings[i].transition_size = 0;
+        rings_state->rings[i].position = fix16_from_int(-3) +
+            eu_random() % fix16_from_int(6);
+        rings_state->rings[i].running = true;
+    }
+    
     return rings_state;
 }
 
@@ -409,9 +418,20 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
             rings_state->rings[i].color = color_modulate_saturation(
                 color_make(eu_random() & 0xFF, eu_random() & 0xFF,
                 eu_random() & 0xFF), fix16_from_float(3.0f));
-            rings_state->rings[i].normal = vector3_make(0, 0, fix16_from_int(1));
-            rings_state->rings[i].velocity =
-                (eu_random() & 0xFFFF) + fix16_from_float(0.5f);
+            rings_state->rings[i].normal = vector3_make(
+                eu_random() % fix16_from_int(2) - fix16_one,
+                eu_random() % fix16_from_int(2) - fix16_one,
+                eu_random() % fix16_from_int(2) - fix16_one);
+            if(rings_state->rings[i].normal.x == 0 &&
+                    rings_state->rings[i].normal.y == 0 &&
+                    rings_state->rings[i].normal.z == 0) {
+                rings_state->rings[i].normal = vector3_make(0, 0, fix16_one);
+            }
+            else {
+                rings_state->rings[i].normal =
+                    vector3_normalize(rings_state->rings[i].normal);
+            }
+            rings_state->rings[i].velocity = fix16_from_float(0.5f);
             rings_state->rings[i].bar_size = fix16_from_float(0.25f);
             rings_state->rings[i].transition_size = fix16_from_float(0.125f);
             rings_state->rings[i].position = fix16_from_int(-3) -
@@ -438,8 +458,8 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
             ++running_count;
         }
     }
-    if((eu_random() % 0xFFFF) < delta_time) {
-        switch(eu_random() % 4) {
+    if((eu_random() % fix16_from_float(0.5f)) < delta_time) {
+        switch(eu_random() % 16) {
         case 0:
             rings_state->group_scramble = eu_random() % DDH_TOTAL_GROUPS;
             break;
@@ -448,6 +468,9 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
                 eu_random() % DDH_DODECAHEDRONS_PER_GROUP;
             break;
         case 2:
+        case 3:
+        case 4:
+        case 5:
             rings_state->vertex_scramble =
                 eu_random() % DDH_VERTICES_PER_DODECAHEDRON;
             break;
@@ -471,7 +494,9 @@ void effect_dusk_process(void * voidp_state, fix16_t delta_time,
 
 typedef struct {
     fix16_t time;
-    size_t stars_pos[20];
+    size_t stars_pos[100];
+    vector3_t auroras_pos[6];
+    color_t buf[DDH_TOTAL_VERTICES];
 } effect_dusk_state_t;
 
 effect_t const effect_dusk = {
@@ -493,14 +518,22 @@ void * effect_dusk_initialize(void)
         state->stars_pos[i] = eu_random() % DDH_TOTAL_VERTICES;
     }
     
+    for(size_t i = 0; i < LENGTHOF(state->auroras_pos); ++i) {
+        state->auroras_pos[i].x = (eu_random() % fix16_one) * 2 - fix16_one;
+        state->auroras_pos[i].y =
+            (eu_random() % fix16_one) * 6 - fix16_from_int(3);
+        state->auroras_pos[i].z = fix16_from_float(-0.5);
+    }
+    
     return state;
 }
 
 void effect_dusk_process(void * voidp_state, fix16_t delta_time,
     color_t buf[DDH_TOTAL_VERTICES])
 {
+    fix16_t auroras_v = fix16_from_float(0.75f);
     effect_dusk_state_t * state = (effect_dusk_state_t *)voidp_state;
-    fix16_t t = state->time / 10;
+    fix16_t t = state->time / 300;
     vector3_t up_vec = vector3_normalize(vector3_make(0,
         fix16_from_float(0.3f), fix16_one));
     fix16_t bias;
@@ -517,24 +550,54 @@ void effect_dusk_process(void * voidp_state, fix16_t delta_time,
     
     state->time += delta_time;
     
+    for(size_t i = 0; i < LENGTHOF(state->auroras_pos); ++i) {
+        state->auroras_pos[i].y -= fix16_mul(delta_time, auroras_v);
+        if(state->auroras_pos[i].y < fix16_from_int(-3)) {
+            state->auroras_pos[i].y += fix16_from_int(6);
+        }
+    }
+    
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        fix16_t pos = vector3_dot(up_vec, ddh_vertex_coords_fix[i]) + bias;
+        vector3_t vc = ddh_vertex_coords_fix[i];
+        fix16_t pos = vector3_dot(up_vec, vc) + bias;
         int32_t pal_pos = fix16_to_int(pos * 256);
         color_t c = eu_lookup_palette3(
             pal_pos > 255 ? 255 : (pal_pos < 0 ? 0 : pal_pos),
             &eu_palette3_dusk);
         
+        if(ddh_vertex_coords_fix[i].z > fix16_from_int(-1)) {
+            fix16_t al = 0;
+            for(size_t j = 0; j < LENGTHOF(state->auroras_pos); ++j) {
+                fix16_t dsq = vector3_distsq(state->auroras_pos[j], vc);
+                if(dsq < fix16_one) {
+                    al += fix16_one - dsq;
+                }
+            }
+            
+            if(al > fix16_one) {
+                al = fix16_one;
+            }
+            
+            c = color_add_sat(c, color_make(0, fix16_to_int(al * 95), 0));
+        }
         buf[i] = c;
     }
     
     for(size_t i = 0; i < LENGTHOF(state->stars_pos); ++i) {
         uint_fast8_t l = fix16_to_int(t * (eu_random() % 256));
         
-        if(eu_random() % (fix16_one * 30) < delta_time) {
+        if(eu_random() % fix16_from_int(30) < delta_time) {
             state->stars_pos[i] = eu_random() % DDH_TOTAL_VERTICES;
         }
         
         buf[state->stars_pos[i]] = color_add_sat(buf[state->stars_pos[i]],
             color_make(l, l, l));
+    }
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        uint32_t r = (uint32_t)state->buf[i].r * 15 + (uint32_t)buf[i].r * 1;
+        uint32_t g = (uint32_t)state->buf[i].g * 15 + (uint32_t)buf[i].g * 1;
+        uint32_t b = (uint32_t)state->buf[i].b * 15 + (uint32_t)buf[i].b * 1;
+        state->buf[i] = buf[i] = color_make(r / 16, g / 16, b / 16);
     }
 }
