@@ -329,6 +329,10 @@ void ddh_process_mode_run(void)
             ddh_frame_buffer);
         break;
     case 2:
+        if(ddh_debug_cursor != last_debug_cursor) {
+            effect_finalize(ddh_dusk_instance);
+            ddh_dusk_instance = effect_initialize(&effect_dusk);
+        }
         effect_process(ddh_dusk_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
