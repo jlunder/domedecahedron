@@ -31,7 +31,26 @@ extern void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     vector3_t plane_normal, fix16_t plane_position, fix16_t bar_size,
     fix16_t transition_size);
 
-extern color_t eu_lookup_palette3(uint_fast8_t pos, eu_palette3_t const * pal);
+extern void eu_color_seq_0(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_1(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_2(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_3(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_4(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_5(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_6(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+extern void eu_color_seq_7(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+
+extern color_t eu_lookup_palette3(uint_fast8_t pos,
+    eu_palette3_t const * pal);
+extern color_t eu_lookup_palette3_random(eu_palette3_t const * pal);
 
 extern int32_t eu_random(void);
 

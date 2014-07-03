@@ -7,10 +7,29 @@ eu_palette3_t eu_palette3_dusk = {{
     {{0, 0, 0, 0}},
 }}; // orange -> magenta -> indigo -> black
 
-eu_palette3_t eu_palette3_adam; // cyan -> magenta -> purple
-eu_palette3_t eu_palette3_peter; // green -> indigo -> dark blue
-eu_palette3_t eu_palette3_joe; // red -> yellow -> orange -> magenta
-eu_palette3_t eu_palette3_primaries; // red -> yellow -> green -> blue
+eu_palette3_t eu_palette3_adam = {{
+    {{255, 0, 255, 0}},
+    {{95, 0, 127, 0}},
+    {{0, 255, 255, 0}},
+}}; // cyan -> magenta -> purple
+
+eu_palette3_t eu_palette3_peter = {{
+    {{0, 255, 0, 0}},
+    {{63, 0, 127, 0}},
+    {{0, 0, 127, 0}},
+}}; // green -> indigo -> dark blue
+
+eu_palette3_t eu_palette3_joe = {{
+    {{255, 0, 0, 0}},
+    {{255, 255, 0, 0}},
+    {{127, 0, 127, 0}},
+}}; // red -> yellow -> magenta
+
+eu_palette3_t eu_palette3_primaries = {{
+    {{255, 0, 0, 0}},
+    {{0, 255, 0, 0}},
+    {{0, 0, 255, 0}},
+}}; // red -> green -> blue
 
 int32_t eu_last_random = 24893;
 color_t eu_temp_buffers[EU_MAX_TEMP_BUFFERS][DDH_TOTAL_VERTICES];
@@ -168,6 +187,80 @@ void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     }
 }
 
+void eu_color_seq_0(color_t * dest, size_t num_dest_colors, fix16_t time,
+    color_t const * seq_colors, size_t num_seq_colors)
+{
+    // fill one light at a time from 0 -> n-1 with color 0, then color 1, 2...
+    size_t sweep_bg_color_index = (time / fix16_one) % num_seq_colors;
+    size_t sweep_fg_color_index = ((time / fix16_one) + 1) % num_seq_colors;
+    size_t sweep_dest_index = fix16_to_int((time % fix16_one) *
+        num_dest_colors);
+    color_t bg_color = seq_colors[sweep_bg_color_index];
+    color_t fg_color = seq_colors[sweep_fg_color_index];
+    
+    for(size_t i = 0; i < sweep_dest_index; ++i) {
+        dest[i] = fg_color;
+    }
+    for(size_t i = sweep_dest_index; i < num_dest_colors; ++i) {
+        dest[i] = bg_color;
+    }
+}
+
+void eu_color_seq_1(color_t * dest, size_t num_dest_colors,
+    fix16_t time, color_t const * seq_colors, size_t num_seq_colors)
+{
+    eu_color_seq_0(dest, num_dest_colors,
+        fix16_from_int(num_dest_colors) -
+            (time % fix16_from_int(num_seq_colors)),
+        seq_colors, num_seq_colors);
+}
+
+void eu_color_seq_2(color_t * dest, size_t num_dest_colors, fix16_t time,
+    color_t const * seq_colors, size_t num_seq_colors)
+{
+    fix16_t scale = fix16_one / num_dest_colors;
+    // rotate solid bars...
+    for(size_t i = 0; i < num_dest_colors; ++i) {
+        size_t j = fix16_to_int(fix16_mul(
+                ((time * num_dest_colors +
+                    fix16_from_int(i)) * num_seq_colors),
+            scale)) % num_seq_colors;
+        dest[i] = seq_colors[j];
+    }
+}
+
+void eu_color_seq_3(color_t * dest, size_t num_dest_colors, fix16_t time,
+    color_t const * seq_colors, size_t num_seq_colors)
+{
+    eu_color_seq_2(dest, num_dest_colors,
+        fix16_one -
+            (time % fix16_one),
+        seq_colors, num_seq_colors);
+}
+
+void eu_color_seq_4(color_t * dest, size_t num_dest_colors, fix16_t time,
+    color_t const * seq_colors, size_t num_seq_colors)
+{
+    fix16_t scale = fix16_one / num_dest_colors;
+    // rotate solid bars...
+    for(size_t i = 0; i < num_dest_colors; ++i) {
+        size_t j = fix16_to_int(fix16_mul(
+                ((time * num_dest_colors +
+                    fix16_from_int(i)) * num_seq_colors),
+            scale)) % num_seq_colors;
+        dest[i] = seq_colors[j];
+    }
+}
+
+void eu_color_seq_5(color_t * dest, size_t num_dest_colors, fix16_t time,
+    color_t const * seq_colors, size_t num_seq_colors)
+{
+    eu_color_seq_2(dest, num_dest_colors,
+        fix16_one -
+            (time % fix16_one),
+        seq_colors, num_seq_colors);
+}
+
 color_t eu_lookup_palette3(uint_fast8_t pos, eu_palette3_t const * pal)
 {
     size_t index = (pos >> 7) & 0x1;
@@ -180,6 +273,34 @@ color_t eu_lookup_palette3(uint_fast8_t pos, eu_palette3_t const * pal)
             pal->colors[index].g * one_minus_alpha) >> 7,
         (pal->colors[index + 1].b * alpha +
             pal->colors[index].b * one_minus_alpha) >> 7);
+}
+
+color_t eu_lookup_palette3_random(eu_palette3_t const * pal)
+{
+    static fix16_t const _0_25 = (fix16_t)(fix16_one * 0.25f + 0.5f);
+    static fix16_t const _0_4 = (fix16_t)(fix16_one * 0.4f + 0.5f);
+    static fix16_t const _0_6 = (fix16_t)(fix16_one * 0.6f + 0.5f);
+    static fix16_t const _0_75 = (fix16_t)(fix16_one * 0.75f + 0.5f);
+    static fix16_t const _0_25_inv_0_4 = (fix16_t)(fix16_one * 0.25f / 0.4f + 0.5f);
+    static fix16_t const _0_5_inv_0_2 = (fix16_t)(fix16_one * 0.5f / 0.2f + 0.5f);
+    
+    fix16_t alpha = eu_random() % fix16_one;
+
+    if(alpha < _0_4) {
+        alpha = fix16_mul(_0_25_inv_0_4, alpha);
+    }
+    else if(alpha < _0_6) {
+        alpha = fix16_mul(_0_5_inv_0_2, alpha - _0_4) + _0_25;
+    }
+    else {
+        alpha = fix16_mul(_0_25_inv_0_4, alpha - _0_6) + _0_75;
+    }
+    
+    if(alpha >= fix16_one) {
+        alpha = fix16_one - 1;
+    }
+    
+    return eu_lookup_palette3(fix16_to_int(alpha * 256), pal);
 }
 
 int32_t eu_random(void)
