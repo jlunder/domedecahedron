@@ -9,6 +9,9 @@
 fix16_t color_hsl[7][3];
 
 vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
+vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS][
+    DDH_DODECAHEDRONS_PER_GROUP];
+vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS];
 
 color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
 
@@ -143,6 +146,44 @@ void ddh_initialize(void)
         ddh_vertex_coords_fix[i].x = fix16_from_float(ddh_vertex_coords[i].x);
         ddh_vertex_coords_fix[i].y = fix16_from_float(ddh_vertex_coords[i].y);
         ddh_vertex_coords_fix[i].z = fix16_from_float(ddh_vertex_coords[i].z);
+    }
+    
+    for(size_t i = 0; i < DDH_TOTAL_GROUPS; ++i) {
+        vertex_t group_centroid = {0.f, 0.f, 0.f};
+        
+        for(size_t j = 0; j < DDH_DODECAHEDRONS_PER_GROUP; ++j) {
+            vertex_t dodecahedron_centroid = {0.f, 0.f, 0.f};
+            
+            for(size_t k = 0; k < DDH_VERTICES_PER_DODECAHEDRON; ++k) {
+                dodecahedron_centroid.x += ddh_vertex_coords[
+                    ddh_group_dodecahedron_vertex_offsets[i][j][k]].x;
+                dodecahedron_centroid.y += ddh_vertex_coords[
+                    ddh_group_dodecahedron_vertex_offsets[i][j][k]].y;
+                dodecahedron_centroid.z += ddh_vertex_coords[
+                    ddh_group_dodecahedron_vertex_offsets[i][j][k]].z;
+            }
+            
+            group_centroid.x += dodecahedron_centroid.x;
+            group_centroid.y += dodecahedron_centroid.y;
+            group_centroid.z += dodecahedron_centroid.z;
+            
+            ddh_group_dodecahedron_centroids_fix[i][j].x =
+                fix16_from_float(dodecahedron_centroid.x /
+                    DDH_VERTICES_PER_DODECAHEDRON);
+            ddh_group_dodecahedron_centroids_fix[i][j].y =
+                fix16_from_float(dodecahedron_centroid.y /
+                    DDH_VERTICES_PER_DODECAHEDRON);
+            ddh_group_dodecahedron_centroids_fix[i][j].z =
+                fix16_from_float(dodecahedron_centroid.z /
+                    DDH_VERTICES_PER_DODECAHEDRON);
+        }
+        
+        ddh_group_centroids_fix[i].x = fix16_from_float(group_centroid.x /
+            (DDH_VERTICES_PER_DODECAHEDRON * DDH_DODECAHEDRONS_PER_GROUP));
+        ddh_group_centroids_fix[i].y = fix16_from_float(group_centroid.y /
+            (DDH_VERTICES_PER_DODECAHEDRON * DDH_DODECAHEDRONS_PER_GROUP));
+        ddh_group_centroids_fix[i].z = fix16_from_float(group_centroid.z /
+            (DDH_VERTICES_PER_DODECAHEDRON * DDH_DODECAHEDRONS_PER_GROUP));
     }
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {

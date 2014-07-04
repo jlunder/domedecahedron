@@ -121,6 +121,6 @@ void effect_dusk_process(void * voidp_state, fix16_t delta_time,
         state->buf[i] = buf[i] = color_make(r / 16, g / 16, b / 16);
     }
     
-    eu_color_seq_3(buf, DDH_VERTICES_PER_DODECAHEDRON, state->time / 4,
+    eu_color_seq_5(buf, DDH_VERTICES_PER_DODECAHEDRON, state->time / 4,
         state->seq_colors, LENGTHOF(state->seq_colors));
 }

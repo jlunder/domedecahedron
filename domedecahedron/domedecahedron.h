@@ -159,6 +159,10 @@ extern vertex_t const ddh_dodecahedron_vertex_coords[
 extern vertex_t const ddh_vertex_coords[DDH_TOTAL_VERTICES];
 extern vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
 
+extern vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS][
+    DDH_DODECAHEDRONS_PER_GROUP];
+extern vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS];
+
 extern float const ddh_dodecahedron_transforms[
     DDH_DODECAHEDRONS_PER_GROUP][16];
 extern float const ddh_group_transforms[DDH_TOTAL_GROUPS][16];

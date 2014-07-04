@@ -241,24 +241,56 @@ void eu_color_seq_3(color_t * dest, size_t num_dest_colors, fix16_t time,
 void eu_color_seq_4(color_t * dest, size_t num_dest_colors, fix16_t time,
     color_t const * seq_colors, size_t num_seq_colors)
 {
-    fix16_t scale = fix16_one / num_dest_colors;
-    // rotate solid bars...
+    fix16_t alpha = time % fix16_one;
+    fix16_t one_minus_alpha = fix16_one - alpha;
+    size_t color_index = (time / fix16_one) % num_seq_colors;
+    color_t ca = seq_colors[color_index];
+    color_t cb = seq_colors[(color_index + 1) % num_seq_colors];
+    color_t c = color_make(
+        fix16_to_int(ca.r * one_minus_alpha + cb.r * alpha),
+        fix16_to_int(ca.g * one_minus_alpha + cb.g * alpha),
+        fix16_to_int(ca.b * one_minus_alpha + cb.b * alpha));
+    
+    // fade from color 0 -> 1 -> 2...
     for(size_t i = 0; i < num_dest_colors; ++i) {
-        size_t j = fix16_to_int(fix16_mul(
-                ((time * num_dest_colors +
-                    fix16_from_int(i)) * num_seq_colors),
-            scale)) % num_seq_colors;
-        dest[i] = seq_colors[j];
+        dest[i] = c;
     }
 }
 
 void eu_color_seq_5(color_t * dest, size_t num_dest_colors, fix16_t time,
     color_t const * seq_colors, size_t num_seq_colors)
 {
-    eu_color_seq_2(dest, num_dest_colors,
-        fix16_one -
-            (time % fix16_one),
-        seq_colors, num_seq_colors);
+    // fade from color 0 -> black -> 1 -> black -> 2...
+    fix16_t t = time % fix16_one;
+    fix16_t alpha = (t < (fix16_one / 2)) ? t * 2 : (fix16_one - t) * 2;
+    color_t ca = seq_colors[(time / fix16_one) % num_seq_colors];
+    color_t c = color_make(
+        fix16_to_int(ca.r * alpha),
+        fix16_to_int(ca.g * alpha),
+        fix16_to_int(ca.b * alpha));
+    
+    // fade into/out of each color
+    for(size_t i = 0; i < num_dest_colors; ++i) {
+        dest[i] = c;
+    }
+}
+
+void eu_color_seq_6(color_t * dest, size_t num_dest_colors, fix16_t time,
+    color_t const * seq_colors, size_t num_seq_colors)
+{
+    // fade from color 0 -> black -> 1 -> black -> 2...
+    fix16_t t = time % fix16_one;
+    fix16_t alpha = (t < (fix16_one / 2)) ? t * 2 : (fix16_one - t) * 2;
+    color_t ca = seq_colors[(time / fix16_one) % num_seq_colors];
+    color_t c = color_make(
+        fix16_to_int(ca.r * alpha),
+        fix16_to_int(ca.g * alpha),
+        fix16_to_int(ca.b * alpha));
+    
+    // fade into/out of each color
+    for(size_t i = 0; i < num_dest_colors; ++i) {
+        dest[i] = c;
+    }
 }
 
 color_t eu_lookup_palette3(uint_fast8_t pos, eu_palette3_t const * pal)
