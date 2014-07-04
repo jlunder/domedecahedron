@@ -99,10 +99,28 @@ def printgroup(g, mat, xlat, rotaxis):
         writef("    // group %d, dodecahedron %d" % (g, i,))
         printm(m)
 
-printm(Matrix4.new_identity())
+m = Matrix4.new_identity()
+m.translate(xlata.x, xlata.y, xlata.z)
+aa = m * Point3(0, 0, 0)
 
-printgroup(0, Matrix4.new_identity(), xlata, rotaxisa)
-printgroup(1, rotateto(11, 10, 1, 7), xlata, rotaxisa)
-printgroup(2, rotateto(11, 6, 1, 9), xlata, rotaxisa)
+m = rotateto(11, 10, 1, 7)
+m.translate(xlata.x, xlata.y, xlata.z)
+bb = m * Point3(0, 0, 0)
+
+m = rotateto(11, 6, 1, 9)
+m.translate(xlata.x, xlata.y, xlata.z)
+cc = m * Point3(0, 0, 0)
+
+a = (aa + bb + cc).normalize().cross(Vector3(0, 0, -1))
+
+m = Matrix4.new_rotate_axis(math.asin(a.magnitude()), a.copy().normalize())
+
+printm(m)
+
+printgroup(0, m * Matrix4.new_identity(), xlata, rotaxisa)
+printgroup(1, m * rotateto(11, 10, 1, 7), xlata, rotaxisa)
+printgroup(2, m * rotateto(11, 6, 1, 9), xlata, rotaxisa)
+
+print(repr(a.magnitude()))
 
 del f

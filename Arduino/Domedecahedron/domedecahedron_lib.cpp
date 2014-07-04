@@ -336,6 +336,7 @@ void ddh_initialize_mode_run(void)
 {
     ddh_initialize_debug_cursor();
     ddh_autoswitch_time = 0;
+    ddh_debug_cursor = 1;
 }
 
 void ddh_process_mode_run(void)

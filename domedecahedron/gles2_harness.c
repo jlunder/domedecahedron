@@ -530,7 +530,7 @@ void gles2_harness_update(float time)
         gles2_harness_dist * cosf(gles2_harness_horizontal_pos),
             gles2_harness_dist * -sinf(gles2_harness_horizontal_pos),
             gles2_harness_vertical_pos + 2.f,
-        0.0f, 0.0f, -2.0f,
+        0.0f, 0.0f, -1.0f,
         0.0f, 0.0f, 1.0f);
     glusPerspectivef(viewProjectionMatrix, 45.0f, g_aspectRatio, 0.1f, 1000.0f);
     glusMatrix4x4Multiplyf(viewProjectionMatrix, viewProjectionMatrix, viewMatrix);
