@@ -67,14 +67,12 @@ def rotateto(fromface, toface, fromface2, toface2):
     
     return m
 
-xlat = makexlat(10)
-rotaxis = xlat.copy().normalize()
-xlatb = makexlat(9)
+xlata = makexlat(11)
+rotaxisa = xlata.copy().normalize()
+xlatb = makexlat(10)
 rotaxisb = xlatb.copy().normalize()
-xlatc = makexlat(4)
+xlatc = makexlat(9)
 rotaxisc = xlatc.copy().normalize()
-xlatd = makexlat(1)
-rotaxisd = xlatd.copy().normalize()
 
 f = open("coords.h", "wt")
 def writef(s):
@@ -91,61 +89,20 @@ def printm(m):
         writef("    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),))
 
 print
-#print "flower transforms:"
-#print "{"
-print xlat
 
-def printgroup(g, basem):
-    m = basem.copy()
-    writef("    // group %d, dodecahedron 0" % (g,))
-    printm(m * rotateto(0, 11, 1, 6))
-    for i in range(5):
-        m = basem.copy()
-        m.rotate_axis(-i * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
-        m.rotate_axis(pi, rotaxis)
-        m.translate(xlat.x, xlat.y, xlat.z)
-        writef("    // group %d, dodecahedron %d" % (g, i + 1,))
-        printm(m * rotateto(0, 4, 1, 0))
+def printgroup(g, mat, xlat, rotaxis):
+    for i in range(3):
+        m = mat.copy()
+        if (i & 1) == 0:
+            m.rotate_axis(pi, rotaxis)
+        m.translate(xlat.x * (i + 1), xlat.y * (i + 1), xlat.z * (i + 1))
+        writef("    // group %d, dodecahedron %d" % (g, i,))
+        printm(m)
 
-m2 = Matrix4.new_rotate_axis(0.5 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
+printm(Matrix4.new_identity())
 
+printgroup(0, Matrix4.new_identity(), xlata, rotaxisa)
+printgroup(1, rotateto(11, 10, 1, 7), xlata, rotaxisa)
+printgroup(2, rotateto(11, 6, 1, 9), xlata, rotaxisa)
 
-printgroup(0, Matrix4.new_identity())
-for i in range(5):
-    m = Matrix4.new_identity()
-    m.rotate_axis(-i * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
-    
-    m.translate(xlatb.x, xlatb.y, xlatb.z)
-    m.translate(xlat.x, xlat.y, xlat.z)
-    m.translate(xlat.x, xlat.y, xlat.z)
-    
-    m.rotate_axis(pi / 5.0, rotaxisb)
-    
-    m.rotate_axis(2 * pi * 2.0 / 5.0, rotaxisd)
-    m.rotate_axis(pi / 5.0, rotaxisc)
-    m.translate(xlatc.x, xlatc.y, xlatc.z)
-    
-    if i == 3:
-        m.rotate_axis(1 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
-    if i == 4:
-        m.rotate_axis(3 * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
-    
-    printgroup(i + 1, m)
-
-"""
-# print out unlit verts
-for i in range(5):
-    m = Matrix4.new_identity()
-    m.rotate_axis(-i * pi * 2.0 / 5.0, Vector3(0.0, 0.0, 1.0))
-    m.translate(xlat.x * 2, xlat.y * 2, xlat.z * 2)
-    writef("    // unlit connectors, dodecahedron %d" % (i + 1,))
-    for v in shrunkverts:
-        v = m * v
-        writef("    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),))
-# and a filler
-for i in range(20):
-    writef("    {%sf, %sf, %sf}," % (repr(0.0), repr(0.0), repr(0.0),))
-"""
-
-#print "}"
 del f
