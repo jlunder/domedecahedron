@@ -30,6 +30,8 @@ extern void eu_scramble(color_t dest[DDH_TOTAL_VERTICES],
 extern void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     vector3_t plane_normal, fix16_t plane_position, fix16_t bar_size,
     fix16_t transition_size);
+extern void eu_temporal_iir_one_pole(color_t dest_accum[DDH_TOTAL_VERTICES],
+    color_t source[DDH_TOTAL_VERTICES], fix16_t k);
 
 extern void eu_color_seq_0(color_t * dest, size_t num_dest_colors,
     fix16_t time, color_t const * seq_colors, size_t num_seq_colors);

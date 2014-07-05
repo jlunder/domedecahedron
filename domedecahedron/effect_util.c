@@ -187,6 +187,24 @@ void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     }
 }
 
+void eu_temporal_iir_one_pole(color_t dest_accum[DDH_TOTAL_VERTICES],
+    color_t source[DDH_TOTAL_VERTICES], fix16_t k)
+{
+    fix16_t one_minus_k = fix16_one - k;
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        fix16_t r = (fix16_t)dest_accum[i].r * one_minus_k +
+            (fix16_t)source[i].r * k;
+        fix16_t g = (fix16_t)dest_accum[i].g * one_minus_k +
+            (fix16_t)source[i].g * k;
+        fix16_t b = (fix16_t)dest_accum[i].b * one_minus_k +
+            (fix16_t)source[i].b * k;
+        
+        dest_accum[i] =
+            color_make(fix16_to_int(r), fix16_to_int(g), fix16_to_int(b));
+    }
+}
+
 void eu_color_seq_0(color_t * dest, size_t num_dest_colors, fix16_t time,
     color_t const * seq_colors, size_t num_seq_colors)
 {

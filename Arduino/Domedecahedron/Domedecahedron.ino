@@ -24,7 +24,7 @@ static bool debounced_button_b;
 
 // On the Due, pins 33-41 map to PORTC bits 1-9. This is the largest contiguous
 // ordered range on the Due, so poach it.
-static int const group_data_pins[DDH_TOTAL_GROUPS] = {33, 34, 35, 36, 37, 38};
+static int const data_pin = 33;
 static int const clock_pin = 40;
 
 static int const debug_pins[4] = {23, 25, 27, 29};
@@ -33,9 +33,7 @@ static int const submode_pins[4] = {6, 7, 8, 9};
 static int const button_a_pin = 10;
 static int const button_b_pin = 11;
 
-static int const analog_address_pins[2] = {12, 13};
-static uint8_t const analog_row_addresses[4] = {0, 3, 1, 2};
-static int const analog_column_pins[4] = {A0, A1, A2, A3};
+static int const analog_pins[3] = {A3, A4, A5};
 
 static int const debounce_micros = 500;
 
@@ -72,9 +70,7 @@ void setup()
   pinMode(45, OUTPUT);
   digitalWrite(45, LOW);
   
-  for(size_t i = 0; i < DDH_TOTAL_GROUPS; ++i) {
-    pinMode(group_data_pins[i], OUTPUT);
-  }
+  pinMode(data_pin, OUTPUT);
   pinMode(clock_pin, OUTPUT);
   
   for(size_t i = 0; i < 4; ++i) {
@@ -88,19 +84,6 @@ void setup()
   
   pinMode(button_a_pin, INPUT_PULLUP);
   pinMode(button_b_pin, INPUT_PULLUP);
-  
-  for(size_t i = 0; i < 2; ++i) {
-    pinMode(analog_address_pins[i], OUTPUT);
-  }
-  
-  /*
-  Serial.print("OWSR: ");
-  Serial.print(REG_PIOC_OWSR, HEX);
-  Serial.print("\n");
-  Serial.print("ODSR: ");
-  Serial.print(REG_PIOC_ODSR, HEX);
-  Serial.print("\n");
-  */
   
   ddh_initialize();
   last_micros = micros();
@@ -189,22 +172,9 @@ void loop()
   }
   
   analog_read_start_micros = micros();
-  
-  for(size_t i = 0; i < 4; ++i) {
-    digitalWrite(analog_address_pins[0], (analog_row_addresses[i] >> 0) & 1);
-    digitalWrite(analog_address_pins[1], (analog_row_addresses[i] >> 1) & 1);
-    delayMicroseconds(10);
-    for(size_t j = 0; j < 4; ++j) {
-      ddh_dais_proximity[i][j] = analogRead(analog_column_pins[j]);
-    }
-    ddh_dais_proximity[i][0] = 
-      ddh_dais_proximity[i][2] = 
-      ddh_dais_proximity[i][3] = 0;
-    if(i == 3) {
-      ddh_dais_proximity[3][1] = ddh_dais_proximity[2][1];
-    }
+  for(size_t i = 0; i < 3; ++i) {
+    ddh_dais_proximity[i] = analogRead(analog_pins[i]);
   }
-  
   analog_read_us = micros() - analog_read_start_micros;
   
   ddh_process(delta_us * 1000ULL);
@@ -240,152 +210,35 @@ void loop()
   Serial.print(process_delta_us, DEC);
   Serial.print("/e");
   Serial.print(last_frame_end_micros - frame_this_micros, DEC);
-  /*
-  Serial.print(ddh_frames_since(last_frame), DEC);
-  Serial.print(" frames; read ");
-  Serial.print(analog_read_us, DEC);
-  Serial.print("us, process ");
-  Serial.print(process_delta_us, DEC);
-  Serial.print("us, emit ");
-  Serial.print(last_frame_end_micros - frame_this_micros, DEC);
-  Serial.print("us; mode=");
-  Serial.print(ddh_mode, DEC);
-  Serial.print(", submode=");
-  Serial.print(ddh_submode, DEC);
-  Serial.print(", a=");
-  Serial.print(ddh_button_a, DEC);
-  Serial.print(", b=");
-  Serial.print(ddh_button_b, DEC);
-  Serial.print(", cursor=");
-  Serial.print(ddh_debug_cursor, DEC);
-  */
   
-  /*
-  Serial.print(" motion=");
-  Serial.print(di_raw_motion_quadrants[0][0].x, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[0][1].x, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][0].x, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][1].x, DEC);
-  */
-  
-  /*
-  Serial.print(" dais=");
-  Serial.print(di_detect[0][1], DEC);
-  Serial.print(", ");
-  Serial.print(di_detect[1][1], DEC);
-  Serial.print(", ");
-  Serial.print(di_detect[2][1], DEC);
-  
-  Serial.print(" motion=");
-  Serial.print(di_raw_motion_quadrants[0][0].y, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[0][1].y, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][0].y, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][1].y, DEC);
-  */
   Serial.print("\n");
-  
-  /*
-  for(size_t i = 0; i < 4; ++i) {
-    Serial.print("dais[");
-    Serial.print(i, DEC);
-    Serial.print("]=");
-    Serial.print(ddh_dais_proximity[0][1], DEC);
-    Serial.print(", ");
-    Serial.print(ddh_dais_proximity[1][1], DEC);
-    Serial.print(", ");
-    Serial.print(ddh_dais_proximity[2][1], DEC);
-    Serial.print(", ");
-    Serial.print(ddh_dais_proximity[3][1], DEC);
-    Serial.print("\n");
-  }
-  */
-  
 }
 
 void emit_frame()
 {
   REG_PIOC_OWDR = ~0x1FEUL;
   
-  /*
-  Serial.print("OWSR: ");
-  Serial.print(REG_PIOC_OWSR, HEX);
-  Serial.print("\n");
-  Serial.print("ODSR: ");
-  Serial.print(REG_PIOC_ODSR, HEX);
-  Serial.print("\n");
-  */
-  
   color_t * vertex_base_ptr = ddh_frame_buffer;
   
-  for(size_t i = 0; i < DDH_DODECAHEDRONS_PER_GROUP * DDH_VERTICES_PER_DODECAHEDRON; ++i) {
-    static size_t const group_stride = DDH_DODECAHEDRONS_PER_GROUP * DDH_VERTICES_PER_DODECAHEDRON;
+  for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+    uint32_t temp_data = ddh_frame_buffer[i].color;
+    temp_data = \
+      (intensity_map[((temp_data >> 0) & 0xFF)] << 8) |
+      (intensity_map[((temp_data >> 8) & 0xFF)] << 0) |
+      (intensity_map[((temp_data >> 16) & 0xFF)] << 16);
     
-    uint32_t temp_group_data_0;
-    uint32_t temp_group_data_1;
-    uint32_t temp_group_data_2;
-    uint32_t temp_group_data_3;
-    uint32_t temp_group_data_4;
-    uint32_t temp_group_data_5;
-    
- #define GET_GROUP_DATA(x) \
-      temp_group_data_##x = vertex_base_ptr[group_stride * x].color; \
-      temp_group_data_##x = \
-        (intensity_map[((temp_group_data_##x >> 0) & 0xFF)] << 8) | \
-        (intensity_map[((temp_group_data_##x >> 8) & 0xFF)] << 0) | \
-        (intensity_map[((temp_group_data_##x >> 16) & 0xFF)] << 16);
-    
-    GET_GROUP_DATA(0);
-    GET_GROUP_DATA(1);
-    GET_GROUP_DATA(2);
-    GET_GROUP_DATA(3);
-    GET_GROUP_DATA(4);
-    GET_GROUP_DATA(5);
-    /*
-    temp_group_data_0 = vertex_base_ptr[group_stride * 0].color;
-    temp_group_data_0 = (temp_group_data_0 << 8) | ((temp_group_data_0 >> 16) & 0xFF);
-    temp_group_data_1 = vertex_base_ptr[group_stride * 1].color;
-    temp_group_data_1 = (temp_group_data_1 << 8) | ((temp_group_data_1 >> 16) & 0xFF);
-    temp_group_data_2 = vertex_base_ptr[group_stride * 2].color;
-    temp_group_data_2 = (temp_group_data_2 << 8) | ((temp_group_data_2 >> 16) & 0xFF);
-    temp_group_data_3 = vertex_base_ptr[group_stride * 3].color;
-    temp_group_data_3 = (temp_group_data_3 << 8) | ((temp_group_data_3 >> 16) & 0xFF);
-    temp_group_data_4 = vertex_base_ptr[group_stride * 4].color;
-    temp_group_data_4 = (temp_group_data_4 << 8) | ((temp_group_data_4 >> 16) & 0xFF);
-    temp_group_data_5 = vertex_base_ptr[group_stride * 5].color;
-    temp_group_data_5 = (temp_group_data_5 << 8) | ((temp_group_data_5 >> 16) & 0xFF);
-    */
     for(size_t j = 0; j < 24; ++j) {
-      uint32_t data =
-        ((temp_group_data_0 & 0x800000) >> (22 - 0)) |
-        ((temp_group_data_1 & 0x800000) >> (22 - 1)) |
-        ((temp_group_data_2 & 0x800000) >> (22 - 2)) |
-        ((temp_group_data_3 & 0x800000) >> (22 - 3)) |
-        ((temp_group_data_4 & 0x800000) >> (22 - 4)) |
-        ((temp_group_data_5 & 0x800000) >> (22 - 5));
+      uint32_t data = (temp_data & 0x800000) >> (22 - 0);
       
       // PORTC bits 1-9 map to our data + clock pins
       REG_PIOC_SODR = data;
       REG_PIOC_CODR = ~data;
       
-      temp_group_data_0 = temp_group_data_0 << 1;
-      temp_group_data_1 = temp_group_data_1 << 1;
-      temp_group_data_2 = temp_group_data_2 << 1;
-      temp_group_data_3 = temp_group_data_3 << 1;
-      temp_group_data_4 = temp_group_data_4 << 1;
-      temp_group_data_5 = temp_group_data_5 << 1;
-      
       delay_precise(0);
       
       REG_PIOC_SODR = data | (0x80 << 1);
+      temp_data = temp_data << 1;
     }
-    
-    ++vertex_base_ptr;
   }
   digitalWrite(clock_pin, 0);
   REG_PIOC_OWER = 0x7FFFFFFF;

@@ -159,13 +159,9 @@ extern vertex_t const ddh_dodecahedron_vertex_coords[
 extern vertex_t const ddh_vertex_coords[DDH_TOTAL_VERTICES];
 extern vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
 
-extern vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS][
+extern vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS + 1][
     DDH_DODECAHEDRONS_PER_GROUP];
-extern vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS];
-
-extern float const ddh_dodecahedron_transforms[
-    DDH_DODECAHEDRONS_PER_GROUP][16];
-extern float const ddh_group_transforms[DDH_TOTAL_GROUPS][16];
+extern vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS + 1];
 
 extern uint8_t const ddh_dodecahedron_vertex_adjacency[
     DDH_VERTICES_PER_DODECAHEDRON][3];
@@ -181,7 +177,7 @@ extern uint8_t const ddh_dodecahedron_face_opposition[
     DDH_FACES_PER_DODECAHEDRON];
 extern uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS];
 
-extern size_t ddh_group_dodecahedron_vertex_offsets[DDH_TOTAL_GROUPS][
+extern size_t ddh_group_dodecahedron_vertex_offsets[DDH_TOTAL_GROUPS + 1][
     DDH_DODECAHEDRONS_PER_GROUP][DDH_VERTICES_PER_DODECAHEDRON];
 
 extern uint8_t const ddh_light_dodecahedron[DDH_TOTAL_VERTICES];
@@ -231,7 +227,7 @@ extern bool ddh_button_a_edge;
 extern bool ddh_button_b;
 extern bool ddh_button_b_edge;
 
-extern uint32_t ddh_dais_proximity[4][4];
+extern uint32_t ddh_dais_proximity[3];
 
 void ddh_initialize(void);
 void ddh_process(uint64_t delta_ns);

@@ -9,9 +9,9 @@
 fix16_t color_hsl[7][3];
 
 vector3_t ddh_vertex_coords_fix[DDH_TOTAL_VERTICES];
-vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS][
+vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS + 1][
     DDH_DODECAHEDRONS_PER_GROUP];
-vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS];
+vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS + 1];
 
 color_t ddh_frame_buffer[DDH_TOTAL_VERTICES];
 
@@ -34,7 +34,7 @@ bool ddh_last_button_b;
 bool ddh_button_b;
 bool ddh_button_b_edge;
 
-uint32_t ddh_dais_proximity[4][4];
+uint32_t ddh_dais_proximity[3];
 
 uint32_t ddh_debug_start_frame;
 uint32_t ddh_debug_cursor;
@@ -148,7 +148,7 @@ void ddh_initialize(void)
         ddh_vertex_coords_fix[i].z = fix16_from_float(ddh_vertex_coords[i].z);
     }
     
-    for(size_t i = 0; i < DDH_TOTAL_GROUPS; ++i) {
+    for(size_t i = 0; i < DDH_TOTAL_GROUPS + 1; ++i) {
         vertex_t group_centroid = {0.f, 0.f, 0.f};
         
         for(size_t j = 0; j < DDH_DODECAHEDRONS_PER_GROUP; ++j) {
