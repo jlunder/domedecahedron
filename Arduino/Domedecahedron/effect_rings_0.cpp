@@ -172,9 +172,12 @@ void effect_rings_0_process(void * voidp_state, fix16_t delta_time,
         eu_color_seq_0(seq_buf, LENGTHOF(seq_buf), state->time / 2,
             eu_palette3_dusk.colors, LENGTHOF(eu_palette3_dusk.colors));
         for(size_t i = 0; i < DDH_VERTICES_PER_DODECAHEDRON; ++i) {
-            sum_buf[i] = seq_buf[state->random_walk_offsets[i]];
+            size_t offset = ddh_group_dodecahedron_vertex_offsets[
+                DDH_TOTAL_GROUPS][0][i];
+            sum_buf[offset] = seq_buf[state->random_walk_offsets[i]];
         }
-        sum_buf[state->random_walk_vertex] = color_white;
+        sum_buf[ddh_group_dodecahedron_vertex_offsets[
+            DDH_TOTAL_GROUPS][0][state->random_walk_vertex]] = color_white;
     }
     
     eu_temporal_iir_one_pole(state->buf, sum_buf, fix16_from_float(0.2));

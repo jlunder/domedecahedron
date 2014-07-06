@@ -1,5 +1,6 @@
 #include "effect.h"
 
+#include "dais_input.h"
 #include "effect_util.h"
 
 
@@ -9,8 +10,9 @@ void effect_dusk_process(void * voidp_state, fix16_t delta_time,
 
 typedef struct {
     fix16_t time;
-    size_t stars_pos[100];
-    vector3_t auroras_pos[6];
+    fix16_t no_interaction_time;
+    size_t stars_pos[50];
+    vector3_t auroras_pos[3];
     color_t buf[DDH_TOTAL_VERTICES];
     color_t seq_colors[4];
 } effect_dusk_state_t;
@@ -37,8 +39,8 @@ void * effect_dusk_initialize(void)
     for(size_t i = 0; i < LENGTHOF(state->auroras_pos); ++i) {
         state->auroras_pos[i].x = (eu_random() % fix16_one) * 2 - fix16_one;
         state->auroras_pos[i].y =
-            (eu_random() % fix16_one) * 6 - fix16_from_int(3);
-        state->auroras_pos[i].z = fix16_from_float(-0.5);
+            (eu_random() % fix16_one) * 4 - fix16_from_int(2);
+        state->auroras_pos[i].z = fix16_from_float(0.75f);
     }
     
     for(size_t i = 0; i < LENGTHOF(state->seq_colors); ++i) {
@@ -51,29 +53,50 @@ void * effect_dusk_initialize(void)
 void effect_dusk_process(void * voidp_state, fix16_t delta_time,
     color_t buf[DDH_TOTAL_VERTICES])
 {
+    fix16_t in0 = fix16_one - di_treated_z[0];
+    fix16_t in1 = fix16_one - di_treated_z[1];
+    fix16_t in2 = fix16_one - di_treated_z[2];
+    
     fix16_t auroras_v = fix16_from_float(0.75f);
     effect_dusk_state_t * state = (effect_dusk_state_t *)voidp_state;
     fix16_t t = state->time / 300;
     vector3_t up_vec = vector3_normalize(vector3_make(0,
         fix16_from_float(0.3f), fix16_one));
     fix16_t bias;
+    color_t aurora_color;
     
-    if(t > fix16_one) {
-        t = fix16_one;
+    if(in0 == 0 && in1 == 0 && in2 == 0) {
+        state->no_interaction_time += delta_time;
+        if(state->no_interaction_time > fix16_from_int(10)) {
+            in0 = (fix16_sin(fix16_mul(state->no_interaction_time,
+                    fix16_two_pi * 1 / 26)) + fix16_one) / 2;
+            in1 = (fix16_sin(fix16_mul(fix16_sin(
+                fix16_mul(state->no_interaction_time,
+                fix16_two_pi * 3 / 29)), fix16_pi)) + fix16_one) / 2;
+            in2 = (eu_random() % fix16_from_int(1)) < delta_time ?
+                eu_random() % fix16_one : 0;
+        }
     }
+    else {
+        state->no_interaction_time = 0;
+    }
+    
+    t = in0;
+    aurora_color = eu_lookup_palette3(fix16_to_int(in1 * 255),
+        &eu_palette3_peter);
     
     up_vec.x = fix16_mul(up_vec.x, fix16_from_float(0.35f));
     up_vec.y = fix16_mul(up_vec.y, fix16_from_float(0.35f));
     up_vec.z = fix16_mul(up_vec.z, fix16_from_float(0.35f));
     
-    bias = fix16_from_float(0.8f) + t / 2;
+    bias = fix16_from_float(0.4f) + t / 2;
     
     state->time += delta_time;
     
     for(size_t i = 0; i < LENGTHOF(state->auroras_pos); ++i) {
         state->auroras_pos[i].y -= fix16_mul(delta_time, auroras_v);
-        if(state->auroras_pos[i].y < fix16_from_int(-3)) {
-            state->auroras_pos[i].y += fix16_from_int(6);
+        if(state->auroras_pos[i].y < fix16_from_int(-2)) {
+            state->auroras_pos[i].y += fix16_from_int(4);
         }
     }
     
@@ -98,7 +121,10 @@ void effect_dusk_process(void * voidp_state, fix16_t delta_time,
                 al = fix16_one;
             }
             
-            c = color_add_sat(c, color_make(0, fix16_to_int(al * 95), 0));
+            c = color_add_sat(c,
+                color_make(fix16_to_int(al * aurora_color.r),
+                    fix16_to_int(al * aurora_color.g),
+                    fix16_to_int(al * aurora_color.b)));
         }
         buf[i] = c;
     }
@@ -120,7 +146,4 @@ void effect_dusk_process(void * voidp_state, fix16_t delta_time,
         uint32_t b = (uint32_t)state->buf[i].b * 15 + (uint32_t)buf[i].b * 1;
         state->buf[i] = buf[i] = color_make(r / 16, g / 16, b / 16);
     }
-    
-    eu_color_seq_5(buf, DDH_VERTICES_PER_DODECAHEDRON, state->time / 4,
-        state->seq_colors, LENGTHOF(state->seq_colors));
 }
