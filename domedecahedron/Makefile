@@ -66,6 +66,7 @@ DOMEDECAHEDRON_SRC= \
 	domedecahedron.c \
 	domedecahedron_data.c \
 	effect.c \
+	effect_ca_0.c \
 	effect_dusk.c \
 	effect_plasma_0.c \
 	effect_rings_0.c \

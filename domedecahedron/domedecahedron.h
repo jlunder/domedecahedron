@@ -154,6 +154,12 @@ static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
 }
 
 
+typedef struct {
+    size_t num_offsets; // how many offsets in the following array?
+    size_t offsets[3]; // ...of vertices adjacent to the vertex at this offset
+} ddh_adjacency_t;
+
+
 extern vertex_t const ddh_dodecahedron_vertex_coords[
     DDH_VERTICES_PER_DODECAHEDRON];
 extern vertex_t const ddh_vertex_coords[DDH_TOTAL_VERTICES];
@@ -163,6 +169,7 @@ extern vector3_t ddh_group_dodecahedron_centroids_fix[DDH_TOTAL_GROUPS + 1][
     DDH_DODECAHEDRONS_PER_GROUP];
 extern vector3_t ddh_group_centroids_fix[DDH_TOTAL_GROUPS + 1];
 
+// Adjacency within a dodecahedron
 extern uint8_t const ddh_dodecahedron_vertex_adjacency[
     DDH_VERTICES_PER_DODECAHEDRON][3];
 extern uint8_t const ddh_dodecahedron_vertex_opposition[
@@ -175,7 +182,8 @@ extern uint8_t const ddh_dodecahedron_face_adjacency[
     DDH_FACES_PER_DODECAHEDRON][5];
 extern uint8_t const ddh_dodecahedron_face_opposition[
     DDH_FACES_PER_DODECAHEDRON];
-extern uint8_t const ddh_dodecahedron_adjacencies[DDH_TOTAL_DODECAHEDRONS];
+// Adjacencies between vertices in neighbouring dodecahedrons
+extern ddh_adjacency_t const ddh_dodecahedron_adjacency[DDH_TOTAL_VERTICES];
 
 extern size_t ddh_group_dodecahedron_vertex_offsets[DDH_TOTAL_GROUPS + 1][
     DDH_DODECAHEDRONS_PER_GROUP][DDH_VERTICES_PER_DODECAHEDRON];
