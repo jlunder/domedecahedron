@@ -118,6 +118,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         case 'L': ddh_submode = 8; break;
         case ';': ddh_submode = 9; break;
         
+        case 'Z': ddh_dais_proximity[0] = 500; break;
+        case 'X': ddh_dais_proximity[0] = 800; break;
+        case 'C': ddh_dais_proximity[1] = 500; break;
+        case 'V': ddh_dais_proximity[1] = 800; break;
+        case 'B': ddh_dais_proximity[2] = 500; break;
+        case 'N': ddh_dais_proximity[2] = 800; break;
+        
         case '[': ddh_button_a = true; break;
         case ']': ddh_button_b = true; break;
         
@@ -135,6 +142,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         switch(key) {
         case '[': ddh_button_a = false; break;
         case ']': ddh_button_b = false; break;
+        
+        case 'Z': ddh_dais_proximity[0] = 100; break;
+        case 'X': ddh_dais_proximity[0] = 100; break;
+        case 'C': ddh_dais_proximity[1] = 100; break;
+        case 'V': ddh_dais_proximity[1] = 100; break;
+        case 'B': ddh_dais_proximity[2] = 100; break;
+        case 'N': ddh_dais_proximity[2] = 100; break;
         
         case GLFW_KEY_LEFT: gles2_harness_input_left = false;
         case GLFW_KEY_RIGHT: gles2_harness_input_right = false;
@@ -530,8 +544,8 @@ void gles2_harness_update(float time)
         gles2_harness_dist * cosf(gles2_harness_horizontal_pos),
             gles2_harness_dist * -sinf(gles2_harness_horizontal_pos),
             gles2_harness_vertical_pos + 2.f,
-        0.0f, 0.0f, -1.0f,
-        0.0f, 0.0f, 1.0f);
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 2.0f);
     glusPerspectivef(viewProjectionMatrix, 45.0f, g_aspectRatio, 0.1f, 1000.0f);
     glusMatrix4x4Multiplyf(viewProjectionMatrix, viewProjectionMatrix, viewMatrix);
     

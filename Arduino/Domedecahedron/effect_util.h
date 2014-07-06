@@ -17,6 +17,7 @@ extern eu_palette3_t eu_palette3_adam; // cyan -> magenta -> purple
 extern eu_palette3_t eu_palette3_peter; // green -> indigo -> dark blue
 extern eu_palette3_t eu_palette3_joe; // red -> yellow -> magenta
 extern eu_palette3_t eu_palette3_primaries; // red -> green -> blue
+extern eu_palette3_t eu_palette3_gold; // red -> green -> blue
 
 
 extern void eu_add_buffer(color_t dest[DDH_TOTAL_VERTICES],

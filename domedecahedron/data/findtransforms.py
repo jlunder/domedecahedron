@@ -86,7 +86,7 @@ def printm(m):
     #print "    //  %sf, %sf, %sf, %sf]" % (repr(m[12]), repr(m[13]), repr(m[14]), repr(m[15]),)
     for v in shrunkverts:
         v = m * v
-        writef("    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z),))
+        writef("    {%sf, %sf, %sf}," % (repr(v.x), repr(v.y), repr(v.z + 0.75),))
 
 print
 

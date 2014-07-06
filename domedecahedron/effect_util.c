@@ -31,6 +31,12 @@ eu_palette3_t eu_palette3_primaries = {{
     {{0, 0, 255, 0}},
 }}; // red -> green -> blue
 
+eu_palette3_t eu_palette3_gold = {{
+    {{0, 0, 0, 0}},
+    {{255, 255, 0, 0}},
+    {{255, 255, 255, 0}},
+}}; // red -> green -> blue
+
 int32_t eu_last_random = 24893;
 color_t eu_temp_buffers[EU_MAX_TEMP_BUFFERS][DDH_TOTAL_VERTICES];
 color_t * eu_free_temp_buffers[EU_MAX_TEMP_BUFFERS] = {

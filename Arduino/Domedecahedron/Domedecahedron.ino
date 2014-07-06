@@ -222,10 +222,10 @@ void emit_frame()
   
   for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
     uint32_t temp_data = ddh_frame_buffer[i].color;
-    temp_data = \
-      (intensity_map[((temp_data >> 0) & 0xFF)] << 8) |
-      (intensity_map[((temp_data >> 8) & 0xFF)] << 0) |
-      (intensity_map[((temp_data >> 16) & 0xFF)] << 16);
+    temp_data =
+      (intensity_map[((temp_data >> 0) & 0xFF)] << 9) |
+      (intensity_map[((temp_data >> 8) & 0xFF)] << 1) |
+      (intensity_map[((temp_data >> 16) & 0xFF)] << 17);
     
     for(size_t j = 0; j < 24; ++j) {
       uint32_t data = (temp_data & 0x800000) >> (22 - 0);
