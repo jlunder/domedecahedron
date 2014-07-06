@@ -10,11 +10,23 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
 
 typedef struct {
     fix16_t time;
+    
     fix16_t no_interaction_time;
+    
     bool sweep_running;
     vector3_t sweep_normal;
     color_t sweep_color;
     fix16_t sweep_pos;
+    
+    fix16_t creep_time;
+    size_t creep_target;
+    size_t creep_pos;
+    
+    fix16_t random_walk_time;
+    size_t random_walk_cur_offset;
+    size_t random_walk_vertex;
+    size_t random_walk_offsets[DDH_VERTICES_PER_DODECAHEDRON];
+    
     color_t buf[DDH_TOTAL_VERTICES];
 } effect_rings_0_state_t;
 
@@ -104,12 +116,69 @@ void effect_rings_0_process(void * voidp_state, fix16_t delta_time,
     }
     
     {
-        eu_bar(temp_buf, color_white, vector3_make(0, 0, fix16_one),
-            fix16_mul(in1, fix16_from_float(3.5f)) - fix16_from_float(3.f),
-            fix16_from_float(0.5f),
-            fix16_from_float(0.1f));
-        eu_add_buffer(sum_buf, 255, temp_buf, 255);
+        size_t in1_count = fix16_to_int(in1 * DDH_DODECAHEDRONS_PER_GROUP *
+            DDH_VERTICES_PER_DODECAHEDRON);
+        size_t creep_pos = state->creep_pos;
+        
+        if(in1_count > state->creep_target) {
+            state->creep_target = in1_count;
+        }
+        state->creep_time += delta_time;
+        if(state->creep_time >= fix16_from_float(0.1f)) {
+            state->creep_time -= fix16_from_float(0.1f);
+            if(creep_pos < state->creep_target) {
+                ++state->creep_pos;
+            }
+            else if(creep_pos > state->creep_target) {
+                --state->creep_pos;
+            }
+            if(creep_pos >= state->creep_target) {
+                state->creep_target = in1_count;
+            }
+            creep_pos = state->creep_pos;
+        }
+        
+        for(size_t i = 0; i < 3; ++i) {
+            for(size_t j = 0; j < creep_pos; ++j) {
+                if(j >= creep_pos - 5) {
+                    size_t dodecahedron = DDH_DODECAHEDRONS_PER_GROUP - 1 -
+                        j / DDH_VERTICES_PER_DODECAHEDRON;
+                    size_t vertex = DDH_VERTICES_PER_DODECAHEDRON - 1 -
+                        j % DDH_VERTICES_PER_DODECAHEDRON;
+                    size_t offset = ddh_group_dodecahedron_vertex_offsets[i][
+                            dodecahedron][vertex];
+                    sum_buf[offset] = color_add_sat(sum_buf[offset],
+                        eu_lookup_palette3_random(&eu_palette3_gold));
+                }
+            }
+        }
     }
+    
+    {
+        color_t seq_buf[DDH_VERTICES_PER_DODECAHEDRON];
+        
+        state->random_walk_time += delta_time;
+        if(state->random_walk_time > fix16_from_float(0.5f)) {
+            state->random_walk_time -= fix16_from_float(0.5f);
+            state->random_walk_vertex = ddh_dodecahedron_vertex_adjacency[
+                state->random_walk_vertex][eu_random() % 3];
+            state->random_walk_offsets[state->random_walk_vertex] =
+                state->random_walk_cur_offset;
+            state->random_walk_cur_offset =
+                (state->random_walk_cur_offset + 1) %
+                DDH_VERTICES_PER_DODECAHEDRON;
+        }
+        
+        eu_color_seq_0(seq_buf, LENGTHOF(seq_buf), state->time / 2,
+            eu_palette3_dusk.colors, LENGTHOF(eu_palette3_dusk.colors));
+        for(size_t i = 0; i < DDH_VERTICES_PER_DODECAHEDRON; ++i) {
+            sum_buf[i] = seq_buf[state->random_walk_offsets[i]];
+        }
+        sum_buf[state->random_walk_vertex] = color_white;
+    }
+    
+    eu_temporal_iir_one_pole(state->buf, sum_buf, fix16_from_float(0.2));
+    memcpy(buf, state->buf, sizeof (color_t) * DDH_TOTAL_VERTICES);
     
     if(!state->sweep_running && in2 > 0) {
         state->sweep_running = true;
@@ -127,36 +196,19 @@ void effect_rings_0_process(void * voidp_state, fix16_t delta_time,
     if(state->sweep_running) {
         eu_bar(temp_buf, state->sweep_color, state->sweep_normal,
             state->sweep_pos, fix16_from_float(0.5f), fix16_from_float(0.1f));
-        state->sweep_pos += fix16_mul(fix16_from_float(10.0f), delta_time);
         if(state->sweep_pos >= fix16_from_int(2)) {
-            state->sweep_running = false;
-        }
-        
-        eu_add_buffer(sum_buf, 255, temp_buf, 255);
-    }
-    
-    eu_temporal_iir_one_pole(state->buf, sum_buf, fix16_from_float(0.2));
-    memcpy(sum_buf, state->buf, sizeof (color_t) * DDH_TOTAL_VERTICES);
-    
-    {
-        size_t count = fix16_to_int(in1 * DDH_DODECAHEDRONS_PER_GROUP *
-            DDH_VERTICES_PER_DODECAHEDRON);
-        
-        for(size_t i = 0; i < 3; ++i) {
-            for(size_t j = 0; j < count; ++j) {
-                size_t dodecahedron = DDH_DODECAHEDRONS_PER_GROUP - 1 -
-                    j / DDH_VERTICES_PER_DODECAHEDRON;
-                size_t vertex = DDH_VERTICES_PER_DODECAHEDRON - 1 -
-                    j % DDH_VERTICES_PER_DODECAHEDRON;
-                temp_buf[ddh_group_dodecahedron_vertex_offsets[i][
-                        dodecahedron][vertex]] =
-                    eu_lookup_palette3_random(&eu_palette3_gold);
+            if(in2 == 0) {
+                state->sweep_running = false;
             }
         }
-        eu_add_buffer(sum_buf, 255, temp_buf, 255);
+        else {
+            state->sweep_pos +=
+                fix16_mul(fix16_from_float(10.0f), delta_time);
+        }
+        
+        eu_add_buffer(buf, 255, temp_buf, 255);
     }
     
-    memcpy(buf, sum_buf, sizeof (color_t) * DDH_TOTAL_VERTICES);
     
     eu_free_temp_buffer(temp_buf);
     eu_free_temp_buffer(sum_buf);
