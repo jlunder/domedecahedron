@@ -34,7 +34,7 @@ static int const button_a_pin = 10;
 static int const button_b_pin = 11;
 
 static int const analog_address_pins[2] = {12, 13};
-static uint8_t const analog_row_addresses[4] = {0, 3, 1, 2};
+static uint8_t const analog_row_addresses[4] = {0, 1, 2, 3};
 static int const analog_column_pins[4] = {A0, A1, A2, A3};
 
 static int const debounce_micros = 500;

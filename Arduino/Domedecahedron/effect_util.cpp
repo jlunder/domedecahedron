@@ -31,7 +31,15 @@ eu_palette3_t eu_palette3_primaries = {{
     {{0, 0, 255, 0}},
 }}; // red -> green -> blue
 
-int32_t eu_last_random = 24893;
+eu_palette3_t eu_palette3_gold = {{
+    {{0, 0, 0, 0}},
+    {{255, 255, 0, 0}},
+    {{255, 255, 255, 0}},
+}}; // red -> green -> blue
+
+uint32_t eu_random_z = 392842;
+uint32_t eu_random_w = 43503;
+
 color_t eu_temp_buffers[EU_MAX_TEMP_BUFFERS][DDH_TOTAL_VERTICES];
 color_t * eu_free_temp_buffers[EU_MAX_TEMP_BUFFERS] = {
     eu_temp_buffers[0],
@@ -187,6 +195,24 @@ void eu_bar(color_t dest[DDH_TOTAL_VERTICES], color_t color,
     }
 }
 
+void eu_temporal_iir_one_pole(color_t dest_accum[DDH_TOTAL_VERTICES],
+    color_t source[DDH_TOTAL_VERTICES], fix16_t k)
+{
+    fix16_t one_minus_k = fix16_one - k;
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        fix16_t r = (fix16_t)dest_accum[i].r * one_minus_k +
+            (fix16_t)source[i].r * k;
+        fix16_t g = (fix16_t)dest_accum[i].g * one_minus_k +
+            (fix16_t)source[i].g * k;
+        fix16_t b = (fix16_t)dest_accum[i].b * one_minus_k +
+            (fix16_t)source[i].b * k;
+        
+        dest_accum[i] =
+            color_make(fix16_to_int(r), fix16_to_int(g), fix16_to_int(b));
+    }
+}
+
 void eu_color_seq_0(color_t * dest, size_t num_dest_colors, fix16_t time,
     color_t const * seq_colors, size_t num_seq_colors)
 {
@@ -335,13 +361,12 @@ color_t eu_lookup_palette3_random(eu_palette3_t const * pal)
     return eu_lookup_palette3(fix16_to_int(alpha * 256), pal);
 }
 
-int32_t eu_random(void)
+uint32_t eu_random(void)
 {
-    eu_last_random =
-        ((eu_last_random + (int32_t)ddh_total_ns) * 1999999973L) & 0x7FFFFFFF;
-    
-    return eu_last_random;
-}
+    eu_random_z = 36969 * (eu_random_z & 65535) + (eu_random_z >> 16);
+    eu_random_w = 18000 * (eu_random_w & 65535) + (eu_random_w >> 16);
+    return (eu_random_z << 16) + eu_random_w;  /* 32-bit result */
+}    
 
 fix16_t eu_sin_dist3(vector3_t a, vector3_t b, fix16_t freq, fix16_t phase)
 {

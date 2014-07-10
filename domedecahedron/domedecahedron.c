@@ -61,9 +61,13 @@ uint8_t ddh_last_debug_mode = 255;
 
 fix16_t ddh_autoswitch_time;
 
+effect_instance_t * ddh_ca_0_instance;
+effect_instance_t * ddh_ca_1_instance;
+effect_instance_t * ddh_dusk_instance;
 effect_instance_t * ddh_plasma_0_instance;
 effect_instance_t * ddh_rings_0_instance;
-effect_instance_t * ddh_dusk_instance;
+effect_instance_t * ddh_rings_1_instance;
+effect_instance_t * ddh_rings_2_instance;
 
 
 color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l)
@@ -226,8 +230,12 @@ void ddh_initialize(void)
     color_hsl[6][1] = 0;
     color_hsl[6][2] = 0;
     
+    ddh_ca_0_instance = effect_initialize(&effect_ca_0);
+    ddh_ca_1_instance = effect_initialize(&effect_ca_1);
     ddh_plasma_0_instance = effect_initialize(&effect_plasma_0);
     ddh_rings_0_instance = effect_initialize(&effect_rings_0);
+    ddh_rings_1_instance = effect_initialize(&effect_rings_1);
+    ddh_rings_2_instance = effect_initialize(&effect_rings_2);
     ddh_dusk_instance = effect_initialize(&effect_dusk);
 }
 
@@ -336,13 +344,14 @@ void ddh_initialize_mode_run(void)
 {
     ddh_initialize_debug_cursor();
     ddh_autoswitch_time = 0;
+    ddh_debug_cursor = 1;
 }
 
 void ddh_process_mode_run(void)
 {
     uint32_t last_debug_cursor = ddh_debug_cursor;
     
-    ddh_process_debug_cursor(3);
+    ddh_process_debug_cursor(7);
     
     if(ddh_submode == 0) {
         if(ddh_debug_cursor != last_debug_cursor) {
@@ -350,9 +359,9 @@ void ddh_process_mode_run(void)
         }
         else {
             ddh_autoswitch_time += ddh_time_since(ddh_last_time);
-            if(ddh_autoswitch_time > fix16_from_int(300)) {
-                ddh_autoswitch_time -= fix16_from_int(300);
-                ddh_debug_cursor = (ddh_debug_cursor + 1) % 3;
+            if(ddh_autoswitch_time > fix16_from_int(600)) {
+                ddh_autoswitch_time -= fix16_from_int(600);
+                ddh_debug_cursor = (ddh_debug_cursor + 1) % 7;
             }
         }
     }
@@ -361,15 +370,32 @@ void ddh_process_mode_run(void)
     }
     
     switch(ddh_debug_cursor) {
+    default:
     case 0:
-        effect_process(ddh_plasma_0_instance, ddh_time_since(ddh_last_time),
+        effect_process(ddh_ca_0_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
     case 1:
-        effect_process(ddh_rings_0_instance, ddh_time_since(ddh_last_time),
+        effect_process(ddh_ca_1_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
     case 2:
+        effect_process(ddh_plasma_0_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 3:
+        effect_process(ddh_rings_0_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 4:
+        effect_process(ddh_rings_1_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 5:
+        effect_process(ddh_rings_2_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 6:
         if(ddh_debug_cursor != last_debug_cursor) {
             effect_finalize(ddh_dusk_instance);
             ddh_dusk_instance = effect_initialize(&effect_dusk);

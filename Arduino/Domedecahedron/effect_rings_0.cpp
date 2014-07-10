@@ -118,7 +118,7 @@ void effect_rings_0_process(void * state, fix16_t delta_time,
             ++running_count;
         }
     }
-    if((eu_random() % fix16_from_float(0.5f)) < delta_time) {
+    if((eu_random() % fix16_from_float(0.5f)) < (uint32_t)delta_time) {
         switch(eu_random() % 16) {
         case 0:
             rings_state->group_scramble = eu_random() % DDH_TOTAL_GROUPS;
