@@ -109,11 +109,11 @@ int32_t di_scale_raw_dais(int32_t raw)
     if(raw >= 768) {
         return 0;
     }
-    else if(raw < 256) {
+    else if(raw < 512) {
         return 65536;
     }
     else {
-        int32_t offset_raw = raw - 256;
+        int32_t offset_raw = (raw - 512) * 2;
         return 65536 - ((offset_raw << 7) | (offset_raw >> 2));
     }
 }
