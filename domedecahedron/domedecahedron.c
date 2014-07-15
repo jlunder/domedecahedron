@@ -351,7 +351,7 @@ void ddh_process_mode_run(void)
 {
     uint32_t last_debug_cursor = ddh_debug_cursor;
     
-    ddh_process_debug_cursor(7);
+    ddh_process_debug_cursor(5);
     
     if(ddh_submode == 0) {
         if(ddh_debug_cursor != last_debug_cursor) {
@@ -361,7 +361,7 @@ void ddh_process_mode_run(void)
             ddh_autoswitch_time += ddh_time_since(ddh_last_time);
             if(ddh_autoswitch_time > fix16_from_int(600)) {
                 ddh_autoswitch_time -= fix16_from_int(600);
-                ddh_debug_cursor = (ddh_debug_cursor + 1) % 7;
+                ddh_debug_cursor = (ddh_debug_cursor + 1) % 5;
             }
         }
     }
@@ -387,6 +387,7 @@ void ddh_process_mode_run(void)
         effect_process(ddh_rings_0_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
+        /*
     case 4:
         effect_process(ddh_rings_1_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
@@ -395,7 +396,8 @@ void ddh_process_mode_run(void)
         effect_process(ddh_rings_2_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
-    case 6:
+        */
+    case 4://6:
         if(ddh_debug_cursor != last_debug_cursor) {
             effect_finalize(ddh_dusk_instance);
             ddh_dusk_instance = effect_initialize(&effect_dusk);

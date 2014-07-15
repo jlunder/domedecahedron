@@ -52,8 +52,10 @@ void effect_rings_1_process(void * voidp_state, fix16_t delta_time,
     color_t buf[DDH_TOTAL_VERTICES])
 {
     effect_rings_1_state_t * state = (effect_rings_1_state_t *)voidp_state;
+    //fix16_t movement_sum = di_raw_motion_quadrants[]
+    //fix16_t z_sum = 0;
     
-    fix16_t in0 = 0; // fix16_one - di_treated_z[0];
+    fix16_t in0 = 0;
     fix16_t in1 = 0; // fix16_one - di_treated_z[1];
     fix16_t in2 = 0; // fix16_one - di_treated_z[2];
     
@@ -63,7 +65,17 @@ void effect_rings_1_process(void * voidp_state, fix16_t delta_time,
     fix16_t ring_bottom = fix16_from_float(-3.0f);
     fix16_t ring_height = fix16_from_float(3.5f);
     vector3_t ring_normal = vector3_make(0, 0, fix16_one);
-    
+    /*
+    for(size_t i = 0; i < 4; ++i) {
+        for(size_t j = 0; j < 4; ++j) {
+            in0 += di_treated_z[i][j];
+        }
+    }
+    in0 /= 8;
+    if(in0 > 65535) {
+        in0 = 65535;
+    }
+    */
     state->time += delta_time;
     
     memset(sum_buf, 0, sizeof (color_t) * DDH_TOTAL_VERTICES);
