@@ -4,10 +4,7 @@
 
 int main(int argc, char* argv[])
 {
-    (void)argc;
-    (void)argv;
-    
-    gles2_harness_main();
+    gles2_harness_main(argc, argv);
     
     return 0;
 }

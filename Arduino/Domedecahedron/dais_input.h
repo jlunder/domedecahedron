@@ -11,8 +11,8 @@ extern vector3_t di_translation;
 
 extern vector3_t di_raw_motion_quadrants[2][2];
 
-extern int32_t di_last_treated_z[4][4];
-extern int32_t di_treated_z[4][4];
+extern fix16_t di_last_treated_z[4][4];
+extern fix16_t di_treated_z[4][4];
 extern bool di_last_detect[4][4];
 extern bool di_detect[4][4];
 

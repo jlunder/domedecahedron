@@ -15,8 +15,8 @@ vector3_t di_rotation;
 vector2_t di_flat_rotation;
 vector3_t di_translation;
 
-int32_t di_last_treated_z[4][4];
-int32_t di_treated_z[4][4];
+fix16_t di_last_treated_z[4][4];
+fix16_t di_treated_z[4][4];
 bool di_last_detect[4][4];
 bool di_detect[4][4];
 

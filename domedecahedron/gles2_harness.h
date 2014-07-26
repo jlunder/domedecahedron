@@ -5,7 +5,7 @@
 #include "domedecahedron.h"
 
 
-void gles2_harness_main(void);
+void gles2_harness_main(int argc, char * argv[]);
 
 
 #endif

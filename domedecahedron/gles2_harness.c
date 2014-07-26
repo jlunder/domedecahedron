@@ -30,8 +30,13 @@
 #include <time.h>
 
 ///MACOS
+#include <errno.h>
+#include <fcntl.h>
 #include <mach/mach.h>
 #include <mach/mach_time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <termios.h>
 #include <unistd.h>
 ///MACOS
 
@@ -44,12 +49,6 @@
 #include <string.h>
 
 #include "glus.h"
-
-
-bool gles2_harness_init(void);
-void gles2_harness_reshape(int width, int height);
-void gles2_harness_update(float time);
-void gles2_harness_terminate(void);
 
 
 static GLuint g_program;
@@ -80,6 +79,31 @@ float gles2_harness_vertical_v = 0.f;
 float gles2_harness_vertical_pos = 0.f;
 float gles2_harness_dist = 5.f;
 
+#define GLES2_HARNESS_LINE_BUF_EMPTY    1
+#define GLES2_HARNESS_LINE_BUF_FULL     2
+#define GLES2_HARNESS_LINE_BUF_OVERRUN  3
+#define GLES2_HARNESS_LINE_BUF_FLUSHING 4
+
+#define GLES2_HARNESS_LINE_NOT_READY 1
+#define GLES2_HARNESS_LINE_READY     2
+#define GLES2_HARNESS_LINE_LOST      3
+
+size_t gles2_harness_serial_count;
+int gles2_harness_line_buf_state = GLES2_HARNESS_LINE_BUF_EMPTY;
+char gles2_harness_serial_buf[1024];
+char gles2_harness_line_buf[1024];
+int gles2_harness_serial_fd = -1;
+
+
+bool gles2_harness_init(char const * dev);
+int gles2_harness_serial_set_interface_attribs(int fd, int speed, int parity);
+void gles2_harness_serial_set_blocking(int fd, int should_block);
+void gles2_harness_init_serial(char const * dev);
+void gles2_harness_process_serial(void);
+int gles2_harness_read_serial(void);
+void gles2_harness_reshape(int width, int height);
+void gles2_harness_update(float time);
+void gles2_harness_terminate(void);
 
 
 static void error_callback(int error, const char* description)
@@ -144,7 +168,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
-void gles2_harness_main(void)
+void gles2_harness_main(int argc, char * argv[])
 {
     GLFWwindow* window;
     //LINUX
@@ -174,7 +198,7 @@ void gles2_harness_main(void)
 
     glfwSetKeyCallback(window, key_callback);
     
-    gles2_harness_init();
+    gles2_harness_init(argc > 1 ? argv[1] : NULL);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -263,7 +287,7 @@ static void show_info_log(
     free(log);
 }
 
-bool gles2_harness_init(void)
+bool gles2_harness_init(char const * dev)
 {
     GLchar const * vert_source = light_vert;
     GLint vert_length = strlen(light_vert);
@@ -380,6 +404,10 @@ bool gles2_harness_init(void)
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
+    if(dev != NULL) {
+        gles2_harness_init_serial(dev);
+    }
+    
     ddh_initialize();
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
@@ -404,6 +432,183 @@ bool gles2_harness_init(void)
 }
 
 
+int gles2_harness_serial_set_interface_attribs (int fd, int speed, int parity)
+{
+    struct termios tty;
+    memset (&tty, 0, sizeof tty);
+    if (tcgetattr (fd, &tty) != 0) {
+        perror("error from tcgetattr");
+        return -1;
+    }
+
+    cfsetospeed (&tty, speed);
+    cfsetispeed (&tty, speed);
+
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
+    // disable IGNBRK for mismatched speed tests; otherwise receive break
+    // as \000 chars
+    tty.c_iflag &= ~IGNBRK;         // disable break processing
+    tty.c_lflag = 0;                // no signaling chars, no echo,
+                                    // no canonical processing
+    tty.c_oflag = 0;                // no remapping, no delays
+    tty.c_cc[VMIN]  = 0;            // read doesn't block
+    tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+
+    tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
+                                    // enable reading
+    tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
+    tty.c_cflag |= parity;
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CRTSCTS;
+
+    if (tcsetattr (fd, TCSANOW, &tty) != 0) {
+        perror("error from tcsetattr");
+        return -1;
+    }
+    return 0;
+}
+
+void gles2_harness_serial_set_blocking(int fd, int should_block)
+{
+    struct termios tty;
+    memset (&tty, 0, sizeof tty);
+    if (tcgetattr (fd, &tty) != 0) {
+        perror("error from tcgetattr");
+        return;
+    }
+
+    tty.c_cc[VMIN]  = should_block ? 1 : 0;
+    tty.c_cc[VTIME] = 0;            // 0.5 seconds read timeout
+
+    if (tcsetattr (fd, TCSANOW, &tty) != 0) {
+        perror("error setting term attributes");
+    }
+}
+
+
+void gles2_harness_init_serial(char const * dev)
+{
+    gles2_harness_serial_fd = open(dev, O_RDONLY | O_NOCTTY | O_NONBLOCK);
+    
+    if(gles2_harness_serial_fd < 0) {
+        perror("error opening tty");
+        return;
+    }
+    
+    // set speed to 115,200 bps, 8n1 (no parity)
+    gles2_harness_serial_set_interface_attribs(gles2_harness_serial_fd,
+        B115200, 0);
+    
+    // set no blocking
+    gles2_harness_serial_set_blocking(gles2_harness_serial_fd, 0);
+}
+
+
+void gles2_harness_process_serial(void)
+{
+    int n;
+    
+    if(gles2_harness_serial_fd < 0) {
+        return;
+    }
+    
+    if(sizeof gles2_harness_serial_buf - gles2_harness_serial_count == 0) {
+        return;
+    }
+    
+    n = read(gles2_harness_serial_fd,
+        gles2_harness_serial_buf + gles2_harness_serial_count,
+        sizeof gles2_harness_serial_buf - gles2_harness_serial_count);
+    if(n <= 0) {
+        return;
+    }
+    
+    gles2_harness_serial_count += n;
+    assert(gles2_harness_serial_count <= sizeof gles2_harness_serial_buf);
+    
+    if(gles2_harness_line_buf_state == GLES2_HARNESS_LINE_BUF_EMPTY) {
+        size_t eol;
+        
+        for(eol = 0; eol < gles2_harness_serial_count; ++eol) {
+            if(gles2_harness_serial_buf[eol] == '\n') {
+                break;
+            }
+        }
+        
+        if(eol < gles2_harness_serial_count) {
+            assert(gles2_harness_serial_buf[eol] == '\n');
+            assert(gles2_harness_serial_count >= eol + 1);
+            assert(eol + 1 <= sizeof gles2_harness_line_buf);
+            // copy the full line into the line buf
+            memcpy(gles2_harness_line_buf, gles2_harness_serial_buf, eol);
+            gles2_harness_line_buf[eol] = '\0';
+            // pack the read buffer down -- +1 to skip \n
+            memmove(gles2_harness_serial_buf,
+                gles2_harness_serial_buf + eol + 1,
+                gles2_harness_serial_count - (eol + 1));
+            gles2_harness_serial_count -= eol + 1;
+            gles2_harness_line_buf_state = GLES2_HARNESS_LINE_BUF_FULL;
+        }
+        else if(eol >= (sizeof gles2_harness_line_buf - 1)) {
+            gles2_harness_line_buf_state = GLES2_HARNESS_LINE_BUF_OVERRUN;
+            gles2_harness_line_buf[0] = '\0';
+        }
+    }
+    else if(gles2_harness_line_buf_state == GLES2_HARNESS_LINE_BUF_FLUSHING) {
+        size_t eol;
+        
+        for(eol = 0; eol < gles2_harness_serial_count; ++eol) {
+            if(gles2_harness_serial_buf[eol] == '\n') {
+                break;
+            }
+        }
+        if(eol < gles2_harness_serial_count) {
+            // found eol, need to preserve characters after that
+            assert(gles2_harness_serial_buf[eol] == '\n');
+            assert(gles2_harness_serial_count >= eol + 1);
+            // pack the read buffer down -- +1 to skip \n
+            memmove(gles2_harness_serial_buf,
+                gles2_harness_serial_buf + eol + 1,
+                gles2_harness_serial_count - (eol + 1));
+            gles2_harness_serial_count -= eol + 1;
+            gles2_harness_line_buf_state = GLES2_HARNESS_LINE_BUF_EMPTY;
+        }
+        else {
+            // no EOL, just clear the buffer
+            gles2_harness_serial_count = 0;
+        }
+        
+        // recurse and try to fill that line buf again
+        gles2_harness_process_serial();
+    }
+}
+
+
+int gles2_harness_read_serial(void)
+{
+    if(gles2_harness_serial_fd < 0) {
+        return GLES2_HARNESS_LINE_NOT_READY;
+    }
+    
+    gles2_harness_process_serial();
+    
+    switch(gles2_harness_line_buf_state) {
+    case GLES2_HARNESS_LINE_BUF_EMPTY:
+    case GLES2_HARNESS_LINE_BUF_FLUSHING:
+        return GLES2_HARNESS_LINE_NOT_READY;
+    case GLES2_HARNESS_LINE_BUF_FULL:
+        gles2_harness_line_buf_state = GLES2_HARNESS_LINE_BUF_EMPTY;
+        return GLES2_HARNESS_LINE_READY;
+    default:
+    case GLES2_HARNESS_LINE_BUF_OVERRUN:
+        gles2_harness_line_buf_state = GLES2_HARNESS_LINE_BUF_FLUSHING;
+        return GLES2_HARNESS_LINE_LOST;
+    }
+}
+
+
 void gles2_harness_reshape(int width, int height)
 {
     // Set the viewport depending on the width and height of the window.
@@ -423,6 +628,22 @@ void gles2_harness_update(float time)
     
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
+    while(gles2_harness_read_serial() == GLES2_HARNESS_LINE_READY) {
+        static int c = 0;
+        int n;
+        
+        n = sscanf(gles2_harness_line_buf,
+            "dr:%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,",
+            &ddh_dais_proximity[0][0], &ddh_dais_proximity[0][1],
+            &ddh_dais_proximity[0][2], &ddh_dais_proximity[0][3],
+            &ddh_dais_proximity[1][0], &ddh_dais_proximity[1][1],
+            &ddh_dais_proximity[1][2], &ddh_dais_proximity[1][3],
+            &ddh_dais_proximity[2][0], &ddh_dais_proximity[2][1],
+            &ddh_dais_proximity[2][2], &ddh_dais_proximity[2][3],
+            &ddh_dais_proximity[3][0], &ddh_dais_proximity[3][1],
+            &ddh_dais_proximity[3][2], &ddh_dais_proximity[3][3]);
+        // if(n == 16) ddh_log("yay! %d\n", c++);
+    }
     
     ddh_process(frame_nsec);
     
@@ -588,3 +809,13 @@ void gles2_harness_terminate(void)
     glDeleteShader(g_vertShader);
     glDeleteShader(g_fragShader);
 }
+
+void ddh_log(char const * format, ...)
+{
+    va_list args;
+    
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
+

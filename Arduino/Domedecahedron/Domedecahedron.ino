@@ -2,7 +2,10 @@
 
 #include "dais_input.h"
 
+#include <stdarg.h>
 
+
+static uint32_t frame_end_micros;
 static uint32_t last_micros;
 static uint32_t last_frame_end_micros;
 static uint32_t last_frame;
@@ -34,7 +37,7 @@ static int const button_a_pin = 10;
 static int const button_b_pin = 11;
 
 static int const analog_address_pins[2] = {13, 12};
-static uint8_t const analog_row_addresses[4] = {1, 2, 3, 0};
+static uint8_t const analog_row_addresses[4] = {0, 1, 2, 3};
 static int const analog_column_pins[4] = {A0, A1, A2, A3};
 
 static int const debounce_micros = 500;
@@ -103,6 +106,7 @@ void loop()
   uint32_t this_micros;
   uint32_t process_delta_us;
   uint32_t frame_this_micros;
+  uint32_t frame_emit_start_micros;
   
   uint32_t analog_read_start_micros;
   uint32_t analog_read_us;
@@ -115,6 +119,7 @@ void loop()
   delta_us = (this_micros - last_micros) & 0xFFFFFFFF;
   last_micros = this_micros;
   last_frame = ddh_total_frames;
+  last_frame_end_micros = frame_end_micros;
   
   digitalWrite(debug_pins[1], 1);
   
@@ -189,6 +194,7 @@ void loop()
       ddh_dais_proximity[i][j] = analogRead(analog_column_pins[j]);
     }
   }
+  /*
   for(size_t i = 0; i < 4; ++i) {
     uint32_t value;
     sort_prox(i, 0, 1);
@@ -202,7 +208,7 @@ void loop()
       ddh_dais_proximity[j][i] = value;
     }
   }
-  delay(50);
+  */
   
   analog_read_us = micros() - analog_read_start_micros;
   
@@ -221,8 +227,8 @@ void loop()
   digitalWrite(debug_pins[2], 1);
   // make sure at least 500us have passed since we finished our last data emit!
   do {
-    frame_this_micros = micros();
-    delta_us = (this_micros - last_frame_end_micros) & 0xFFFFFFFF;
+    frame_emit_start_micros = micros();
+    delta_us = (frame_emit_start_micros - last_frame_end_micros) & 0xFFFFFFFF;
   } while(delta_us < 500);
   digitalWrite(debug_pins[2], 0);
   
@@ -230,113 +236,19 @@ void loop()
   emit_frame();
   digitalWrite(debug_pins[3], 0);
   
-  last_frame_end_micros = micros();
+  frame_end_micros = micros();
   
   digitalWrite(debug_pins[0], 0);
   
-  Serial.print(ddh_frames_since(last_frame), DEC);
-  Serial.print("f/p");
-  Serial.print(process_delta_us, DEC);
-  Serial.print("/e");
-  Serial.print(last_frame_end_micros - frame_this_micros, DEC);
-  /*
-  Serial.print(ddh_frames_since(last_frame), DEC);
-  Serial.print(" frames; read ");
-  Serial.print(analog_read_us, DEC);
-  Serial.print("us, process ");
-  Serial.print(process_delta_us, DEC);
-  Serial.print("us, emit ");
-  Serial.print(last_frame_end_micros - frame_this_micros, DEC);
-  Serial.print("us; mode=");
-  Serial.print(ddh_mode, DEC);
-  Serial.print(", submode=");
-  Serial.print(ddh_submode, DEC);
-  Serial.print(", a=");
-  Serial.print(ddh_button_a, DEC);
-  Serial.print(", b=");
-  Serial.print(ddh_button_b, DEC);
-  Serial.print(", cursor=");
-  Serial.print(ddh_debug_cursor, DEC);
-  */
-  
-  /*
-  Serial.print(" motion=");
-  Serial.print(di_raw_motion_quadrants[0][0].x, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[0][1].x, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][0].x, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][1].x, DEC);
-  */
-  
-  /*
-  Serial.print(" dais=");
-  Serial.print(di_detect[0][1], DEC);
-  Serial.print(", ");
-  Serial.print(di_detect[1][1], DEC);
-  Serial.print(", ");
-  Serial.print(di_detect[2][1], DEC);
-  
-  Serial.print(" motion=");
-  Serial.print(di_raw_motion_quadrants[0][0].y, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[0][1].y, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][0].y, DEC);
-  Serial.print(", ");
-  Serial.print(di_raw_motion_quadrants[1][1].y, DEC);
-  */
-  Serial.print("\n");
-   /*
-  for(size_t i = 0; i < 4; ++i) {
-    Serial.print(
-      ddh_dais_proximity[i][0] < 256 ? ' ' :
-      ddh_dais_proximity[i][0] < 256 + 64 ? '.' :
-      ddh_dais_proximity[i][0] < 256 + 128 ? ':' :
-      ddh_dais_proximity[i][0] < 256 + 192 ? 'o' :
-      ddh_dais_proximity[i][0] < 256 + 256 ? 'O' :
-      '@'
-      );
-    Serial.print(
-      ddh_dais_proximity[i][1] < 256 ? ' ' :
-      ddh_dais_proximity[i][1] < 256 + 64 ? '.' :
-      ddh_dais_proximity[i][1] < 256 + 128 ? ':' :
-      ddh_dais_proximity[i][1] < 256 + 192 ? 'o' :
-      ddh_dais_proximity[i][1] < 256 + 256 ? 'O' :
-      '@'
-      );
-    Serial.print(
-      ddh_dais_proximity[i][2] < 256 ? ' ' :
-      ddh_dais_proximity[i][2] < 256 + 64 ? '.' :
-      ddh_dais_proximity[i][2] < 256 + 128 ? ':' :
-      ddh_dais_proximity[i][2] < 256 + 192 ? 'o' :
-      ddh_dais_proximity[i][2] < 256 + 256 ? 'O' :
-      '@'
-      );
-    Serial.print(
-      ddh_dais_proximity[i][3] < 256 ? ' ' :
-      ddh_dais_proximity[i][3] < 256 + 64 ? '.' :
-      ddh_dais_proximity[i][3] < 256 + 128 ? ':' :
-      ddh_dais_proximity[i][3] < 256 + 192 ? 'o' :
-      ddh_dais_proximity[i][3] < 256 + 256 ? 'O' :
-      '@'
-      );
-    Serial.print("\n");
+  if(ddh_mode == DDH_MODE_DEBUG_LOG) {
+    char buf[40];
+    snprintf(buf, sizeof buf, "t:s=%d,f=%d,t=%d,p=%d,e=%d\n",
+      ddh_submode, ddh_frames_since(last_frame),
+      frame_end_micros - last_frame_end_micros,
+      process_delta_us,
+      frame_end_micros - frame_emit_start_micros);
+    Serial.print(buf);
   }
-  */
-  
-  /*
-  Serial.print(di_raw_motion_quadrants[0][0].x, DEC);
-  Serial.print('/');
-  Serial.print(di_raw_motion_quadrants[0][1].x, DEC);
-  Serial.print('\n');
-  Serial.print(di_raw_motion_quadrants[1][0].x, DEC);
-  Serial.print('/');
-  Serial.print(di_raw_motion_quadrants[1][1].x, DEC);
-  Serial.print('\n');
-  */
-  
 }
 
 void sort_prox(size_t col, size_t row_a, size_t row_b)
@@ -439,5 +351,16 @@ void delay_precise(uint32_t count)
    while(delay_precise_counter > 0) {
      --delay_precise_counter;
    }
+}
+
+void ddh_log(char const * format, ...)
+{
+  va_list args;
+  char buf[1000];
+  
+  va_start(args, format);
+  vsnprintf(buf, sizeof buf, format, args);
+  va_end(args);
+  Serial.print(buf);
 }
 

@@ -704,12 +704,35 @@ void ddh_process_mode_debug_color(void)
 
 void ddh_initialize_mode_debug_log(void)
 {
+    ddh_initialize_mode_run();
 }
 
 void ddh_process_mode_debug_log(void)
 {
-    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        ddh_frame_buffer[i] = color_make(0x00, 0xFF, 0xFF);
+    if(ddh_submode == 9) {
+        for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+            ddh_frame_buffer[i] = color_make(0x00, 0xFF, 0xFF);
+        }
+        
+        ddh_log("i:m=%d,s=%d,a=%d,b=%d\n",
+          ddh_mode, ddh_submode, ddh_button_a, ddh_button_b, ddh_debug_cursor);
+            /*
+            Serial.print(buf);
+            snprintf(buf, sizeof buf, "m:%d,%d,%d %d,%d,%d %d,%d,%d\n",
+              di_raw_motion_quadrants[0][0].y,
+              );
+              di_detect
+              */
+        ddh_log("dr:");
+        for(size_t i = 0; i < 4; ++i) {
+            for(size_t j = 0; j < 4; ++j) {
+                ddh_log("%d,", ddh_dais_proximity[i][j]);
+            }
+        }
+        ddh_log("\n");
+    }
+    else {
+        ddh_process_mode_run();
     }
 }
 

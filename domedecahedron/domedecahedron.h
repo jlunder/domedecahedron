@@ -237,8 +237,11 @@ extern bool ddh_button_b_edge;
 
 extern uint32_t ddh_dais_proximity[4][4];
 
-void ddh_initialize(void);
-void ddh_process(uint64_t delta_ns);
+// implemented in framework! so that we can specialize for Arduino or test app
+extern void ddh_log(char const * format, ...);
+
+extern void ddh_initialize(void);
+extern void ddh_process(uint64_t delta_ns);
 
 uint64_t ddh_ns_since(uint64_t total_ns);
 uint32_t ddh_ms_since(uint64_t total_ns);
