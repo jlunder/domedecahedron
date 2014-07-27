@@ -63,6 +63,7 @@ fix16_t ddh_autoswitch_time;
 
 effect_instance_t * ddh_ca_0_instance;
 effect_instance_t * ddh_ca_1_instance;
+effect_instance_t * ddh_controller_instance;
 effect_instance_t * ddh_dusk_instance;
 effect_instance_t * ddh_plasma_0_instance;
 effect_instance_t * ddh_rings_0_instance;
@@ -232,6 +233,7 @@ void ddh_initialize(void)
     
     ddh_ca_0_instance = effect_initialize(&effect_ca_0);
     ddh_ca_1_instance = effect_initialize(&effect_ca_1);
+    ddh_controller_instance = effect_initialize(&effect_controller);
     ddh_plasma_0_instance = effect_initialize(&effect_plasma_0);
     ddh_rings_0_instance = effect_initialize(&effect_rings_0);
     ddh_rings_1_instance = effect_initialize(&effect_rings_1);
@@ -372,32 +374,36 @@ void ddh_process_mode_run(void)
     switch(ddh_debug_cursor) {
     default:
     case 0:
-        effect_process(ddh_ca_0_instance, ddh_time_since(ddh_last_time),
+        effect_process(ddh_controller_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
     case 1:
-        effect_process(ddh_ca_1_instance, ddh_time_since(ddh_last_time),
+        effect_process(ddh_ca_0_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
     case 2:
-        effect_process(ddh_plasma_0_instance, ddh_time_since(ddh_last_time),
+        effect_process(ddh_ca_1_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
     case 3:
+        effect_process(ddh_plasma_0_instance, ddh_time_since(ddh_last_time),
+            ddh_frame_buffer);
+        break;
+    case 4:
         effect_process(ddh_rings_0_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
         /*
-    case 4:
+    case 5:
         effect_process(ddh_rings_1_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
-    case 5:
+    case 6:
         effect_process(ddh_rings_2_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
         */
-    case 4://6:
+    case 5://7:
         if(ddh_debug_cursor != last_debug_cursor) {
             effect_finalize(ddh_dusk_instance);
             ddh_dusk_instance = effect_initialize(&effect_dusk);

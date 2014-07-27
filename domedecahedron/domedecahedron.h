@@ -123,6 +123,12 @@ static inline vector3_t vector3_add(vector3_t a, vector3_t b)
     return res;
 }
 
+static inline vector3_t vector3_scale(vector3_t a, fix16_t k)
+{
+    vector3_t res = {fix16_mul(a.x, k), fix16_mul(a.y, k), fix16_mul(a.z, k)};
+    return res;
+}
+
 static inline vector3_t vector3_sub(vector3_t a, vector3_t b)
 {
     vector3_t res = {a.x - b.x, a.y - b.y, a.z - b.z};

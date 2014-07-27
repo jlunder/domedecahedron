@@ -40,12 +40,14 @@ static const fix16_t fix16_maximum  = 0x7FFFFFFF; /*!< the maximum value of fix1
 static const fix16_t fix16_minimum  = 0x80000000; /*!< the minimum value of fix16_t */
 static const fix16_t fix16_overflow = 0x80000000; /*!< the value used to indicate overflows when FIXMATH_NO_OVERFLOW is not specified */
 
-static const fix16_t fix16_pi     = 205887;     /*!< fix16_t value of pi */
-static const fix16_t fix16_two_pi = 411775;
-static const fix16_t fix16_pi_two = 102944;
-static const fix16_t fix16_e      = 178145;     /*!< fix16_t value of e */
-static const fix16_t fix16_one    = 0x00010000; /*!< fix16_t value of 1 */
-
+static const fix16_t fix16_pi             = 205887;     /*!< fix16_t value of pi */
+static const fix16_t fix16_two_pi         = 411775;
+static const fix16_t fix16_pi_two         = 102944;
+static const fix16_t fix16_e              = 178145;     /*!< fix16_t value of e */
+static const fix16_t fix16_one            = 0x00010000; /*!< fix16_t value of 1 */
+static const fix16_t fix16_sqrt_two       = 92682;      /*!< fix16_t value of sqrt(2) */
+static const fix16_t fix16_sqrt_two_two   = 46341;      /*!< fix16_t value of sqrt(2)/2 */
+static const fix16_t fix16_sqrt_three_two = 56756;      /*!< fix16_t value of sqrt(3)/2 (sin(pi/3)) */
 /* Conversion functions between fix16_t and float/integer.
  * These are inlined to allow compiler to optimize away constant numbers
  */

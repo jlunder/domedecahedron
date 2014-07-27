@@ -7,6 +7,7 @@ files = [
     ('effect.c', 'effect.cpp',),
     ('effect_ca_0.c', 'effect_ca_0.cpp',),
     ('effect_ca_1.c', 'effect_ca_1.cpp',),
+    ('effect_controller.c', 'effect_controller.cpp',),
     ('effect_dusk.c', 'effect_dusk.cpp',),
     ('effect_plasma_0.c', 'effect_plasma_0.cpp',),
     ('effect_rings_0.c', 'effect_rings_0.cpp',),

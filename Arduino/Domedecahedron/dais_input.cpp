@@ -4,7 +4,7 @@
 static int32_t const di_motion_lookup[16] = {
     0, 1, -1, 0, -1, 0, 1, 1, 1, -1, 0, -1, 0, -1, 1, 0,
 };
-static int32_t const di_detection_filter_k = (int32_t)(256 * 0.9);
+static int32_t const di_detection_filter_k = (int32_t)(256 * 0.7);
 static int32_t const di_detection_filter_one_minus_k =
   256 - di_detection_filter_k;
 static int32_t const di_detection_threshold = 65536;
@@ -98,7 +98,7 @@ void di_process(void)
                     }
                 }
             }
-            di_raw_motion_quadrants[i][j].z = delta_z / 4;
+            di_raw_motion_quadrants[i][j].z = (delta_z * 4) / 4;
         }
     }
 }
