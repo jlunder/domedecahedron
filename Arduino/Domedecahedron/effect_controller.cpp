@@ -3,28 +3,6 @@
 #include "dais_input.h"
 #include "effect_util.h"
 
-static const vector2_t effect_controller_impulse_pos[2][2] = {
-    {
-        {-fix16_sqrt_two_two,  fix16_sqrt_two_two},
-        { fix16_sqrt_two_two,  fix16_sqrt_two_two},
-    },
-    {
-        {-fix16_sqrt_two_two, -fix16_sqrt_two_two},
-        { fix16_sqrt_two_two, -fix16_sqrt_two_two},
-    },
-};
-
-static const vector2_t effect_controller_impulse_pos_perp[2][2] = {
-    {
-        {-fix16_sqrt_two_two, -fix16_sqrt_two_two},
-        {-fix16_sqrt_two_two,  fix16_sqrt_two_two},
-    },
-    {
-        { fix16_sqrt_two_two, -fix16_sqrt_two_two},
-        { fix16_sqrt_two_two,  fix16_sqrt_two_two},
-    },
-};
-
 
 void * effect_controller_initialize(void);
 void effect_controller_process(void * state, fix16_t delta_time,
@@ -46,9 +24,6 @@ effect_t const effect_controller = {
     NULL,
     NULL,
 };
-
-void effect_controller_process_motion(effect_controller_state_t * state,
-    fix16_t delta_time);
 
 void * effect_controller_initialize(void)
 {
@@ -80,8 +55,6 @@ void effect_controller_process(void * void_state, fix16_t delta_time,
     
     UNUSED(state);
     UNUSED(delta_time);
-    
-    effect_controller_process_motion(state, delta_time);
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         buf[i] = color_make(fix16_to_int(255 * *state->lookup[i]), 0, 0);
@@ -124,68 +97,6 @@ void effect_controller_process(void * void_state, fix16_t delta_time,
     ///*
     // todo add 0.5 * a * t * t
     /**/
-}
-
-void effect_controller_process_motion(effect_controller_state_t * state,
-    fix16_t delta_time)
-{
-    vector2_t a = vector2_make(0, 0);
-    fix16_t r_a = 0;
-    
-    for(size_t i = 0; i < 2; ++i) {
-        for(size_t j = 0; j < 2; ++j) {
-            vector2_t motion = vector2_make(di_raw_motion_quadrants[i][j].x,
-                di_raw_motion_quadrants[i][j].y);
-            fix16_t q_a =
-                vector2_dot(motion, effect_controller_impulse_pos[i][j]);
-            fix16_t q_r_a =
-                vector2_dot(motion, effect_controller_impulse_pos_perp[i][j]);
-            
-            a = vector2_add(a,
-                vector2_scale(effect_controller_impulse_pos[i][j], q_a));
-            r_a += q_r_a;
-        }
-    }
-    
-    state->p = vector2_add(state->p, vector2_add(
-        vector2_scale(state->v, delta_time),
-        vector2_scale(a, fix16_sq(delta_time) / 2)));
-    state->r_p += fix16_mul(state->r_p, delta_time) +
-        fix16_mul(r_a, fix16_sq(delta_time) / 2);
-    
-    state->v = vector2_add(state->v, vector2_scale(a, delta_time));
-    state->r_v += fix16_mul(r_a, delta_time);
-    
-    // pretty sure this is mathematically off but I don't want to integrate
-    {
-        fix16_t f_a = fix16_mul(fix16_from_float(0.05f), delta_time);
-        fix16_t f_r_a = fix16_mul(fix16_from_float(0.025f), delta_time);
-        fix16_t v_mag = fix16_sqrt(vector2_lengthsq(state->v));
-        
-        if(v_mag <= f_a) {
-            state->v = vector2_make(0, 0);
-        }
-        else {
-            vector2_t dir = vector2_normalize(state->v);
-            vector2_t delta_v = vector2_scale(dir, f_a);
-            state->v = vector2_sub(state->v, delta_v);
-            assert(fix16_sqrt(vector2_lengthsq(state->v)) <= v_mag);
-        }
-        
-        if(abs(state->r_v) < f_r_a) {
-            state->r_v = 0;
-        }
-        else {
-            if(state->r_v > 0) {
-                state->r_v -= f_r_a;
-            }
-            else {
-                state->r_v += f_r_a;
-            }
-        }
-    }
-    
-    ddh_log("v: %6.4f,%6.4f / %6.4f\n", fix16_to_float(state->v.x), fix16_to_float(state->v.y), fix16_to_float(state->r_v));
 }
 
 

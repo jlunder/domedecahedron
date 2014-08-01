@@ -294,7 +294,7 @@ void ddh_process(uint64_t delta_ns)
     ddh_last_button_a = ddh_button_a;
     ddh_last_button_b = ddh_button_b;
     
-    di_process();
+    di_process(delta_t);
     
     switch(ddh_mode) {
     default:

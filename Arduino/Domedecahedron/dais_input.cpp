@@ -9,11 +9,36 @@ static int32_t const di_detection_filter_one_minus_k =
   256 - di_detection_filter_k;
 static int32_t const di_detection_threshold = 32768;
 
+static const vector3_t di_impulse_pos[2][2] = {
+    {
+        {-fix16_sqrt_two_two,  fix16_sqrt_two_two, 0},
+        { fix16_sqrt_two_two,  fix16_sqrt_two_two, 0},
+    },
+    {
+        {-fix16_sqrt_two_two, -fix16_sqrt_two_two, 0},
+        { fix16_sqrt_two_two, -fix16_sqrt_two_two, 0},
+    },
+};
+
+static const vector3_t di_impulse_pos_perp[2][2] = {
+    {
+        {-fix16_sqrt_two_two, -fix16_sqrt_two_two, 0},
+        {-fix16_sqrt_two_two,  fix16_sqrt_two_two, 0},
+    },
+    {
+        { fix16_sqrt_two_two, -fix16_sqrt_two_two, 0},
+        { fix16_sqrt_two_two,  fix16_sqrt_two_two, 0},
+    },
+};
+
+
 vector3_t di_motion_quadrants[2][2];
 
 vector3_t di_rotation;
-vector2_t di_flat_rotation;
+fix16_t di_flat_rotation;
+fix16_t di_flat_rotation_v;
 vector3_t di_translation;
+vector3_t di_translation_v;
 
 fix16_t di_last_treated_z[4][4];
 fix16_t di_treated_z[4][4];
@@ -25,15 +50,22 @@ vector3_t di_raw_motion_quadrants[2][2];
 
 int32_t di_scale_raw_dais(int32_t raw);
 int32_t di_motion_detect(size_t r0, size_t c0, size_t r1, size_t c1);
+void di_process_inertia(fix16_t delta_time);
 
 
 void di_initialize(void)
 {
     memset(di_last_detect, 0, sizeof di_last_detect);
+    
+    di_rotation = vector3_make(0, 0, 0);
+    di_flat_rotation = 0;
+    di_flat_rotation_v = 0;
+    di_translation = vector3_make(0, 0, 0);
+    di_translation_v = vector3_make(0, 0, 0);
 }
 
 
-void di_process(void)
+void di_process(fix16_t delta_time)
 {
     memcpy(di_last_detect, di_detect, sizeof di_last_detect);
     memcpy(di_last_treated_z, di_treated_z, sizeof di_last_treated_z);
@@ -101,6 +133,8 @@ void di_process(void)
             di_raw_motion_quadrants[i][j].z = (delta_z * 4) / 4;
         }
     }
+    
+    di_process_inertia(delta_time);
 }
 
 
@@ -127,5 +161,66 @@ int32_t di_motion_detect(size_t r0, size_t c0, size_t r1, size_t c1)
         (di_last_detect[r0][c0] ? 4 : 0) |
         (di_last_detect[r1][c1] ? 8 : 0);
     return di_motion_lookup[index];
+}
+
+
+void di_process_inertia(fix16_t delta_time)
+{
+    vector3_t a = vector3_make(0, 0, 0);
+    fix16_t r_a = 0;
+    
+    for(size_t i = 0; i < 2; ++i) {
+        for(size_t j = 0; j < 2; ++j) {
+            vector3_t motion = di_raw_motion_quadrants[i][j];
+            fix16_t q_a =
+                vector3_dot(motion, di_impulse_pos[i][j]);
+            fix16_t q_r_a =
+                vector3_dot(motion, di_impulse_pos_perp[i][j]);
+            
+            a = vector3_add(a, vector3_scale(di_impulse_pos[i][j], q_a));
+            r_a += q_r_a;
+        }
+    }
+    
+    di_translation = vector3_add(di_translation, vector3_add(
+        vector3_scale(di_translation_v, delta_time),
+        vector3_scale(a, fix16_sq(delta_time) / 2)));
+    di_flat_rotation += fix16_mul(di_flat_rotation_v, delta_time) +
+        fix16_mul(r_a, fix16_sq(delta_time) / 2);
+    
+    di_translation_v = vector3_add(di_translation_v,
+        vector3_scale(a, delta_time));
+    di_flat_rotation_v += fix16_mul(r_a, delta_time);
+    
+    // pretty sure this is mathematically off but I don't want to integrate
+    {
+        fix16_t f_a = fix16_mul(fix16_from_float(0.05f), delta_time);
+        fix16_t f_r_a = fix16_mul(fix16_from_float(0.025f), delta_time);
+        fix16_t v_mag = fix16_sqrt(vector3_lengthsq(di_translation_v));
+        
+        if(v_mag <= f_a) {
+            di_translation_v = vector3_make(0, 0, 0);
+        }
+        else {
+            vector3_t dir = vector3_normalize(di_translation_v);
+            vector3_t delta_v = vector3_scale(dir, f_a);
+            di_translation_v = vector3_sub(di_translation_v, delta_v);
+            assert(fix16_sqrt(vector3_lengthsq(di_translation_v)) <= v_mag);
+        }
+        
+        if(abs(di_flat_rotation_v) < f_r_a) {
+            di_flat_rotation_v = 0;
+        }
+        else {
+            if(di_flat_rotation_v > 0) {
+                di_flat_rotation_v -= f_r_a;
+            }
+            else {
+                di_flat_rotation_v += f_r_a;
+            }
+        }
+    }
+    
+    ddh_log("v: %6.4f,%6.4f / %6.4f\n", fix16_to_float(di_translation_v.x), fix16_to_float(di_translation_v.y), fix16_to_float(di_flat_rotation_v));
 }
 
