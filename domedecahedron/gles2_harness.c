@@ -94,6 +94,8 @@ char gles2_harness_serial_buf[1024];
 char gles2_harness_line_buf[1024];
 int gles2_harness_serial_fd = -1;
 
+float gles2_harness_fake_input_time = 0.0f;
+
 
 bool gles2_harness_init(char const * dev);
 int gles2_harness_serial_set_interface_attribs(int fd, int speed, int parity);
@@ -103,6 +105,9 @@ void gles2_harness_process_serial(void);
 int gles2_harness_read_serial(void);
 void gles2_harness_reshape(int width, int height);
 void gles2_harness_update(float time);
+void gles2_harness_generate_motion_input(float time);
+void gles2_harness_process_lookaround_input(float time);
+void gles2_harness_draw_lights(float time);
 void gles2_harness_terminate(void);
 
 
@@ -112,6 +117,7 @@ static void error_callback(int error, const char* description)
     
     fputs(description, stderr);
 }
+
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -167,6 +173,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         }
     }
 }
+
 
 void gles2_harness_main(int argc, char * argv[])
 {
@@ -620,35 +627,109 @@ void gles2_harness_reshape(int width, int height)
 
 void gles2_harness_update(float time)
 {
-    GLfloat viewMatrix[16];
-    GLfloat viewProjectionMatrix[16];
-    GLfloat modelMatrix[16];
-    
-    GLfloat lightSize = 0.02f;
-    
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
-    while(gles2_harness_read_serial() == GLES2_HARNESS_LINE_READY) {
-        int n;
-        
-        n = sscanf(gles2_harness_line_buf,
-            "dr:%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,",
-            &ddh_dais_proximity[0][0], &ddh_dais_proximity[0][1],
-            &ddh_dais_proximity[0][2], &ddh_dais_proximity[0][3],
-            &ddh_dais_proximity[1][0], &ddh_dais_proximity[1][1],
-            &ddh_dais_proximity[1][2], &ddh_dais_proximity[1][3],
-            &ddh_dais_proximity[2][0], &ddh_dais_proximity[2][1],
-            &ddh_dais_proximity[2][2], &ddh_dais_proximity[2][3],
-            &ddh_dais_proximity[3][0], &ddh_dais_proximity[3][1],
-            &ddh_dais_proximity[3][2], &ddh_dais_proximity[3][3]);
-        // if(n == 16) ddh_log("yay! %d\n", c++);
-    }
+    gles2_harness_generate_motion_input(time);
     
     ddh_process(frame_nsec);
     
-    
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+    gles2_harness_process_lookaround_input(time);
+    gles2_harness_draw_lights(time);
+}
+
+
+void gles2_harness_generate_motion_input(float time)
+{
+    if(gles2_harness_serial_fd < 0) {
+        // Make up some fake input
+        float x = 0.0f, y = 0.0f, z = -1.0f;
+        
+        gles2_harness_fake_input_time =
+            fmodf(gles2_harness_fake_input_time + time / 5.0f, 10.0f);
+        if(gles2_harness_fake_input_time < 1.0f) {
+            float t = (gles2_harness_fake_input_time - 0.0f) *
+                TWO_PI_F * 5.0f;
+            x = cosf(t);
+            y = sinf(t);
+            //ddh_log("Generating fake input: rotate ccw (%g, %g)\n", x, y);
+        }
+        else if(gles2_harness_fake_input_time < 2.0f) {
+            float t = (gles2_harness_fake_input_time - 1.0f) *
+                TWO_PI_F * 5.0f;
+            x = cosf(-t);
+            y = sinf(-t);
+            //ddh_log("Generating fake input: rotate cw (%g, %g)\n", x, y);
+        }
+        else if(gles2_harness_fake_input_time < 3.0f) {
+            float t = (gles2_harness_fake_input_time - 2.0f) * 6.0f;
+            x = floorf(t / 2.0f) - 1.0f;
+            y = fmodf(t, 1.0f) * 2.0f - 1.0f;
+            //ddh_log("Generating fake input: linear forward (%g, %g)\n", x, y);
+        }
+        else if(gles2_harness_fake_input_time < 4.0f) {
+            float t = (gles2_harness_fake_input_time - 3.0f) * 6.0f;
+            x = floorf(t / 2.0f) - 1.0f;
+            y = -(fmodf(t, 1.0f) * 2.0f - 1.0f);
+            //ddh_log("Generating fake input: linear back (%g, %g)\n", x, y);
+        }
+        else if(gles2_harness_fake_input_time < 5.0f) {
+            float t = (gles2_harness_fake_input_time - 4.0f) * 3.0f;
+            z = -(fmodf(t, 2.0f) - 1.0f);
+            ddh_log("Generating fake input: linear down (%g)\n", z);
+        }
+        else if(gles2_harness_fake_input_time < 6.0f) {
+            z = 1.0f;
+        }
+        else if(gles2_harness_fake_input_time < 7.0f) {
+            float t = (gles2_harness_fake_input_time - 6.0f) * 6.0f;
+            z = fmodf(t, 2.0f) - 1.0f;
+            ddh_log("Generating fake input: linear up (%g)\n", z);
+        }
+        else if(gles2_harness_fake_input_time < 8.0f) {
+            z = 1.0f;
+        }
+        else {
+            z = 1.0f;
+        }
+        
+        for(size_t i = 0; i < 4; ++i) {
+            for(size_t j = 0; j < 4; ++j) {
+                float px = j * 2.0f / 3.0f - 1.0f;
+                float py = -(i * 2.0f / 3.0f - 1.0f);
+                float distsq = (px - x) * (px - x) + (py - y) * (py - y);
+                distsq *= 5.0f;
+                if(distsq < 1.0f) {
+                    distsq = 1.0f;
+                }
+                ddh_dais_proximity[i][j] = (int)((1.0f / distsq) *
+                    (z * -300.0f + 300.0f) + 200.0f);
+                //ddh_log("%d,%d=%3d; ", i, j, ddh_dais_proximity[i][j]);
+            }
+            //ddh_log("\n");
+        }
+    }
+    else {
+        while(gles2_harness_read_serial() == GLES2_HARNESS_LINE_READY) {
+            int n;
+        
+            n = sscanf(gles2_harness_line_buf,
+                "dr:%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,",
+                &ddh_dais_proximity[0][0], &ddh_dais_proximity[0][1],
+                &ddh_dais_proximity[0][2], &ddh_dais_proximity[0][3],
+                &ddh_dais_proximity[1][0], &ddh_dais_proximity[1][1],
+                &ddh_dais_proximity[1][2], &ddh_dais_proximity[1][3],
+                &ddh_dais_proximity[2][0], &ddh_dais_proximity[2][1],
+                &ddh_dais_proximity[2][2], &ddh_dais_proximity[2][3],
+                &ddh_dais_proximity[3][0], &ddh_dais_proximity[3][1],
+                &ddh_dais_proximity[3][2], &ddh_dais_proximity[3][3]);
+            // if(n == 16) ddh_log("yay! %d\n", c++);
+        }
+    }
+}
+
+
+void gles2_harness_process_lookaround_input(float time)
+{
     float horizontal_a = 0.0f;
     if(gles2_harness_input_left && !gles2_harness_input_right) {
         horizontal_a = gles2_harness_delta_v;
@@ -746,6 +827,19 @@ void gles2_harness_update(float time)
             gles2_harness_vertical_v = 0.f;
         }
     }
+}
+
+
+void gles2_harness_draw_lights(float time)
+{
+    GLfloat viewMatrix[16];
+    GLfloat viewProjectionMatrix[16];
+    GLfloat modelMatrix[16];
+    
+    GLfloat lightSize = 0.02f;
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     glusLookAtf(viewMatrix,
         gles2_harness_dist * cosf(gles2_harness_horizontal_pos),
             gles2_harness_dist * -sinf(gles2_harness_horizontal_pos),
@@ -796,6 +890,7 @@ void gles2_harness_update(float time)
     glUseProgram(0);
 }
 
+
 void gles2_harness_terminate(void)
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -808,6 +903,7 @@ void gles2_harness_terminate(void)
     glDeleteShader(g_vertShader);
     glDeleteShader(g_fragShader);
 }
+
 
 void ddh_log(char const * format, ...)
 {

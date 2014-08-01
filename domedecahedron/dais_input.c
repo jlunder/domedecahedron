@@ -178,7 +178,8 @@ void di_process_inertia(fix16_t delta_time)
                 vector3_dot(motion, di_impulse_pos_perp[i][j]);
             
             a = vector3_add(a, vector3_scale(di_impulse_pos[i][j], q_a));
-            r_a += q_r_a;
+            a.z += motion.z;
+            r_a += q_r_a * 2;
         }
     }
     
