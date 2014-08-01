@@ -7,7 +7,7 @@ static int32_t const di_motion_lookup[16] = {
 static int32_t const di_detection_filter_k = (int32_t)(256 * 0.7);
 static int32_t const di_detection_filter_one_minus_k =
   256 - di_detection_filter_k;
-static int32_t const di_detection_threshold = 65536;
+static int32_t const di_detection_threshold = 32768;
 
 vector3_t di_motion_quadrants[2][2];
 

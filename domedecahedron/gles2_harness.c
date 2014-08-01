@@ -629,7 +629,6 @@ void gles2_harness_update(float time)
     int64_t frame_nsec = (int64_t)round(time * 1.0e9);
     
     while(gles2_harness_read_serial() == GLES2_HARNESS_LINE_READY) {
-        static int c = 0;
         int n;
         
         n = sscanf(gles2_harness_line_buf,

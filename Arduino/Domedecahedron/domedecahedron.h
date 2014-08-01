@@ -123,15 +123,15 @@ static inline vector3_t vector3_add(vector3_t a, vector3_t b)
     return res;
 }
 
-static inline vector3_t vector3_scale(vector3_t a, fix16_t k)
-{
-    vector3_t res = {fix16_mul(a.x, k), fix16_mul(a.y, k), fix16_mul(a.z, k)};
-    return res;
-}
-
 static inline vector3_t vector3_sub(vector3_t a, vector3_t b)
 {
     vector3_t res = {a.x - b.x, a.y - b.y, a.z - b.z};
+    return res;
+}
+
+static inline vector3_t vector3_scale(vector3_t a, fix16_t k)
+{
+    vector3_t res = {fix16_mul(a.x, k), fix16_mul(a.y, k), fix16_mul(a.z, k)};
     return res;
 }
 
@@ -144,9 +144,9 @@ static inline vector3_t vector3_normalize(vector3_t a)
 {
     fix16_t invlen = fix16_div(fix16_one,
         fix16_sqrt(fix16_sq(a.x) + fix16_sq(a.y) + fix16_sq(a.z)));
-    
-    return vector3_make(fix16_mul(invlen, a.x), fix16_mul(invlen, a.y),
-        fix16_mul(invlen, a.z));
+    vector3_t res = {fix16_mul(invlen, a.x), fix16_mul(invlen, a.y),
+        fix16_mul(invlen, a.z)};
+    return res;
 }
 
 static inline fix16_t vector3_distsq(vector3_t a, vector3_t b)
@@ -154,9 +154,60 @@ static inline fix16_t vector3_distsq(vector3_t a, vector3_t b)
     return fix16_sq(a.x - b.x) + fix16_sq(a.y - b.y) + fix16_sq(a.z - b.z);
 }
 
+static inline fix16_t vector3_lengthsq(vector3_t a)
+{
+    return fix16_sq(a.x) + fix16_sq(a.y) + fix16_sq(a.z);
+}
+
 static inline vector2_t vector2_make(fix16_t x, fix16_t y) {
     vector2_t v = {x, y};
     return v;
+}
+
+static inline vector2_t vector2_perp_ccw(fix16_t x, fix16_t y) {
+    vector2_t v = {-y, x};
+    return v;
+}
+
+static inline vector2_t vector2_add(vector2_t a, vector2_t b)
+{
+    vector2_t res = {a.x + b.x, a.y + b.y};
+    return res;
+}
+
+static inline vector2_t vector2_sub(vector2_t a, vector2_t b)
+{
+    vector2_t res = {a.x - b.x, a.y - b.y};
+    return res;
+}
+
+static inline vector2_t vector2_scale(vector2_t a, fix16_t k)
+{
+    vector2_t res = {fix16_mul(a.x, k), fix16_mul(a.y, k)};
+    return res;
+}
+
+static inline fix16_t vector2_dot(vector2_t a, vector2_t b)
+{
+    return fix16_mul(a.x, b.x) + fix16_mul(a.y, b.y);
+}
+
+static inline vector2_t vector2_normalize(vector2_t a)
+{
+    fix16_t invlen = fix16_div(fix16_one,
+        fix16_sqrt(fix16_sq(a.x) + fix16_sq(a.y)));
+    vector2_t res = {fix16_mul(invlen, a.x), fix16_mul(invlen, a.y)};
+    return res;
+}
+
+static inline fix16_t vector2_distsq(vector2_t a, vector2_t b)
+{
+    return fix16_sq(a.x - b.x) + fix16_sq(a.y - b.y);
+}
+
+static inline fix16_t vector2_lengthsq(vector2_t a)
+{
+    return fix16_sq(a.x) + fix16_sq(a.y);
 }
 
 
@@ -242,6 +293,7 @@ extern bool ddh_button_b;
 extern bool ddh_button_b_edge;
 
 extern uint32_t ddh_dais_proximity[4][4];
+extern uint32_t ddh_presence[8];
 
 // implemented in framework! so that we can specialize for Arduino or test app
 extern void ddh_log(char const * format, ...);
