@@ -11,6 +11,26 @@ typedef struct {
     color_t colors[3];
 } eu_palette3_t;
 
+typedef struct {
+    fix16_t transition_time;
+    color_t seq_colors[16];
+    size_t num_seq_colors;
+    size_t repeat_color_count;
+    
+    fix16_t duration_since_last_transition;
+    bool need_new_color;
+    size_t trail[DDH_TOTAL_VERTICES];
+} eu_trail_state_t;
+
+typedef struct {
+    fix16_t initial_duration;
+    
+    struct {
+        fix16_t duration;
+        fix16_t holdoff;
+    } sparkle[DDH_TOTAL_VERTICES];
+} eu_sparkle_state_t;
+
 
 extern eu_palette3_t eu_palette3_dusk; // orange -> magenta -> indigo
 extern eu_palette3_t eu_palette3_adam; // cyan -> magenta -> purple
@@ -50,6 +70,20 @@ extern void eu_color_seq_6(color_t * dest, size_t num_dest_colors,
     fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
 extern void eu_color_seq_7(color_t * dest, size_t num_dest_colors,
     fix16_t time, color_t const * seq_colors, size_t num_seq_colors);
+
+extern void eu_trail_initialize(eu_trail_state_t * state,
+    fix16_t transition_time, size_t repeat_color_count,
+    color_t const * seq_colors, size_t num_seq_colors);
+extern bool eu_trail_need_new_pos(eu_trail_state_t * state);
+extern void eu_trail_add_pos(eu_trail_state_t * state, size_t pos);
+extern void eu_trail_process(eu_trail_state_t * state,
+    color_t dest[DDH_TOTAL_VERTICES], fix16_t delta_time);
+
+extern void eu_sparkle_initialize(eu_sparkle_state_t * state,
+    fix16_t sparkle_time);
+extern void eu_sparkle_add_pos(eu_sparkle_state_t * state, size_t pos);
+extern void eu_sparkle_process(eu_sparkle_state_t * state,
+    color_t dest[DDH_TOTAL_VERTICES], fix16_t delta_time);
 
 extern color_t eu_lookup_palette3(uint_fast8_t pos,
     eu_palette3_t const * pal);

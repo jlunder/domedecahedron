@@ -109,6 +109,16 @@ static inline color_t color_add_sat(color_t x, color_t y)
         b > 255 ? 255 : b);
 }
 
+static inline color_t color_blend(color_t x, color_t y, uint8_t alpha)
+{
+    uint32_t one_minus_alpha = 256 - alpha;
+    uint32_t r = (uint32_t)x.r * one_minus_alpha + (uint32_t)y.r * alpha;
+    uint32_t g = (uint32_t)x.g * one_minus_alpha + (uint32_t)y.g * alpha;
+    uint32_t b = (uint32_t)x.b * one_minus_alpha + (uint32_t)y.b * alpha;
+    
+    return color_make(r, g, b);
+}
+
 extern color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l);
 extern color_t color_modulate_saturation(color_t color, fix16_t amount);
 

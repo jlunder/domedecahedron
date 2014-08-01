@@ -11,10 +11,7 @@ void effect_controller_process(void * state, fix16_t delta_time,
 typedef struct {
     fix16_t time;
     fix16_t * lookup[DDH_TOTAL_VERTICES];
-    vector2_t v;
-    fix16_t r_v;
-    vector2_t p;
-    fix16_t r_p;
+    eu_sparkle_state_t sparkle;
 } effect_controller_state_t;
 
 effect_t const effect_controller = {
@@ -31,16 +28,8 @@ void * effect_controller_initialize(void)
         (effect_controller_state_t *)malloc(sizeof (effect_controller_state_t));
     
     memset(state, 0, sizeof (effect_controller_state_t));
-    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        int32_t row =
-            (int32_t)((atan2f(ddh_vertex_coords[i].y,
-                ddh_vertex_coords[i].x) + PI_F) * 4.0f / TWO_PI_F);
-        int32_t col = (int32_t)((ddh_vertex_coords[i].z + 2.0f) * 2.0f);
-        row = ((row < 0 ? 0 : row >= 4 ? 3 : row) + 3) % 4;
-        col = col < 0 ? 0 : col >= 4 ? 3 : col;
-        
-        state->lookup[i] = &di_treated_z[row][col];
-    }
+    
+    eu_sparkle_initialize(&state->sparkle, fix16_from_float(1.0f));
     
     return state;
 }
@@ -53,50 +42,20 @@ void effect_controller_process(void * void_state, fix16_t delta_time,
     //size_t running_count = 0;
     //color_t * sum_buf = eu_alloc_temp_buffer();
     
-    UNUSED(state);
-    UNUSED(delta_time);
+    state->time += delta_time;
+    state->time %= fix16_from_int(100);
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
-        buf[i] = color_make(fix16_to_int(255 * *state->lookup[i]), 0, 0);
+        buf[i] = color_make(0, 0, 0);
     }
     
-    /*
-    ddh_log("motion:");
-    for(size_t i = 0; i < 2; ++i) {
-        for(size_t j = 0; j < 2; ++j) {
-            ddh_log("%s ",
-                di_raw_motion_quadrants[i][j].x < fix16_from_float(-0.50f) ? "<-*  " :
-                di_raw_motion_quadrants[i][j].x < fix16_from_float(-0.10f) ? " <*  " :
-                di_raw_motion_quadrants[i][j].x < fix16_from_float( 0.10f) ? "  *  " :
-                di_raw_motion_quadrants[i][j].x < fix16_from_float( 0.50f) ? "  *> " :
-                                                                             "  *->");
-        }
+    if((fix16_t)(eu_random() % fix16_from_float(0.4f)) < delta_time) {
+        size_t pos = eu_random() % DDH_TOTAL_VERTICES;
+        ddh_log("adding pos %d\n", pos);
+        eu_sparkle_add_pos(&state->sparkle, pos);
     }
-    for(size_t i = 0; i < 2; ++i) {
-        for(size_t j = 0; j < 2; ++j) {
-            ddh_log("%s ",
-                di_raw_motion_quadrants[i][j].y < fix16_from_float(-0.50f) ? "<-*  " :
-                di_raw_motion_quadrants[i][j].y < fix16_from_float(-0.10f) ? " <*  " :
-                di_raw_motion_quadrants[i][j].y < fix16_from_float( 0.10f) ? "  *  " :
-                di_raw_motion_quadrants[i][j].y < fix16_from_float( 0.50f) ? "  *> " :
-                                                                             "  *->");
-        }
-    }
-    for(size_t i = 0; i < 2; ++i) {
-        for(size_t j = 0; j < 2; ++j) {
-            ddh_log("%s ",
-                di_raw_motion_quadrants[i][j].z < fix16_from_float(-0.50f) ? "<-*  " :
-                di_raw_motion_quadrants[i][j].z < fix16_from_float(-0.10f) ? " <*  " :
-                di_raw_motion_quadrants[i][j].z < fix16_from_float( 0.10f) ? "  *  " :
-                di_raw_motion_quadrants[i][j].z < fix16_from_float( 0.50f) ? "  *> " :
-                                                                             "  *->");
-        }
-    }
-    ddh_log("\n");
-    /**/
-    ///*
-    // todo add 0.5 * a * t * t
-    /**/
+    
+    eu_sparkle_process(&state->sparkle, buf, delta_time);
 }
 
 

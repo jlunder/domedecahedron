@@ -35,7 +35,7 @@ eu_palette3_t eu_palette3_gold = {{
     {{0, 0, 0, 0}},
     {{255, 255, 0, 0}},
     {{255, 255, 255, 0}},
-}}; // red -> green -> blue
+}}; // black -> orange -> yellow
 
 uint32_t eu_random_z = 392842;
 uint32_t eu_random_w = 43503;
@@ -316,6 +316,96 @@ void eu_color_seq_6(color_t * dest, size_t num_dest_colors, fix16_t time,
     // fade into/out of each color
     for(size_t i = 0; i < num_dest_colors; ++i) {
         dest[i] = c;
+    }
+}
+
+void eu_trail_initialize(eu_trail_state_t * state, fix16_t transition_time,
+    size_t repeat_color_count, color_t const * seq_colors,
+    size_t num_seq_colors)
+{
+    UNUSED(state);
+    UNUSED(transition_time);
+    UNUSED(repeat_color_count);
+    UNUSED(seq_colors);
+    UNUSED(num_seq_colors);
+}
+
+bool eu_trail_need_new_pos(eu_trail_state_t * state)
+{
+    UNUSED(state);
+    return false;
+}
+
+void eu_trail_add_pos(eu_trail_state_t * state, size_t pos)
+{
+    UNUSED(state);
+    UNUSED(pos);
+}
+
+void eu_trail_process(eu_trail_state_t * state,
+    color_t dest[DDH_TOTAL_VERTICES], fix16_t delta_time)
+{
+    UNUSED(state);
+    UNUSED(dest);
+    UNUSED(delta_time);
+}
+
+void eu_sparkle_initialize(eu_sparkle_state_t * state, fix16_t sparkle_time)
+{
+    state->initial_duration = sparkle_time;
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        state->sparkle[i].duration = 0;
+        state->sparkle[i].holdoff = 0;
+    }
+}
+
+void eu_sparkle_add_pos(eu_sparkle_state_t * state, size_t pos)
+{
+    assert(pos < DDH_TOTAL_VERTICES);
+    state->sparkle[pos].duration = state->initial_duration;
+    // reduce the holdoff so we sparkle very soon, but if we just blinked,
+    // not yet because that would just look like holding the point solid white
+    if(state->sparkle[pos].holdoff > 0) {
+        state->sparkle[pos].holdoff = 1;
+    }
+    // else it's 0 already.
+}
+
+void eu_sparkle_process(eu_sparkle_state_t * state,
+    color_t dest[DDH_TOTAL_VERTICES], fix16_t delta_time)
+{
+    fix16_t initial_duration = state->initial_duration;
+    
+    for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
+        if(state->sparkle[i].duration > 0) {
+            if(state->sparkle[i].holdoff == 0) {
+                fix16_t age = initial_duration - state->sparkle[i].duration;
+                dest[i] = color_white;
+                state->sparkle[i].holdoff =
+                    (age > 0 ? eu_random() % age : 0) + (age - age / 2);
+            }
+            else if(state->sparkle[i].holdoff > delta_time) {
+                state->sparkle[i].holdoff -= delta_time;
+            }
+            else {
+                state->sparkle[i].holdoff = 0;
+            }
+            
+            if(state->sparkle[i].duration > delta_time) {
+                state->sparkle[i].duration -= delta_time;
+            }
+            else {
+                state->sparkle[i].duration = 0;
+                // don't clear holdoff yet because if we just sparkled this
+                // point and re-add it next frame, it should still be holding
+                // off for one frame between the two! 
+            }
+        }
+        else {
+            // Because we don't clear holdoff in the duration->0 transition,
+            // clear it here.
+            state->sparkle[i].holdoff = 0;
+        }
     }
 }
 

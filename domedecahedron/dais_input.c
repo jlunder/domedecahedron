@@ -222,6 +222,40 @@ void di_process_inertia(fix16_t delta_time)
         }
     }
     
+    /*
+    ddh_log("motion:");
+    for(size_t i = 0; i < 2; ++i) {
+        for(size_t j = 0; j < 2; ++j) {
+            ddh_log("%s ",
+                di_raw_motion_quadrants[i][j].x < fix16_from_float(-0.50f) ? "<-*  " :
+                di_raw_motion_quadrants[i][j].x < fix16_from_float(-0.10f) ? " <*  " :
+                di_raw_motion_quadrants[i][j].x < fix16_from_float( 0.10f) ? "  *  " :
+                di_raw_motion_quadrants[i][j].x < fix16_from_float( 0.50f) ? "  *> " :
+                                                                             "  *->");
+        }
+    }
+    for(size_t i = 0; i < 2; ++i) {
+        for(size_t j = 0; j < 2; ++j) {
+            ddh_log("%s ",
+                di_raw_motion_quadrants[i][j].y < fix16_from_float(-0.50f) ? "<-*  " :
+                di_raw_motion_quadrants[i][j].y < fix16_from_float(-0.10f) ? " <*  " :
+                di_raw_motion_quadrants[i][j].y < fix16_from_float( 0.10f) ? "  *  " :
+                di_raw_motion_quadrants[i][j].y < fix16_from_float( 0.50f) ? "  *> " :
+                                                                             "  *->");
+        }
+    }
+    for(size_t i = 0; i < 2; ++i) {
+        for(size_t j = 0; j < 2; ++j) {
+            ddh_log("%s ",
+                di_raw_motion_quadrants[i][j].z < fix16_from_float(-0.50f) ? "<-*  " :
+                di_raw_motion_quadrants[i][j].z < fix16_from_float(-0.10f) ? " <*  " :
+                di_raw_motion_quadrants[i][j].z < fix16_from_float( 0.10f) ? "  *  " :
+                di_raw_motion_quadrants[i][j].z < fix16_from_float( 0.50f) ? "  *> " :
+                                                                             "  *->");
+        }
+    }
+    ddh_log("\n");
+    */
     ddh_log("v: %6.4f,%6.4f / %6.4f\n", fix16_to_float(di_translation_v.x), fix16_to_float(di_translation_v.y), fix16_to_float(di_flat_rotation_v));
 }
 
