@@ -28,12 +28,27 @@ void * effect_ca_0_initialize(void)
 {
     effect_ca_0_state_t * state =
         (effect_ca_0_state_t *)malloc(sizeof (effect_ca_0_state_t));
+    eu_palette3_t * pal;
     
     memset(state, 0, sizeof (*state));
     
+    switch(eu_random() % 5) {
+    case 0: pal = &eu_palette3_adam; break;
+    case 1: pal = &eu_palette3_peter; break;
+    case 2: pal = &eu_palette3_joe; break;
+    case 3: pal = &eu_palette3_primaries; break;
+    }
+    
     for(size_t i = 0; i < LENGTHOF(state->seeds); ++i) {
-        state->seeds[i].pos = eu_random() % DDH_TOTAL_VERTICES;
-        state->seeds[i].c = eu_lookup_palette3_random(&eu_palette3_adam);
+        if(i < DDH_TOTAL_GROUPS) {
+            state->seeds[i].pos = ddh_group_dodecahedron_vertex_offsets[i][
+                eu_random() % DDH_DODECAHEDRONS_PER_GROUP][
+                eu_random() % DDH_VERTICES_PER_DODECAHEDRON];
+        }
+        else {
+            state->seeds[i].pos = eu_random() % DDH_TOTAL_VERTICES;
+        }
+        state->seeds[i].c = eu_lookup_palette3_random(pal);
         
         state->seeds[i].c = color_make(state->seeds[i].c.r * 5 / 8,
             state->seeds[i].c.g * 5 / 8, state->seeds[i].c.b * 5 / 8);

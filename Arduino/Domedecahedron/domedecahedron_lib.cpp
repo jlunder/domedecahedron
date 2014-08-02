@@ -4,6 +4,7 @@
 
 #include "dais_input.h"
 #include "effect.h"
+#include "effect_util.h"
 
 
 fix16_t color_hsl[7][3];
@@ -359,11 +360,18 @@ void ddh_process_mode_run(void)
         if(ddh_debug_cursor != last_debug_cursor) {
             ddh_autoswitch_time = 0;
         }
+        else if(di_flat_rotation_v > fix16_from_float(0.01) ||
+                vector3_lengthsq(di_translation_v) >
+                fix16_sq(fix16_from_float(0.01))) {
+            ddh_log("interaction forcing mode 0\n");
+            ddh_autoswitch_time = 0;
+            ddh_debug_cursor = 0;
+        }
         else {
             ddh_autoswitch_time += ddh_time_since(ddh_last_time);
             if(ddh_autoswitch_time > fix16_from_int(600)) {
                 ddh_autoswitch_time -= fix16_from_int(600);
-                ddh_debug_cursor = (ddh_debug_cursor + 1) % 5;
+                ddh_debug_cursor = eu_random() % 5 + 1;
             }
         }
     }
@@ -378,6 +386,10 @@ void ddh_process_mode_run(void)
             ddh_frame_buffer);
         break;
     case 1:
+        if(ddh_debug_cursor != last_debug_cursor) {
+            effect_finalize(ddh_ca_0_instance);
+            ddh_ca_0_instance = effect_initialize(&effect_ca_0);
+        }
         effect_process(ddh_ca_0_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;

@@ -28,6 +28,7 @@ typedef struct {
     struct {
         fix16_t duration;
         fix16_t holdoff;
+        fix16_t holdoff_age;
     } sparkle[DDH_TOTAL_VERTICES];
 } eu_sparkle_state_t;
 

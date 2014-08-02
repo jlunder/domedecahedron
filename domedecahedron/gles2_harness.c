@@ -697,12 +697,12 @@ void gles2_harness_generate_motion_input(float time)
                 float px = j * 2.0f / 3.0f - 1.0f;
                 float py = -(i * 2.0f / 3.0f - 1.0f);
                 float distsq = (px - x) * (px - x) + (py - y) * (py - y);
-                distsq *= 5.0f;
+                distsq *= 2.0f * 2.0f;
                 if(distsq < 1.0f) {
                     distsq = 1.0f;
                 }
                 ddh_dais_proximity[i][j] = (int)((1.0f / distsq) *
-                    (z * -300.0f + 300.0f) + 200.0f);
+                    (z * -150.0f + 650.0f));
                 //ddh_log("%d,%d=%3d; ", i, j, ddh_dais_proximity[i][j]);
             }
             //ddh_log("\n");
@@ -837,6 +837,8 @@ void gles2_harness_draw_lights(float time)
     GLfloat modelMatrix[16];
     
     GLfloat lightSize = 0.02f;
+    
+    UNUSED(time);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     

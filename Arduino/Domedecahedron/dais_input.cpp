@@ -45,11 +45,15 @@ fix16_t di_treated_z[4][4];
 bool di_last_detect[4][4];
 bool di_detect[4][4];
 
+fix16_t di_z;
+fix16_t di_last_z;
+
 vector3_t di_raw_motion_quadrants[2][2];
 
 
 int32_t di_scale_raw_dais(int32_t raw);
 int32_t di_motion_detect(size_t r0, size_t c0, size_t r1, size_t c1);
+void di_process_delta_z(fix16_t delta_time);
 void di_process_inertia(fix16_t delta_time);
 
 
@@ -62,6 +66,8 @@ void di_initialize(void)
     di_flat_rotation_v = 0;
     di_translation = vector3_make(0, 0, 0);
     di_translation_v = vector3_make(0, 0, 0);
+    
+    di_z = fix16_one;
 }
 
 
@@ -115,24 +121,7 @@ void di_process(fix16_t delta_time)
             (motion_y_1 + motion_y_2 * 2) / 3;
     }
     
-    for(size_t i = 0; i < 2; ++i) {
-        for(size_t j = 0; j < 2; ++j) {
-            int32_t delta_z = 0;
-            
-            for(size_t k = 0; k < 2; ++k) {
-                for(size_t l = 0; l < 2; ++l) {
-                    size_t r = i * 2 + k;
-                    size_t c = j * 2 + l;
-                    
-                    if(di_detect[r][c] && di_last_detect[r][c]) {
-                        delta_z += di_treated_z[r][c] -
-                          di_last_treated_z[r][c];
-                    }
-                }
-            }
-            di_raw_motion_quadrants[i][j].z = (delta_z * 4) / 4;
-        }
-    }
+    di_process_delta_z(delta_time);
     
     di_process_inertia(delta_time);
 }
@@ -164,6 +153,39 @@ int32_t di_motion_detect(size_t r0, size_t c0, size_t r1, size_t c1)
 }
 
 
+void di_process_delta_z(fix16_t delta_time)
+{
+    fix16_t delta_z;
+    
+    di_last_z = di_z;
+    
+    di_z = fix16_one;
+    for(size_t i = 0; i < 4; ++i) {
+        for(size_t j = 0; j < 4; ++j) {
+            if(di_treated_z[i][j] < di_z) {
+                di_z = di_treated_z[i][j];
+            }
+        }
+    }
+    //ddh_log("z: %6.4f", fix16_to_float(di_z));
+    
+    if(abs(di_z - di_last_z) > fix16_from_float(0.25f)) {
+        //ddh_log(" z warp!");
+        delta_z = 0;
+    }
+    else {
+        delta_z = fix16_div(di_z - di_last_z, delta_time * 100);
+    }
+    //ddh_log(" dz: %7.4f\n", fix16_to_float(delta_z));
+    
+    for(size_t i = 0; i < 2; ++i) {
+        for(size_t j = 0; j < 2; ++j) {
+            di_raw_motion_quadrants[i][j].z = delta_z;
+        }
+    }
+}
+
+
 void di_process_inertia(fix16_t delta_time)
 {
     vector3_t a = vector3_make(0, 0, 0);
@@ -179,7 +201,7 @@ void di_process_inertia(fix16_t delta_time)
             
             a = vector3_add(a, vector3_scale(di_impulse_pos[i][j], q_a));
             a.z += motion.z;
-            r_a += q_r_a * 2;
+            r_a += q_r_a * 10;
         }
     }
     
@@ -196,7 +218,7 @@ void di_process_inertia(fix16_t delta_time)
     // pretty sure this is mathematically off but I don't want to integrate
     {
         fix16_t f_a = fix16_mul(fix16_from_float(0.05f), delta_time);
-        fix16_t f_r_a = fix16_mul(fix16_from_float(0.025f), delta_time);
+        fix16_t f_r_a = fix16_mul(fix16_from_float(0.15f), delta_time);
         fix16_t v_mag = fix16_sqrt(vector3_lengthsq(di_translation_v));
         
         if(v_mag <= f_a) {
@@ -256,6 +278,6 @@ void di_process_inertia(fix16_t delta_time)
     }
     ddh_log("\n");
     */
-    ddh_log("v: %6.4f,%6.4f / %6.4f\n", fix16_to_float(di_translation_v.x), fix16_to_float(di_translation_v.y), fix16_to_float(di_flat_rotation_v));
+    ddh_log("v: %7.4f,%7.4f,%7.4f / %6.4f\n", fix16_to_float(di_translation_v.x), fix16_to_float(di_translation_v.y), fix16_to_float(di_translation_v.z), fix16_to_float(di_flat_rotation_v));
 }
 

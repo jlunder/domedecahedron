@@ -356,6 +356,7 @@ void eu_sparkle_initialize(eu_sparkle_state_t * state, fix16_t sparkle_time)
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         state->sparkle[i].duration = 0;
         state->sparkle[i].holdoff = 0;
+        state->sparkle[i].holdoff_age = fix16_from_int(1000);
     }
 }
 
@@ -375,6 +376,7 @@ void eu_sparkle_process(eu_sparkle_state_t * state,
     color_t dest[DDH_TOTAL_VERTICES], fix16_t delta_time)
 {
     fix16_t initial_duration = state->initial_duration;
+    fix16_t fade_duration = fix16_from_float(0.2f);
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {
         if(state->sparkle[i].duration > 0) {
@@ -383,6 +385,7 @@ void eu_sparkle_process(eu_sparkle_state_t * state,
                 dest[i] = color_white;
                 state->sparkle[i].holdoff =
                     (age > 0 ? eu_random() % age : 0) + (age - age / 2);
+                state->sparkle[i].holdoff_age = 0;
             }
             else if(state->sparkle[i].holdoff > delta_time) {
                 state->sparkle[i].holdoff -= delta_time;
@@ -405,6 +408,13 @@ void eu_sparkle_process(eu_sparkle_state_t * state,
             // Because we don't clear holdoff in the duration->0 transition,
             // clear it here.
             state->sparkle[i].holdoff = 0;
+        }
+        
+        if(state->sparkle[i].holdoff_age < fade_duration) {
+            uint32_t alpha =
+                255 - 255 * state->sparkle[i].holdoff_age / fade_duration;
+            dest[i] = color_add_sat(dest[i], color_make(alpha, alpha, alpha));
+            state->sparkle[i].holdoff_age += delta_time;
         }
     }
 }
