@@ -270,6 +270,7 @@ void ddh_process(uint64_t delta_ns)
         switch(ddh_mode) {
         default:
         case DDH_MODE_RUN:
+        case DDH_MODE_RUN_NONINTERACTIVE:
             ddh_initialize_mode_run();
             break;
         case DDH_MODE_CONFIGURE:
@@ -300,6 +301,7 @@ void ddh_process(uint64_t delta_ns)
     switch(ddh_mode) {
     default:
     case DDH_MODE_RUN:
+    case DDH_MODE_RUN_NONINTERACTIVE:
         ddh_process_mode_run();
         break;
     case DDH_MODE_CONFIGURE:
@@ -354,29 +356,35 @@ void ddh_process_mode_run(void)
 {
     uint32_t last_debug_cursor = ddh_debug_cursor;
     
-    ddh_process_debug_cursor(5);
+    ddh_process_debug_cursor(6);
     
     if(ddh_submode == 0) {
         if(ddh_debug_cursor != last_debug_cursor) {
             ddh_autoswitch_time = 0;
         }
-        else if(di_flat_rotation_v > fix16_from_float(0.01) ||
+        else if((ddh_mode != DDH_MODE_RUN_NONINTERACTIVE) &&
+                (di_flat_rotation_v > fix16_from_float(0.01) ||
                 vector3_lengthsq(di_translation_v) >
-                fix16_sq(fix16_from_float(0.01))) {
-            ddh_log("interaction forcing mode 0\n");
+                fix16_sq(fix16_from_float(0.01)))) {
+            //ddh_log("interaction forcing mode 0\n");
             ddh_autoswitch_time = 0;
             ddh_debug_cursor = 0;
         }
         else {
             ddh_autoswitch_time += ddh_time_since(ddh_last_time);
-            if(ddh_autoswitch_time > fix16_from_int(600)) {
-                ddh_autoswitch_time -= fix16_from_int(600);
+            if(ddh_autoswitch_time > fix16_from_int(300)) {
+                ddh_autoswitch_time -= fix16_from_int(300);
                 ddh_debug_cursor = eu_random() % 5 + 1;
             }
         }
     }
     else {
         ddh_debug_cursor = ddh_submode - 1;
+    }
+    
+    if(ddh_mode == DDH_MODE_RUN_NONINTERACTIVE && ddh_debug_cursor == 0) {
+        // skip interactive mode in run mode 1
+        ddh_debug_cursor = 1;
     }
     
     switch(ddh_debug_cursor) {

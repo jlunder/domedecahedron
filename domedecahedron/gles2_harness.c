@@ -675,7 +675,7 @@ void gles2_harness_generate_motion_input(float time)
         else if(gles2_harness_fake_input_time < 5.0f) {
             float t = (gles2_harness_fake_input_time - 4.0f) * 3.0f;
             z = -(fmodf(t, 2.0f) - 1.0f);
-            ddh_log("Generating fake input: linear down (%g)\n", z);
+            //ddh_log("Generating fake input: linear down (%g)\n", z);
         }
         else if(gles2_harness_fake_input_time < 6.0f) {
             z = 1.0f;
@@ -683,7 +683,7 @@ void gles2_harness_generate_motion_input(float time)
         else if(gles2_harness_fake_input_time < 7.0f) {
             float t = (gles2_harness_fake_input_time - 6.0f) * 6.0f;
             z = fmodf(t, 2.0f) - 1.0f;
-            ddh_log("Generating fake input: linear up (%g)\n", z);
+            //ddh_log("Generating fake input: linear up (%g)\n", z);
         }
         else if(gles2_harness_fake_input_time < 8.0f) {
             z = 1.0f;
@@ -696,8 +696,9 @@ void gles2_harness_generate_motion_input(float time)
             for(size_t j = 0; j < 4; ++j) {
                 float px = j * 2.0f / 3.0f - 1.0f;
                 float py = -(i * 2.0f / 3.0f - 1.0f);
-                float distsq = (px - x) * (px - x) + (py - y) * (py - y);
-                distsq *= 2.0f * 2.0f;
+                float distsq = (px - x * 1.25) * (px - x * 1.25) +
+                    (py - y * 1.25) * (py - y * 1.25);
+                distsq *= 1.5f * 1.5f;
                 if(distsq < 1.0f) {
                     distsq = 1.0f;
                 }

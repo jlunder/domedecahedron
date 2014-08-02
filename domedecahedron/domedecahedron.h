@@ -266,7 +266,8 @@ extern uint32_t ddh_total_frames;
 extern fix16_t ddh_total_time;
 
 #define DDH_MODE_RUN                           0
-#define DDH_MODE_CONFIGURE                     1
+#define DDH_MODE_RUN_NONINTERACTIVE            1
+#define DDH_MODE_CONFIGURE                     2
 #define DDH_MODE_DEBUG_LOCATE                  5
 #define DDH_MODE_DEBUG_SWEEP                   6
 #define DDH_MODE_DEBUG_COLOR                   7
