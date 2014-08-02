@@ -415,6 +415,7 @@ bool gles2_harness_init(char const * dev)
         gles2_harness_init_serial(dev);
     }
     
+    eu_initialize_random(time(NULL));
     ddh_initialize();
     
     for(size_t i = 0; i < DDH_TOTAL_VERTICES; ++i) {

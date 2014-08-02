@@ -461,6 +461,13 @@ color_t eu_lookup_palette3_random(eu_palette3_t const * pal)
     return eu_lookup_palette3(fix16_to_int(alpha * 256), pal);
 }
 
+void eu_initialize_random(uint32_t seed)
+{
+    eu_random_z ^= seed;
+    eu_random_w ^= seed;
+    ddh_log("z=%d w=%d\n", eu_random_z, eu_random_w);
+}    
+
 uint32_t eu_random(void)
 {
     eu_random_z = 36969 * (eu_random_z & 65535) + (eu_random_z >> 16);

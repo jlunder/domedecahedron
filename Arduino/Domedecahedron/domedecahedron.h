@@ -116,7 +116,7 @@ static inline color_t color_blend(color_t x, color_t y, uint8_t alpha)
     uint32_t g = (uint32_t)x.g * one_minus_alpha + (uint32_t)y.g * alpha;
     uint32_t b = (uint32_t)x.b * one_minus_alpha + (uint32_t)y.b * alpha;
     
-    return color_make(r, g, b);
+    return color_make(r / 256, g / 256, b / 256);
 }
 
 extern color_t color_rgb_from_hsl(uint_fast16_t h, fix16_t s, fix16_t l);

@@ -90,6 +90,7 @@ extern color_t eu_lookup_palette3(uint_fast8_t pos,
     eu_palette3_t const * pal);
 extern color_t eu_lookup_palette3_random(eu_palette3_t const * pal);
 
+extern void eu_initialize_random(uint32_t seed);
 extern uint32_t eu_random(void);
 
 // This is a basic component of plasma -- sin of distance from a point

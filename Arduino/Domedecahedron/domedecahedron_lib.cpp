@@ -248,6 +248,10 @@ void ddh_process(uint64_t delta_ns)
     uint32_t delta_frames;
     fix16_t delta_t;
     
+    if(ddh_total_frames == 0) {
+        eu_initialize_random(delta_ns);
+    }
+    
     ddh_total_ns += delta_ns;
     
     ddh_frame_fraction += delta_ns * DDH_FPS;
@@ -390,6 +394,10 @@ void ddh_process_mode_run(void)
     switch(ddh_debug_cursor) {
     default:
     case 0:
+        if(ddh_debug_cursor != last_debug_cursor) {
+            effect_finalize(ddh_controller_instance);
+            ddh_controller_instance = effect_initialize(&effect_controller);
+        }
         effect_process(ddh_controller_instance, ddh_time_since(ddh_last_time),
             ddh_frame_buffer);
         break;
