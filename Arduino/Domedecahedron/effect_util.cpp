@@ -465,7 +465,6 @@ void eu_initialize_random(uint32_t seed)
 {
     eu_random_z ^= seed;
     eu_random_w ^= seed;
-    ddh_log("z=%d w=%d\n", eu_random_z, eu_random_w);
 }    
 
 uint32_t eu_random(void)

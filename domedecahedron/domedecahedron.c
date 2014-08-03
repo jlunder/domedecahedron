@@ -367,11 +367,11 @@ void ddh_process_mode_run(void)
             ddh_autoswitch_time = 0;
         }
         else if((ddh_mode != DDH_MODE_RUN_NONINTERACTIVE) &&
-                (di_flat_rotation_v > fix16_from_float(0.01) ||
+                (di_flat_rotation_v > fix16_from_float(0.1) ||
                 vector3_lengthsq(di_translation_v) >
-                fix16_sq(fix16_from_float(0.01)))) {
-            //ddh_log("interaction forcing mode 0\n");
-            ddh_autoswitch_time = 0;
+                fix16_sq(fix16_from_float(0.1)))) {
+            ddh_log("interaction forcing mode 0\n");
+            ddh_autoswitch_time = 300 - 30;
             ddh_debug_cursor = 0;
         }
         else {
