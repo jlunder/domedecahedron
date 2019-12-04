@@ -1,0 +1,8 @@
+.bbprojectd
+.pyc
+*.d
+*.d.*
+*.o
+*.o.*
+.DS_Store
+domedecahedron/domedecahedron
